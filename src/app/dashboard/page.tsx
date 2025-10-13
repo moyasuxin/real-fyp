@@ -2,9 +2,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import StudentSidebar from "./DashboardSidebar";
-import StudentStats from "./StudentStats";
+import StudentRadarChart from "./StudentRadarChart";
+import { Card, CardContent } from "@/components/card";
 
-// 🧩 Define the Student interface (matches Supabase 'students' table)
 interface Student {
   id: number;
   name: string | null;
@@ -12,25 +12,20 @@ interface Student {
   dob: string | null;
   image_url: string | null;
   description: string | null;
-  analysis: Record<string, unknown> | null; // if it's JSONB, we use Record<string, unknown>
-  level: string | null;
+  analysis: {
+    [key: string]: number;
+  } | null;
   program: string | null;
-  cgpa: string | null;
-  programming_score: string | null;
-  design_score: string | null;
-  it_infrastructure_score: string | null;
-  co_curricular_points: string | null;
-  github_url: string | null;
-  linkedin_url: string | null;
-  portfolio_url: string | null;
-  created_at: string | null;
 }
 
 export default function DashboardPage() {
   const [activeGroup, setActiveGroup] = useState("Degree");
-  const [activeProgram, setActiveProgram] = useState(""); // default empty
-  const [students, setStudents] = useState<Student[]>([]); // ✅ fixed type
+  const [activeProgram, setActiveProgram] = useState("");
+  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [aiSummary, setAiSummary] = useState<string>("Loading AI summary...");
 
+  // Fetch all students for selected program
   useEffect(() => {
     if (!activeProgram) return;
 
@@ -40,6 +35,7 @@ export default function DashboardPage() {
         if (!res.ok) throw new Error("Failed to fetch students");
         const data: Student[] = await res.json();
         setStudents(data);
+        setSelectedStudent(data[0] || null); // auto-select first student
       } catch (error) {
         console.error(error);
       }
@@ -48,8 +44,31 @@ export default function DashboardPage() {
     fetchStudents();
   }, [activeProgram]);
 
+  // Fetch Gemini AI summary for selected student
+  useEffect(() => {
+    if (!selectedStudent) return;
+
+    async function getAiSummary() {
+      try {
+        const res = await fetch("/api/gemini-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(selectedStudent),
+        });
+        const data = await res.json();
+        setAiSummary(data.summary);
+      } catch (error) {
+        console.error("AI summary error:", error);
+        setAiSummary("Failed to load AI summary.");
+      }
+    }
+
+    getAiSummary();
+  }, [selectedStudent]);
+
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
+      {/* Sidebar */}
       <StudentSidebar
         activeGroup={activeGroup}
         activeProgram={activeProgram}
@@ -57,12 +76,85 @@ export default function DashboardPage() {
         onSelectProgram={setActiveProgram}
       />
 
-      <div className="flex-grow min-w-0">
-        <div className="bg-zinc-800/80 backdrop-blur-sm border border-zinc-700/80 rounded-2xl shadow-2xl p-px overflow-hidden">
-          <div className="relative bg-zinc-900/80 rounded-2xl p-6">
-            <StudentStats students={students} />
-          </div>
-        </div>
+      {/* Main Dashboard */}
+      <div className="flex-grow min-w-0 space-y-6">
+        {selectedStudent ? (
+          <>
+            {/* Student Info */}
+            <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+              <CardContent className="p-6 text-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold">
+                      {selectedStudent.name}
+                    </h2>
+                    <p className="text-gray-400">
+                      {selectedStudent.gender} • {selectedStudent.dob}
+                    </p>
+                    <p className="text-gray-400">{selectedStudent.program}</p>
+                  </div>
+                  {selectedStudent.image_url && (
+                    <img
+                      src={selectedStudent.image_url}
+                      alt={selectedStudent.name || ""}
+                      className="w-24 h-24 rounded-full border-4 border-zinc-700 object-cover"
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Summary */}
+            <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+              <CardContent className="p-6 text-gray-100">
+                <h3 className="font-semibold text-lime-400 mb-2">AI Summary</h3>
+                <p className="whitespace-pre-line">{aiSummary}</p>
+              </CardContent>
+            </Card>
+
+            {/* Radar Chart */}
+            {selectedStudent.analysis && (
+              <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+                <CardContent className="p-6">
+                  <StudentRadarChart data={selectedStudent.analysis} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Other Students */}
+            <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+              <CardContent className="p-6 text-gray-100">
+                <h3 className="font-semibold text-lime-400 mb-3">
+                  Other Students in {activeProgram}
+                </h3>
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {students
+                    .filter((s) => s.id !== selectedStudent.id)
+                    .map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setSelectedStudent(s)}
+                        className="flex flex-col items-center bg-zinc-900 p-3 rounded-lg hover:bg-zinc-700 transition"
+                      >
+                        {s.image_url && (
+                          <img
+                            src={s.image_url}
+                            alt={s.name || ""}
+                            className="w-16 h-16 rounded-full object-cover border border-zinc-700"
+                          />
+                        )}
+                        <p className="mt-2 text-white font-semibold text-sm">
+                          {s.name}
+                        </p>
+                      </button>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <p className="text-gray-400">Select a course to view students.</p>
+        )}
       </div>
     </div>
   );
