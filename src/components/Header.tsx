@@ -1,7 +1,7 @@
 // src/app/dashboard/Header.tsx
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { supabase } from "../../services/supabaseClient";
+import { supabase } from "../services/supabaseClient";
 import { User } from "@supabase/supabase-js";
 
 const DashboardHeader: React.FC = () => {

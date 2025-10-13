@@ -1,42 +1,52 @@
 // src/app/dashboard/StudentStats.tsx
 "use client";
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/card";
 
-// Temporary interface for dummy data (replace with real type later)
-interface StudentProfile {
+// 🧩 Match Supabase fields (no more mismatch)
+interface Student {
   id: number;
-  name: string;
-  program: string;
-  cgpa: number;
-  coCurricularPoints: number;
+  name: string | null;
+  program: string | null;
+  cgpa: string | null; // stored as text in DB
+  co_curricular_points: string | null; // also text
 }
 
 interface StudentStatsProps {
-  students: StudentProfile[];
+  students: Student[];
 }
 
 const StudentStats: React.FC<StudentStatsProps> = ({ students }) => {
+  // Convert safely to numbers (since DB stores them as text)
+  const parsedStudents = students.map((s) => ({
+    ...s,
+    cgpa: parseFloat(s.cgpa || "0"),
+    co_curricular_points: parseFloat(s.co_curricular_points || "0"),
+  }));
+
   const stats = [
-    { label: "Active Students", value: students.length },
-    { label: "Graduates", value: students.filter((s) => s.cgpa >= 2.5).length },
+    { label: "Active Students", value: parsedStudents.length },
+    {
+      label: "Graduates",
+      value: parsedStudents.filter((s) => s.cgpa >= 2.5).length,
+    },
     {
       label: "Average Performance",
       value:
-        students.length > 0
+        parsedStudents.length > 0
           ? (
-              students.reduce((acc, s) => acc + (s.cgpa || 0), 0) /
-              students.length
+              parsedStudents.reduce((acc, s) => acc + s.cgpa, 0) /
+              parsedStudents.length
             ).toFixed(2)
           : "0",
     },
     {
       label: "Engagement Rate",
       value:
-        students.length > 0
+        parsedStudents.length > 0
           ? `${(
-              (students.filter((s) => s.coCurricularPoints > 0).length /
-                students.length) *
+              (parsedStudents.filter((s) => s.co_curricular_points > 0).length /
+                parsedStudents.length) *
               100
             ).toFixed(0)}%`
           : "0%",

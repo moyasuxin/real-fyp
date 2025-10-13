@@ -1,18 +1,20 @@
-// src/app/dashboard/StudentSidebar.tsx
-import React from "react";
+// src/app/dashboard/DashboardSidebar.tsx
+"use client";
+import React, { useEffect, useState } from "react";
 
 interface Program {
-  short: string;
-  long: string;
+  id: number;
+  group_name: string;
+  program_short: string;
+  program_long: string;
 }
 
-interface Group {
+interface GroupedPrograms {
   name: string;
   programs: Program[];
 }
 
 interface SidebarProps {
-  groups: Group[];
   activeGroup: string;
   activeProgram: string;
   onSelectGroup: (group: string) => void;
@@ -20,12 +22,39 @@ interface SidebarProps {
 }
 
 const StudentSidebar: React.FC<SidebarProps> = ({
-  groups,
   activeGroup,
   activeProgram,
   onSelectGroup,
   onSelectProgram,
 }) => {
+  const [groups, setGroups] = useState<GroupedPrograms[]>([]);
+
+  useEffect(() => {
+    async function fetchPrograms() {
+      const res = await fetch("/api/programs");
+      if (!res.ok) {
+        console.error("Failed to fetch programs:", res.statusText);
+        return;
+      }
+      const programs: Program[] = await res.json();
+
+      // Type-safe grouping
+      const grouped = programs.reduce<GroupedPrograms[]>((acc, program) => {
+        const existingGroup = acc.find((g) => g.name === program.group_name);
+        if (existingGroup) {
+          existingGroup.programs.push(program);
+        } else {
+          acc.push({ name: program.group_name, programs: [program] });
+        }
+        return acc;
+      }, []);
+
+      setGroups(grouped);
+    }
+
+    fetchPrograms();
+  }, []);
+
   return (
     <aside className="flex-shrink-0 w-64 bg-gray-800 text-white p-4 rounded-2xl shadow-lg">
       {groups.map((group) => (
@@ -33,12 +62,11 @@ const StudentSidebar: React.FC<SidebarProps> = ({
           {/* Level 1: Group */}
           <button
             onClick={() => onSelectGroup(group.name)}
-            className={`w-full px-4 py-2 text-left font-bold rounded-lg mb-2 transition-colors
-              ${
-                activeGroup === group.name
-                  ? "bg-blue-600"
-                  : "bg-gray-700 hover:bg-gray-600"
-              }`}
+            className={`w-full px-4 py-2 text-left font-bold rounded-lg mb-2 transition-colors ${
+              activeGroup === group.name
+                ? "bg-blue-600"
+                : "bg-gray-700 hover:bg-gray-600"
+            }`}
           >
             {group.name}
           </button>
@@ -48,16 +76,15 @@ const StudentSidebar: React.FC<SidebarProps> = ({
             <div className="ml-4 space-y-2">
               {group.programs.map((p) => (
                 <button
-                  key={p.short}
-                  onClick={() => onSelectProgram(p.short)}
-                  className={`w-full px-3 py-1 text-left rounded-md transition-colors
-                    ${
-                      activeProgram === p.short
-                        ? "border-l-4 border-lime-400 text-lime-300"
-                        : "hover:text-white text-gray-300"
-                    }`}
+                  key={p.program_short}
+                  onClick={() => onSelectProgram(p.program_short)}
+                  className={`w-full px-3 py-1 text-left rounded-md transition-colors ${
+                    activeProgram === p.program_short
+                      ? "border-l-4 border-lime-400 text-lime-300"
+                      : "hover:text-white text-gray-300"
+                  }`}
                 >
-                  {p.long}
+                  {p.program_long}
                 </button>
               ))}
             </div>
