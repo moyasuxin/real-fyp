@@ -24,7 +24,7 @@ ChartJS.register(
 );
 
 interface StudentRadarChartProps {
-  data: number[]; // array of 6 metric values [prog, design, infra, cocu, feedback, professional]
+  data: { [key: string]: number }; // object with keys as metric names and values as their scores
 }
 
 const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
@@ -42,7 +42,7 @@ const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
     datasets: [
       {
         label: "Student Performance",
-        data,
+        data: Object.values(data),
         backgroundColor: "rgba(34,197,94,0.2)",
         borderColor: "rgba(34,197,94,1)",
         borderWidth: 2,

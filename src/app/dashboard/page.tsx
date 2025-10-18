@@ -1,9 +1,10 @@
 // src/app/dashboard/page.tsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import StudentSidebar from "./DashboardSidebar";
 import StudentRadarChart from "./StudentRadarChart";
 import { Card, CardContent } from "@/components/card";
+import { supabase } from "@/services/supabaseClient";
 
 interface Student {
   id: number;
@@ -12,10 +13,12 @@ interface Student {
   dob: string | null;
   image_url: string | null;
   description: string | null;
-  analysis: {
-    [key: string]: number;
-  } | null;
+  analysis: { [key: string]: number } | null;
   program: string | null;
+  cgpa?: number | null;
+  cocu?: string | null;
+  feedback?: string | null;
+  social_media?: string | null;
 }
 
 export default function DashboardPage() {
@@ -24,48 +27,80 @@ export default function DashboardPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [aiSummary, setAiSummary] = useState<string>("Loading AI summary...");
+  const prevStudentData = useRef<Student | null>(null); // to track changes
 
-  // Fetch all students for selected program
+  // 🟢 1. Fetch all students for selected program
   useEffect(() => {
     if (!activeProgram) return;
+    if (!activeProgram) return;
+    const interval = setInterval(() => {
+      fetch(`/api/students?program=${activeProgram}`)
+        .then((res) => res.json())
+        .then((data: Student[]) => setStudents(data));
+    }, 5000); // refresh every 5 seconds
 
-    async function fetchStudents() {
-      try {
-        const res = await fetch(`/api/students?program=${activeProgram}`);
-        if (!res.ok) throw new Error("Failed to fetch students");
-        const data: Student[] = await res.json();
-        setStudents(data);
-        setSelectedStudent(data[0] || null); // auto-select first student
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    fetchStudents();
+    return () => clearInterval(interval);
   }, [activeProgram]);
 
-  // Fetch Gemini AI summary for selected student
+  // 🟢 2. Check for missing or changed data → auto generate summary
   useEffect(() => {
     if (!selectedStudent) return;
 
-    async function getAiSummary() {
-      try {
+    async function generateSummaryIfNeeded(student: Student) {
+      const prev = prevStudentData.current;
+
+      const dataChanged =
+        !prev ||
+        prev.cgpa !== student.cgpa ||
+        prev.cocu !== student.cocu ||
+        prev.feedback !== student.feedback ||
+        prev.social_media !== student.social_media;
+
+      if (
+        !student.description ||
+        student.description.trim() === "" ||
+        dataChanged
+      ) {
+        console.log("🧠 Generating/updating AI summary for:", student.name);
+
         const res = await fetch("/api/gemini-summary", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedStudent),
+          body: JSON.stringify({ student }),
         });
+
         const data = await res.json();
-        setAiSummary(data.summary);
-      } catch (error) {
-        console.error("AI summary error:", error);
-        setAiSummary("Failed to load AI summary.");
+
+        if (data.summary) {
+          setAiSummary(data.summary);
+
+          await fetch("/api/update-summary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: student.id,
+              description: data.summary,
+            }),
+          });
+
+          setSelectedStudent((prev) =>
+            prev ? { ...prev, description: data.summary } : prev
+          );
+        } else {
+          setAiSummary("No summary generated.");
+        }
+      } else {
+        setAiSummary(student.description);
       }
+
+      prevStudentData.current = student;
     }
 
-    getAiSummary();
+    // Pass as parameter (so TS knows it’s non-null)
+    generateSummaryIfNeeded(selectedStudent);
   }, [selectedStudent]);
 
+  // 🟢 3. Main Dashboard UI
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
       {/* Sidebar */}
@@ -107,7 +142,9 @@ export default function DashboardPage() {
             {/* AI Summary */}
             <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
               <CardContent className="p-6 text-gray-100">
-                <h3 className="font-semibold text-lime-400 mb-2">AI Summary</h3>
+                <h3 className="text-lime-400 font-semibold mb-3">
+                  AI Student Summary
+                </h3>
                 <p className="whitespace-pre-line">{aiSummary}</p>
               </CardContent>
             </Card>
