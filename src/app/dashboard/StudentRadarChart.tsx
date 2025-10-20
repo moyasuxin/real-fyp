@@ -27,18 +27,9 @@ interface StudentRadarChartProps {
 }
 
 const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
-  if (
-    !data ||
-    typeof data !== "object" ||
-    Array.isArray(data) ||
-    Object.keys(data).length === 0
-  ) {
-    return (
-      <div className="text-gray-400 text-center p-4">
-        Loading or no performance data available.
-      </div>
-    );
-  }
+  const chartValues = Array.isArray(data.chartData)
+    ? data.chartData
+    : Object.values(data || {});
 
   const labels = [
     "Programming",
@@ -54,14 +45,11 @@ const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
     datasets: [
       {
         label: "Student Performance",
-        data: Object.values(data || {}), // ✅ convert object → array
+        data: chartValues,
         backgroundColor: "rgba(34,197,94,0.2)",
         borderColor: "rgba(34,197,94,1)",
         borderWidth: 2,
         pointBackgroundColor: "rgba(34,197,94,1)",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "rgba(34,197,94,1)",
       },
     ],
   };

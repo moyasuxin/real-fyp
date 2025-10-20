@@ -36,8 +36,23 @@ export default function DashboardPage() {
         const res = await fetch(`/api/students?program=${activeProgram}`);
         if (!res.ok) throw new Error("Failed to fetch students");
         const data: Student[] = await res.json();
-        setStudents(data);
-        setSelectedStudent(data[0] || null);
+
+        // ✅ safely parse analysis field if it's a string
+        const parsedData = data.map((student) => {
+          let analysisObj = null;
+          try {
+            analysisObj =
+              typeof student.analysis === "string"
+                ? JSON.parse(student.analysis)
+                : student.analysis;
+          } catch (e) {
+            console.error("Failed to parse analysis for", student.name, e);
+          }
+          return { ...student, analysis: analysisObj };
+        });
+
+        setStudents(parsedData);
+        setSelectedStudent(parsedData[0] || null);
       } catch (error) {
         console.error(error);
       }
