@@ -29,76 +29,21 @@ export default function DashboardPage() {
   const [aiSummary, setAiSummary] = useState<string>("Loading AI summary...");
   const prevStudentData = useRef<Student | null>(null); // to track changes
 
-  // 🟢 1. Fetch all students for selected program
   useEffect(() => {
     if (!activeProgram) return;
-    if (!activeProgram) return;
-    const interval = setInterval(() => {
-      fetch(`/api/students?program=${activeProgram}`)
-        .then((res) => res.json())
-        .then((data: Student[]) => setStudents(data));
-    }, 5000); // refresh every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [activeProgram]);
-
-  // 🟢 2. Check for missing or changed data → auto generate summary
-  useEffect(() => {
-    if (!selectedStudent) return;
-
-    async function generateSummaryIfNeeded(student: Student) {
-      const prev = prevStudentData.current;
-
-      const dataChanged =
-        !prev ||
-        prev.cgpa !== student.cgpa ||
-        prev.cocu !== student.cocu ||
-        prev.feedback !== student.feedback ||
-        prev.social_media !== student.social_media;
-
-      if (
-        !student.description ||
-        student.description.trim() === "" ||
-        dataChanged
-      ) {
-        console.log("🧠 Generating/updating AI summary for:", student.name);
-
-        const res = await fetch("/api/gemini-summary", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ student }),
-        });
-
-        const data = await res.json();
-
-        if (data.summary) {
-          setAiSummary(data.summary);
-
-          await fetch("/api/update-summary", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: student.id,
-              description: data.summary,
-            }),
-          });
-
-          setSelectedStudent((prev) =>
-            prev ? { ...prev, description: data.summary } : prev
-          );
-        } else {
-          setAiSummary("No summary generated.");
-        }
-      } else {
-        setAiSummary(student.description);
+    async function fetchStudents() {
+      try {
+        const res = await fetch(`/api/students?program=${activeProgram}`);
+        if (!res.ok) throw new Error("Failed to fetch students");
+        const data: Student[] = await res.json();
+        setStudents(data);
+        setSelectedStudent(data[0] || null);
+      } catch (error) {
+        console.error(error);
       }
-
-      prevStudentData.current = student;
     }
-
-    // Pass as parameter (so TS knows it’s non-null)
-    generateSummaryIfNeeded(selectedStudent);
-  }, [selectedStudent]);
+    fetchStudents();
+  }, [activeProgram]);
 
   // 🟢 3. Main Dashboard UI
   return (

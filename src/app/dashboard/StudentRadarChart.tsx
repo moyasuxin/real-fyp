@@ -13,7 +13,6 @@ import {
   ChartOptions,
 } from "chart.js";
 
-// Register Chart.js components
 ChartJS.register(
   RadialLinearScale,
   PointElement,
@@ -24,10 +23,23 @@ ChartJS.register(
 );
 
 interface StudentRadarChartProps {
-  data: { [key: string]: number }; // object with keys as metric names and values as their scores
+  data: { [key: string]: number };
 }
 
 const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
+  if (
+    !data ||
+    typeof data !== "object" ||
+    Array.isArray(data) ||
+    Object.keys(data).length === 0
+  ) {
+    return (
+      <div className="text-gray-400 text-center p-4">
+        Loading or no performance data available.
+      </div>
+    );
+  }
+
   const labels = [
     "Programming",
     "Design",
@@ -42,7 +54,7 @@ const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
     datasets: [
       {
         label: "Student Performance",
-        data: Object.values(data),
+        data: Object.values(data || {}), // ✅ convert object → array
         backgroundColor: "rgba(34,197,94,0.2)",
         borderColor: "rgba(34,197,94,1)",
         borderWidth: 2,
