@@ -6,6 +6,12 @@ import StudentRadarChart from "./StudentRadarChart";
 import { Card, CardContent } from "@/components/card";
 import { supabase } from "@/services/supabaseClient";
 
+interface Comment {
+  commenter: string;
+  content: string;
+  created_at: string;
+}
+
 interface Student {
   id: number;
   name: string | null;
@@ -19,6 +25,13 @@ interface Student {
   cocu?: string | null;
   feedback?: string | null;
   social_media?: string | null;
+  programming_score?: string | null;
+  design_score?: string | null;
+  it_infrastructure_score?: string | null;
+  co_curricular_points?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  portfolio_url?: string | null;
 }
 
 export default function DashboardPage() {
@@ -27,7 +40,9 @@ export default function DashboardPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [aiSummary, setAiSummary] = useState<string>("Loading AI summary...");
-  const [recommendedCareer, setRecommendedCareer] = useState<string>("");
+  const [recommendedCareer, setRecommendedCareer] =
+    useState<string>("Loading...");
+  const [comments, setComments] = useState<Comment[]>([]);
   const prevStudentData = useRef<Student | null>(null);
 
   // 🟢 Fetch students for selected program
@@ -39,7 +54,6 @@ export default function DashboardPage() {
         if (!res.ok) throw new Error("Failed to fetch students");
         const data: Student[] = await res.json();
 
-        // Safely parse JSON analysis
         const parsedData = data.map((student) => {
           let analysisObj = null;
           try {
@@ -62,49 +76,30 @@ export default function DashboardPage() {
     fetchStudents();
   }, [activeProgram]);
 
-  // 🧠 Handle AI Summary (uses stored description first)
+  // 🧠 AI Summary
   useEffect(() => {
     async function fetchSummary() {
       if (!selectedStudent) return;
+      setAiSummary("Loading AI summary...");
 
-      // Use description from DB if exists
-      if (
-        selectedStudent.description &&
-        selectedStudent.description.trim() !== "" &&
-        selectedStudent.description.trim() !== "No summary generated."
-      ) {
-        setAiSummary(selectedStudent.description);
-      } else {
-        setAiSummary("Loading AI summary...");
-      }
-
-      // ✅ Only generate a new summary if there’s new student data (e.g., feedback/cocu/social changes)
       try {
         const res = await fetch("/api/gemini-summary", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ student: selectedStudent }),
+          body: JSON.stringify(selectedStudent),
         });
 
-        if (!res.ok) throw new Error("Failed to get AI summary");
         const data = await res.json();
-        console.log("Gemini response:", data);
-
         const summary = data.summary || "No summary generated.";
         setAiSummary(summary);
 
-        // 📝 Update the database description if it's different
-        if (summary !== selectedStudent.description) {
-          await supabase
-            .from("students")
-            .update({ description: summary })
-            .eq("id", selectedStudent.id);
-        }
+        await supabase
+          .from("students")
+          .update({ description: summary })
+          .eq("id", selectedStudent.id);
       } catch (err) {
         console.error("AI Summary Error:", err);
-        setAiSummary(
-          selectedStudent.description || "Failed to load AI summary."
-        );
+        setAiSummary("Failed to load AI summary.");
       }
     }
 
@@ -117,35 +112,44 @@ export default function DashboardPage() {
     }
   }, [selectedStudent]);
 
-  // 🎯 Generate Recommended Career based on radar data
+  // 🧩 AI Career Recommendation
   useEffect(() => {
-    if (!selectedStudent?.analysis) {
-      setRecommendedCareer("");
-      return;
+    async function fetchCareerRecommendation() {
+      if (!selectedStudent) return;
+      setRecommendedCareer("Analyzing data...");
+
+      try {
+        const res = await fetch("/api/gemini-career", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            student: selectedStudent,
+            comments, // future unstructured input
+          }),
+        });
+
+        const data = await res.json();
+        const recommendation =
+          data.recommendation || "No career recommendation generated.";
+        setRecommendedCareer(recommendation);
+
+        // Save to Supabase (optional if you have a column for it)
+        await supabase
+          .from("students")
+          .update({ recommended_career: recommendation })
+          .eq("id", selectedStudent.id);
+      } catch (err) {
+        console.error("Career Recommendation Error:", err);
+        setRecommendedCareer("Failed to generate career recommendation.");
+      }
     }
 
-    const analysis = selectedStudent.analysis;
-    const topSkill = Object.keys(analysis).reduce((a, b) =>
-      analysis[a] > analysis[b] ? a : b
-    );
+    fetchCareerRecommendation();
+  }, [selectedStudent, comments]);
 
-    const recommendations: Record<string, string> = {
-      programming: "Software Engineer / Full Stack Developer",
-      design: "UI/UX Designer / Graphic Designer",
-      it_infrastructure: "Network Engineer / DevOps Specialist",
-      communication: "Project Manager / Team Lead",
-      research: "Data Analyst / Research Scientist",
-    };
-
-    setRecommendedCareer(
-      recommendations[topSkill.toLowerCase()] || "General IT Professional"
-    );
-  }, [selectedStudent]);
-
-  // 🟢 Main UI
+  // 🟢 UI
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
-      {/* Sidebar */}
       <StudentSidebar
         activeGroup={activeGroup}
         activeProgram={activeProgram}
@@ -153,7 +157,6 @@ export default function DashboardPage() {
         onSelectProgram={setActiveProgram}
       />
 
-      {/* Main Dashboard */}
       <div className="flex-grow min-w-0 space-y-6">
         {selectedStudent ? (
           <>
@@ -191,74 +194,23 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Radar Chart */}
+            {/* Radar Chart + AI Career */}
             {selectedStudent.analysis && (
               <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
                 <CardContent className="p-6">
                   <StudentRadarChart data={selectedStudent.analysis} />
-                  {recommendedCareer && (
-                    <div className="mt-4 text-center">
-                      <h4 className="text-lime-400 font-semibold mb-1">
-                        Recommended Career Path:
-                      </h4>
-                      <p className="text-white">{recommendedCareer}</p>
-                    </div>
-                  )}
+                  <div className="mt-4 text-center">
+                    <h4 className="text-lime-400 font-semibold mb-1">
+                      Recommended Career Path (AI Analysis):
+                    </h4>
+                    <p className="text-white whitespace-pre-line">
+                      {recommendedCareer}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             )}
-
-            {/* Other Students */}
-            <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
-              <CardContent className="p-6 text-gray-100">
-                <h3 className="font-semibold text-lime-400 mb-3">
-                  Other Students in {activeProgram}
-                </h3>
-
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {students.map((s) => {
-                    const isSelected = s.id === selectedStudent?.id;
-                    return (
-                      <button
-                        key={s.id}
-                        onClick={() => setSelectedStudent(s)}
-                        className={`flex flex-col items-center p-3 rounded-lg transition border
-                          ${
-                            isSelected
-                              ? "bg-lime-600/30 border-lime-400"
-                              : "bg-zinc-900 border-zinc-700 hover:bg-zinc-700"
-                          }`}
-                      >
-                        {s.image_url && (
-                          <img
-                            src={s.image_url}
-                            alt={s.name || ""}
-                            className={`w-16 h-16 rounded-full object-cover border 
-                              ${
-                                isSelected
-                                  ? "border-lime-400"
-                                  : "border-zinc-700"
-                              }`}
-                          />
-                        )}
-                        <p
-                          className={`mt-2 font-semibold text-sm ${
-                            isSelected ? "text-lime-300" : "text-white"
-                          }`}
-                        >
-                          {s.name}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
           </>
-        ) : students.length === 0 && activeProgram ? (
-          <p className="text-gray-400">
-            No students found for {activeProgram}.
-          </p>
         ) : (
           <p className="text-gray-400">Select a course to view students.</p>
         )}
