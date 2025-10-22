@@ -1,7 +1,7 @@
 // src/app/dashboard/StudentSummary.tsx
 "use client";
-import React, { useState } from "react";
-import { supabase } from "@/services/supabaseClient"; // import Supabase client
+import React, { useEffect, useState, useRef } from "react";
+import { supabase } from "@/services/supabaseClient";
 
 interface Student {
   id: number;
@@ -17,7 +17,7 @@ interface Student {
   github_url?: string | null;
   linkedin_url?: string | null;
   portfolio_url?: string | null;
-  description?: string | null;
+  description?: string | null; // AI summary
 }
 
 interface StudentSummaryProps {
@@ -25,40 +25,77 @@ interface StudentSummaryProps {
 }
 
 const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
-  const [summary, setSummary] = useState("");
+  const [summary, setSummary] = useState(student.description || "");
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const lastData = useRef<string>("");
 
+  // ✅ Auto-regenerate summary when student data changes (except description)
+  useEffect(() => {
+    if (!student) return;
+
+    // Exclude description field from comparison
+    const { description, ...dataToCompare } = student;
+    const serialized = JSON.stringify(dataToCompare);
+
+    // Skip if no change or description already matches
+    if (serialized === lastData.current && summary === student.description)
+      return;
+
+    lastData.current = serialized;
+
+    // Debounce 2 seconds before regenerating
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      generateSummary();
+    }, 2000);
+  }, [student]);
+
+  // ✅ Generate AI summary via /api/gemini-summary
   const generateSummary = async () => {
     setLoading(true);
+    setStatus("Generating summary...");
 
-    // 1️⃣ Send student data to your Gemini API route
-    const res = await fetch("/api/summary", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(student),
-    });
+    try {
+      const res = await fetch("/api/gemini-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(student),
+      });
 
-    const data = await res.json();
-    setSummary(data.summary);
+      const data = await res.json();
 
-    // 2️⃣ Save AI-generated summary into Supabase table
-    const { error } = await supabase
-      .from("students")
-      .update({ description: data.summary })
-      .eq("id", student.id);
+      if (!data.summary) {
+        throw new Error("No summary returned from API");
+      }
 
-    if (error) {
-      console.error("Failed to update summary in Supabase:", error.message);
-    } else {
-      console.log("Summary saved to Supabase successfully!");
+      setSummary(data.summary);
+
+      // ✅ Save to Supabase
+      const { error } = await supabase
+        .from("students")
+        .update({ description: data.summary })
+        .eq("id", student.id);
+
+      if (error) {
+        console.error("Supabase update failed:", error.message);
+        setStatus("⚠️ Failed to save summary to Supabase");
+      } else {
+        setStatus("✅ Summary saved successfully!");
+      }
+    } catch (err) {
+      console.error("Error generating summary:", err);
+      setStatus("❌ Error generating summary");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md mt-6">
       <h2 className="text-xl font-semibold mb-4">AI Student Summary</h2>
+
       <button
         onClick={generateSummary}
         disabled={loading}
@@ -66,6 +103,8 @@ const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
       >
         {loading ? "Generating..." : "Generate Summary"}
       </button>
+
+      {status && <p className="mt-2 text-sm text-gray-500">{status}</p>}
 
       {summary && (
         <p className="mt-4 text-gray-700 whitespace-pre-line">{summary}</p>

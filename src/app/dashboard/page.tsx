@@ -70,7 +70,8 @@ export default function DashboardPage() {
       // Use description from DB if exists
       if (
         selectedStudent.description &&
-        selectedStudent.description.trim() !== ""
+        selectedStudent.description.trim() !== "" &&
+        selectedStudent.description.trim() !== "No summary generated."
       ) {
         setAiSummary(selectedStudent.description);
       } else {
@@ -87,6 +88,7 @@ export default function DashboardPage() {
 
         if (!res.ok) throw new Error("Failed to get AI summary");
         const data = await res.json();
+        console.log("Gemini response:", data);
 
         const summary = data.summary || "No summary generated.";
         setAiSummary(summary);
@@ -253,6 +255,10 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           </>
+        ) : students.length === 0 && activeProgram ? (
+          <p className="text-gray-400">
+            No students found for {activeProgram}.
+          </p>
         ) : (
           <p className="text-gray-400">Select a course to view students.</p>
         )}
