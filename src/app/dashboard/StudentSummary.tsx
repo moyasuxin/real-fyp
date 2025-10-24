@@ -26,6 +26,7 @@ interface StudentSummaryProps {
 
 const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
   const [summary, setSummary] = useState(student.description || "");
+  const [recommendedCareer, setRecommendedCareer] = useState<string>(""); // 🟢 new state
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -35,17 +36,14 @@ const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
   useEffect(() => {
     if (!student) return;
 
-    // Exclude description field from comparison
     const { description, ...dataToCompare } = student;
     const serialized = JSON.stringify(dataToCompare);
 
-    // Skip if no change or description already matches
     if (serialized === lastData.current && summary === student.description)
       return;
 
     lastData.current = serialized;
 
-    // Debounce 2 seconds before regenerating
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
       generateSummary();
@@ -61,21 +59,23 @@ const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
       const res = await fetch("/api/gemini-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(student),
+        body: JSON.stringify({ student }), // 🟢 ensure structure matches API
       });
 
       const data = await res.json();
 
-      if (!data.summary) {
-        throw new Error("No summary returned from API");
-      }
+      if (!data.summary) throw new Error("No summary returned from API");
 
       setSummary(data.summary);
+      setRecommendedCareer(data.recommendedCareer || ""); // 🟢 store AI career
 
-      // ✅ Save to Supabase
+      // ✅ Save both summary and career to Supabase
       const { error } = await supabase
         .from("students")
-        .update({ description: data.summary })
+        .update({
+          description: data.summary,
+          recommended_career: data.recommendedCareer,
+        })
         .eq("id", student.id);
 
       if (error) {
@@ -107,7 +107,14 @@ const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
       {status && <p className="mt-2 text-sm text-gray-500">{status}</p>}
 
       {summary && (
-        <p className="mt-4 text-gray-700 whitespace-pre-line">{summary}</p>
+        <>
+          <p className="mt-4 text-gray-700 whitespace-pre-line">{summary}</p>
+          {recommendedCareer && (
+            <p className="mt-4 text-lime-600 font-medium">
+              Recommended Career: {recommendedCareer}
+            </p>
+          )}
+        </>
       )}
     </div>
   );

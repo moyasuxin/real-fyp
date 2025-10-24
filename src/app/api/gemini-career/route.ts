@@ -1,18 +1,48 @@
 // src/app/api/gemini-career/route.ts
 import { NextResponse } from "next/server";
 
+interface Comment {
+  commenter: string;
+  content: string;
+  created_at: string;
+}
+
+interface Student {
+  id: number;
+  name?: string | null;
+  gender?: string | null;
+  dob?: string | null;
+  program?: string | null;
+  cgpa?: string | null;
+  programming_score?: string | null;
+  design_score?: string | null;
+  it_infrastructure_score?: string | null;
+  co_curricular_points?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  portfolio_url?: string | null;
+  feedback?: string | null;
+  social_media?: string | null;
+  cocu?: string | null;
+}
+
 export async function POST(req: Request) {
   try {
-    const { student, comments = [] } = await req.json();
+    const { student, comments = [] }: { student: Student; comments?: Comment[] } =
+      await req.json();
 
     if (!student) {
       return NextResponse.json({ error: "Missing student data" }, { status: 400 });
     }
 
-    // 🧩 Prepare AI prompt integrating structured + unstructured data
+    // 🧩 Combine structured and unstructured data
     const commentSection =
       comments.length > 0
-        ? comments.map(c => `- (${c.created_at}) ${c.commenter}: ${c.content}`).join("\n")
+        ? comments
+            .map(
+              (c: Comment) => `- (${c.created_at}) ${c.commenter}: ${c.content}`
+            )
+            .join("\n")
         : "No lecturer or admin comments yet.";
 
     const prompt = `
