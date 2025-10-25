@@ -6,32 +6,26 @@ import StudentRadarChart from "./StudentRadarChart";
 import { Card, CardContent } from "@/components/card";
 import { supabase } from "@/services/supabaseClient";
 
-interface Comment {
-  commenter: string;
-  content: string;
-  created_at: string;
-}
-
 interface Student {
   id: number;
   name: string | null;
   gender: string | null;
   dob: string | null;
   image_url: string | null;
-  description: string | null; // AI Summary
+  description: string | null;
   analysis: { [key: string]: number } | null;
   program: string | null;
   cgpa?: number | null;
-  cocu?: string | null;
-  feedback?: string | null;
-  social_media?: string | null;
-  programming_score?: string | null;
-  design_score?: string | null;
-  it_infrastructure_score?: string | null;
-  co_curricular_points?: string | null;
+  programming_score?: number | null;
+  design_score?: number | null;
+  it_infrastructure_score?: number | null;
+  co_curricular_points?: number | null;
   github_url?: string | null;
   linkedin_url?: string | null;
   portfolio_url?: string | null;
+  recommended_career?: string | null;
+  last_summary_updated?: string | null;
+  last_hash?: string | null;
 }
 
 export default function DashboardPage() {
@@ -42,112 +36,113 @@ export default function DashboardPage() {
   const [aiSummary, setAiSummary] = useState<string>("Loading AI summary...");
   const [recommendedCareer, setRecommendedCareer] =
     useState<string>("Loading...");
-  const [comments, setComments] = useState<Comment[]>([]);
-  const prevStudentData = useRef<Student | null>(null);
+  const [loading, setLoading] = useState(false);
+  const prevStudentId = useRef<number | null>(null);
 
-  // 🟢 Fetch students for selected program
+  // 🧠 Unified effect: fetch + conditional AI summary/career
   useEffect(() => {
     if (!activeProgram) return;
-    async function fetchStudents() {
+
+    const fetchAndAnalyze = async () => {
       try {
+        // 1️⃣ Fetch students
         const res = await fetch(`/api/students?program=${activeProgram}`);
         if (!res.ok) throw new Error("Failed to fetch students");
         const data: Student[] = await res.json();
 
         const parsedData = data.map((student) => {
-          let analysisObj = null;
           try {
-            analysisObj =
-              typeof student.analysis === "string"
-                ? JSON.parse(student.analysis)
-                : student.analysis;
+            if (typeof student.analysis === "string") {
+              student.analysis = JSON.parse(student.analysis);
+            }
           } catch (e) {
             console.error("Failed to parse analysis for", student.name, e);
           }
-          return { ...student, analysis: analysisObj };
+          return student;
         });
 
         setStudents(parsedData);
-        setSelectedStudent(parsedData[0] || null);
+        const firstStudent = parsedData[0] || null;
+        setSelectedStudent(firstStudent);
+        if (!firstStudent) return;
+
+        // 2️⃣ Check if summary needs update
+        const now = new Date();
+        const lastUpdated = firstStudent.last_summary_updated
+          ? new Date(firstStudent.last_summary_updated)
+          : null;
+        const hoursSinceLast = lastUpdated
+          ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
+          : Infinity;
+
+        // Create a hash from student core data (to detect changes)
+        const studentHash = JSON.stringify({
+          cgpa: firstStudent.cgpa,
+          programming_score: firstStudent.programming_score,
+          design_score: firstStudent.design_score,
+          it_infrastructure_score: firstStudent.it_infrastructure_score,
+          co_curricular_points: firstStudent.co_curricular_points,
+          github_url: firstStudent.github_url,
+          linkedin_url: firstStudent.linkedin_url,
+          portfolio_url: firstStudent.portfolio_url,
+        });
+
+        const hasChanged = studentHash !== firstStudent.last_hash;
+        const needsRefresh = hoursSinceLast >= 6 || hasChanged;
+
+        if (!needsRefresh) {
+          console.log("🟢 Using cached AI summary and career.");
+          setAiSummary(firstStudent.description || "No summary available.");
+          setRecommendedCareer(
+            firstStudent.recommended_career || "Not available."
+          );
+          return;
+        }
+
+        // 3️⃣ Generate new AI data
+        console.log("⚙️ Regenerating AI summary & career...");
+        setLoading(true);
+        setAiSummary("Generating new AI summary...");
+        setRecommendedCareer("Analyzing new career path...");
+
+        const aiRes = await fetch("/api/gemini-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ student: firstStudent }),
+        });
+
+        const aiData = await aiRes.json();
+        const summary = aiData.summary || "No summary generated.";
+        const career = aiData.recommendedCareer || "No career generated.";
+
+        setAiSummary(summary);
+        setRecommendedCareer(career);
+
+        // 4️⃣ Save back to Supabase with new hash + timestamp
+        await supabase
+          .from("students")
+          .update({
+            description: summary,
+            recommended_career: career,
+            last_summary_updated: now.toISOString(),
+            last_hash: studentHash,
+          })
+          .eq("id", firstStudent.id);
+
+        prevStudentId.current = firstStudent.id;
       } catch (error) {
-        console.error(error);
+        console.error("Dashboard unified error:", error);
+        setAiSummary("❌ Failed to load AI summary.");
+        setRecommendedCareer("❌ Failed to load career prediction.");
+      } finally {
+        setLoading(false);
       }
-    }
-    fetchStudents();
+    };
+
+    fetchAndAnalyze();
   }, [activeProgram]);
 
-  // 🧠 AI Summary
-  useEffect(() => {
-    async function fetchSummary() {
-      if (!selectedStudent) return;
-      setAiSummary("Loading AI summary...");
-
-      try {
-        const res = await fetch("/api/gemini-summary", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedStudent),
-        });
-
-        const data = await res.json();
-        const summary = data.summary || "No summary generated.";
-        setAiSummary(summary);
-
-        await supabase
-          .from("students")
-          .update({ description: summary })
-          .eq("id", selectedStudent.id);
-      } catch (err) {
-        console.error("AI Summary Error:", err);
-        setAiSummary("Failed to load AI summary.");
-      }
-    }
-
-    if (
-      !prevStudentData.current ||
-      prevStudentData.current.id !== selectedStudent?.id
-    ) {
-      fetchSummary();
-      prevStudentData.current = selectedStudent;
-    }
-  }, [selectedStudent]);
-
-  // 🧩 AI Career Recommendation
-  useEffect(() => {
-    async function fetchCareerRecommendation() {
-      if (!selectedStudent) return;
-      setRecommendedCareer("Analyzing data...");
-
-      try {
-        const res = await fetch("/api/gemini-career", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            student: selectedStudent,
-            comments, // future unstructured input
-          }),
-        });
-
-        const data = await res.json();
-        const recommendation =
-          data.recommendation || "No career recommendation generated.";
-        setRecommendedCareer(recommendation);
-
-        // Save to Supabase (optional if you have a column for it)
-        await supabase
-          .from("students")
-          .update({ recommended_career: recommendation })
-          .eq("id", selectedStudent.id);
-      } catch (err) {
-        console.error("Career Recommendation Error:", err);
-        setRecommendedCareer("Failed to generate career recommendation.");
-      }
-    }
-
-    fetchCareerRecommendation();
-  }, [selectedStudent, comments]);
-
-  // 🟢 UI
+  // 🖼️ UI rendering
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
       <StudentSidebar
@@ -188,7 +183,10 @@ export default function DashboardPage() {
             <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
               <CardContent className="p-6 text-gray-100">
                 <h3 className="text-lime-400 font-semibold mb-3">
-                  AI Student Summary
+                  AI Student Summary{" "}
+                  {loading && (
+                    <span className="text-gray-400">(Updating...)</span>
+                  )}
                 </h3>
                 <p className="whitespace-pre-line">{aiSummary}</p>
               </CardContent>

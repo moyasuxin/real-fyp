@@ -18,6 +18,7 @@ interface Student {
   linkedin_url?: string | null;
   portfolio_url?: string | null;
   description?: string | null; // AI summary
+  recommended_career?: string | null; // AI career
 }
 
 interface StudentSummaryProps {
@@ -26,50 +27,57 @@ interface StudentSummaryProps {
 
 const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
   const [summary, setSummary] = useState(student.description || "");
-  const [recommendedCareer, setRecommendedCareer] = useState<string>(""); // 🟢 new state
+  const [recommendedCareer, setRecommendedCareer] = useState(
+    student.recommended_career || ""
+  );
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const lastData = useRef<string>("");
 
-  // ✅ Auto-regenerate summary when student data changes (except description)
+  // ✅ Automatically regenerate when student data changes
   useEffect(() => {
     if (!student) return;
 
-    const { description, ...dataToCompare } = student;
+    // ignore unchanged data
+    const { description, recommended_career, ...dataToCompare } = student;
     const serialized = JSON.stringify(dataToCompare);
-
-    if (serialized === lastData.current && summary === student.description)
+    if (
+      serialized === lastData.current &&
+      summary === student.description &&
+      recommendedCareer === student.recommended_career
+    )
       return;
 
     lastData.current = serialized;
 
+    // debounce 2 seconds before regenerate
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
       generateSummary();
     }, 2000);
   }, [student]);
 
-  // ✅ Generate AI summary via /api/gemini-summary
+  // ✅ Unified AI Summary & Career generation
   const generateSummary = async () => {
     setLoading(true);
-    setStatus("Generating summary...");
+    setStatus("Generating summary and career...");
 
     try {
       const res = await fetch("/api/gemini-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ student }), // 🟢 ensure structure matches API
+        body: JSON.stringify({ student }),
       });
 
       const data = await res.json();
-
       if (!data.summary) throw new Error("No summary returned from API");
 
+      // Update state
       setSummary(data.summary);
-      setRecommendedCareer(data.recommendedCareer || ""); // 🟢 store AI career
+      setRecommendedCareer(data.recommendedCareer || "");
 
-      // ✅ Save both summary and career to Supabase
+      // Update Supabase (redundant but safe)
       const { error } = await supabase
         .from("students")
         .update({
@@ -80,13 +88,13 @@ const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
 
       if (error) {
         console.error("Supabase update failed:", error.message);
-        setStatus("⚠️ Failed to save summary to Supabase");
+        setStatus("⚠️ Failed to save summary to database");
       } else {
-        setStatus("✅ Summary saved successfully!");
+        setStatus("✅ Summary & career saved successfully!");
       }
     } catch (err) {
       console.error("Error generating summary:", err);
-      setStatus("❌ Error generating summary");
+      setStatus("❌ Error generating summary and career");
     } finally {
       setLoading(false);
     }
@@ -96,16 +104,18 @@ const StudentSummary: React.FC<StudentSummaryProps> = ({ student }) => {
     <div className="bg-white p-6 rounded-xl shadow-md mt-6">
       <h2 className="text-xl font-semibold mb-4">AI Student Summary</h2>
 
+      {/* Generate Button */}
       <button
         onClick={generateSummary}
         disabled={loading}
         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
       >
-        {loading ? "Generating..." : "Generate Summary"}
+        {loading ? "Generating..." : "Generate Summary & Career"}
       </button>
 
       {status && <p className="mt-2 text-sm text-gray-500">{status}</p>}
 
+      {/* Output */}
       {summary && (
         <>
           <p className="mt-4 text-gray-700 whitespace-pre-line">{summary}</p>
