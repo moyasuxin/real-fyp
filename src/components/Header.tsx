@@ -1,4 +1,4 @@
-// src/app/dashboard/Header.tsx
+// src/components/Header.tsx
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { supabase } from "../services/supabaseClient";
@@ -93,9 +93,7 @@ const DashboardHeader: React.FC = () => {
             </button>
           ) : (
             <button
-              onClick={() =>
-                supabase.auth.signInWithOtp({ email: "admin@example.com" })
-              }
+              onClick={() => (window.location.href = "/login")}
               className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-md hover:bg-yellow-500 transition-colors"
             >
               Lecturer Login

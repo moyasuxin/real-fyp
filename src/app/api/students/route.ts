@@ -1,21 +1,33 @@
 // src/app/api/students/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { supabase } from "@/services/supabaseClient";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const program = searchParams.get("program");
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const program = searchParams.get("program");
 
-  if (!program)
-    return NextResponse.json({ error: "program query required" }, { status: 400 });
+    console.log("🟢 API Called: /api/students");
+    console.log("Program param:", program);
 
-  const { data, error } = await supabase
-    .from("students")
-    .select("*")
-    .eq("program", program); // this matches the `program_short` value in students table
+    const query = supabase.from("students").select("*");
 
-  if (error)
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (program) {
+      query.ilike("program", program);
+    }
 
-  return NextResponse.json(data);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("❌ Supabase query error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.log("✅ Supabase returned:", data?.length, "rows");
+
+    return NextResponse.json(data || []);
+  } catch (err) {
+    console.error("❌ API error:", err);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }

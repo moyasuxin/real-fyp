@@ -20,9 +20,6 @@ interface Student {
   design_score?: number | null;
   it_infrastructure_score?: number | null;
   co_curricular_points?: number | null;
-  github_url?: string | null;
-  linkedin_url?: string | null;
-  portfolio_url?: string | null;
   recommended_career?: string | null;
   last_summary_updated?: string | null;
   last_hash?: string | null;
@@ -33,77 +30,80 @@ export default function DashboardPage() {
   const [activeProgram, setActiveProgram] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [aiSummary, setAiSummary] = useState<string>("Loading AI summary...");
-  const [recommendedCareer, setRecommendedCareer] =
-    useState<string>("Loading...");
+  const [aiSummary, setAiSummary] = useState<string>("");
+  const [recommendedCareer, setRecommendedCareer] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const prevStudentId = useRef<number | null>(null);
 
-  // 🧠 Unified effect: fetch + conditional AI summary/career
+  const prevProgram = useRef<string>("");
+  const prevHash = useRef<string>("");
+
   useEffect(() => {
     if (!activeProgram) return;
 
     const fetchAndAnalyze = async () => {
       try {
-        // 1️⃣ Fetch students
+        // Avoid refetch if same program and same hash
+        if (prevProgram.current === activeProgram) {
+          console.log("🟢 Program already loaded — skipping re-fetch");
+          return;
+        }
+
         const res = await fetch(`/api/students?program=${activeProgram}`);
         if (!res.ok) throw new Error("Failed to fetch students");
         const data: Student[] = await res.json();
+        if (!data?.length) return;
 
         const parsedData = data.map((student) => {
           try {
-            if (typeof student.analysis === "string") {
+            if (typeof student.analysis === "string")
               student.analysis = JSON.parse(student.analysis);
-            }
-          } catch (e) {
-            console.error("Failed to parse analysis for", student.name, e);
-          }
+          } catch {}
           return student;
         });
 
         setStudents(parsedData);
-        const firstStudent = parsedData[0] || null;
+        const firstStudent = parsedData[0];
         setSelectedStudent(firstStudent);
+
         if (!firstStudent) return;
 
-        // 2️⃣ Check if summary needs update
-        const now = new Date();
-        const lastUpdated = firstStudent.last_summary_updated
-          ? new Date(firstStudent.last_summary_updated)
-          : null;
-        const hoursSinceLast = lastUpdated
-          ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
-          : Infinity;
-
-        // Create a hash from student core data (to detect changes)
-        const studentHash = JSON.stringify({
+        // 🧮 Compute hash from key academic data
+        const coreDataHash = JSON.stringify({
           cgpa: firstStudent.cgpa,
           programming_score: firstStudent.programming_score,
           design_score: firstStudent.design_score,
           it_infrastructure_score: firstStudent.it_infrastructure_score,
           co_curricular_points: firstStudent.co_curricular_points,
-          github_url: firstStudent.github_url,
-          linkedin_url: firstStudent.linkedin_url,
-          portfolio_url: firstStudent.portfolio_url,
         });
 
-        const hasChanged = studentHash !== firstStudent.last_hash;
-        const needsRefresh = hoursSinceLast >= 6 || hasChanged;
+        const now = new Date();
+        const lastUpdated = firstStudent.last_summary_updated
+          ? new Date(firstStudent.last_summary_updated)
+          : null;
+
+        const hoursSinceLast = lastUpdated
+          ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
+          : Infinity;
+
+        const hasChanged = coreDataHash !== firstStudent.last_hash;
+        const needsRefresh = hasChanged || hoursSinceLast >= 6;
 
         if (!needsRefresh) {
-          console.log("🟢 Using cached AI summary and career.");
+          console.log("✅ Using cached AI summary and career.");
           setAiSummary(firstStudent.description || "No summary available.");
           setRecommendedCareer(
             firstStudent.recommended_career || "Not available."
           );
+          prevProgram.current = activeProgram;
+          prevHash.current = coreDataHash;
           return;
         }
 
-        // 3️⃣ Generate new AI data
+        // 🧠 Generate new AI data
         console.log("⚙️ Regenerating AI summary & career...");
         setLoading(true);
-        setAiSummary("Generating new AI summary...");
-        setRecommendedCareer("Analyzing new career path...");
+        setAiSummary("Generating AI summary...");
+        setRecommendedCareer("Analyzing career path...");
 
         const aiRes = await fetch("/api/gemini-summary", {
           method: "POST",
@@ -118,18 +118,19 @@ export default function DashboardPage() {
         setAiSummary(summary);
         setRecommendedCareer(career);
 
-        // 4️⃣ Save back to Supabase with new hash + timestamp
+        // Save new metadata
         await supabase
           .from("students")
           .update({
             description: summary,
             recommended_career: career,
             last_summary_updated: now.toISOString(),
-            last_hash: studentHash,
+            last_hash: coreDataHash,
           })
           .eq("id", firstStudent.id);
 
-        prevStudentId.current = firstStudent.id;
+        prevProgram.current = activeProgram;
+        prevHash.current = coreDataHash;
       } catch (error) {
         console.error("Dashboard unified error:", error);
         setAiSummary("❌ Failed to load AI summary.");
@@ -142,7 +143,6 @@ export default function DashboardPage() {
     fetchAndAnalyze();
   }, [activeProgram]);
 
-  // 🖼️ UI rendering
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
       <StudentSidebar
@@ -155,7 +155,6 @@ export default function DashboardPage() {
       <div className="flex-grow min-w-0 space-y-6">
         {selectedStudent ? (
           <>
-            {/* Student Info */}
             <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
               <CardContent className="p-6 text-gray-100">
                 <div className="flex items-center justify-between">
@@ -179,27 +178,22 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* AI Summary */}
             <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
               <CardContent className="p-6 text-gray-100">
                 <h3 className="text-lime-400 font-semibold mb-3">
-                  AI Student Summary{" "}
-                  {loading && (
-                    <span className="text-gray-400">(Updating...)</span>
-                  )}
+                  AI Student Summary {loading && <span>(Updating...)</span>}
                 </h3>
                 <p className="whitespace-pre-line">{aiSummary}</p>
               </CardContent>
             </Card>
 
-            {/* Radar Chart + AI Career */}
             {selectedStudent.analysis && (
               <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
                 <CardContent className="p-6">
                   <StudentRadarChart data={selectedStudent.analysis} />
                   <div className="mt-4 text-center">
                     <h4 className="text-lime-400 font-semibold mb-1">
-                      Recommended Career Path (AI Analysis):
+                      Recommended Career Path:
                     </h4>
                     <p className="text-white whitespace-pre-line">
                       {recommendedCareer}
