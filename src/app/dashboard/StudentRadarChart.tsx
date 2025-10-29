@@ -74,8 +74,26 @@ const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
   };
 
   return (
-    <div className="w-full h-full bg-zinc-800/50 rounded-xl p-2">
-      <Radar data={chartData} options={options} />
+    <div className="w-full h-full bg-zinc-800/50 rounded-xl p-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="lg:col-span-2 h-[400px]">
+        <Radar data={chartData} options={options} />
+      </div>
+      <div className="lg:col-span-1 space-y-2">
+        <h3 className="text-lg font-semibold text-gray-200 mb-4">
+          Performance Breakdown
+        </h3>
+        {labels.map((label, index) => (
+          <div
+            key={label}
+            className="flex justify-between items-center p-2 bg-zinc-700/50 rounded"
+          >
+            <span className="text-gray-200">{label}</span>
+            <span className="text-green-400 font-semibold">
+              {chartValues[index]}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

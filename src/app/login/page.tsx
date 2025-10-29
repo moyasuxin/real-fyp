@@ -32,7 +32,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-zinc-900 text-white">
+    <div className="flex items-center justify-center min-h-screen  text-white">
       <form
         onSubmit={handleLogin}
         className="bg-zinc-800 p-8 rounded-2xl shadow-xl w-96 space-y-5"

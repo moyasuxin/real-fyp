@@ -28,7 +28,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="relative z-30 bg-black/30 backdrop-blur-sm p-3 border-b-2 border-red-500/50">
+    <header className="relative z-30 bg-black/30 backdrop-blur-sm p-3 border-b-2 border-lime-400">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo Section */}
         <div className="flex items-center gap-4">
