@@ -5,7 +5,7 @@ import { Session } from "@supabase/supabase-js";
 
 interface HeaderProps {
   session: Session | null;
-  onNavigate: (view: "dashboard" | "login") => void;
+  onNavigate: (view: "dashboard" | "login" | "students" | "profile") => void;
   onLogout: () => void;
 }
 
@@ -28,13 +28,13 @@ const DashboardHeader: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className="relative z-30 bg-black/30 backdrop-blur-sm p-3 border-b-2 border-lime-400">
+    <header className="relative z-30 bg-black/30 backdrop-blur-sm p-3 border-b-2 border-lime-400 transition-all duration-300">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Logo Section */}
+        {/* Logo + Title */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => onNavigate("dashboard")}
-            className="p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition-colors"
+            className="p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -51,6 +51,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
               />
             </svg>
           </button>
+
           <div className="px-4 py-1 bg-gray-800/70 rounded-md">
             <span className="font-bold text-white text-lg">
               Nilai University | Computing Student
@@ -69,7 +70,9 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                 Admin
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className={`h-5 w-5 transition-transform ${
+                    menuOpen ? "rotate-180" : ""
+                  }`}
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -81,23 +84,41 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                 </svg>
               </button>
 
+              {/* White dropdown menu */}
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-800/90 backdrop-blur-md rounded-lg shadow-lg overflow-hidden z-50 animate-fade-in">
-                  <ul className="text-white">
+                <div className="absolute right-0 mt-2 w-52 bg-white text-black rounded-lg shadow-lg overflow-hidden z-50 animate-fade-in border border-gray-200">
+                  <ul className="text-sm font-medium">
                     <li>
                       <button
-                        onClick={() => onNavigate("dashboard")}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-700/80"
+                        onClick={() => {
+                          onNavigate("students");
+                          setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
                       >
-                        Dashboard
+                        🎓 Student Manager
                       </button>
                     </li>
                     <li>
                       <button
-                        onClick={onLogout}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-700/80"
+                        onClick={() => {
+                          onNavigate("profile");
+                          setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
                       >
-                        Logout
+                        👤 Profile
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => {
+                          onLogout();
+                          setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        🚪 Logout
                       </button>
                     </li>
                   </ul>
@@ -107,7 +128,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
           ) : (
             <button
               onClick={() => onNavigate("login")}
-              className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-md hover:bg-yellow-500 transition-colors"
+              className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-md hover:bg-yellow-500 transition"
             >
               Lecturer Login
             </button>
