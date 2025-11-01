@@ -2,11 +2,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import StudentSidebar from "./DashboardSidebar";
-import StudentRadarChart from "./StudentRadarChart";
-import { Card, CardContent } from "@/components/card";
+import StudentSelector from "./StudentSelector";
+import StudentProfileDisplay from "./StudentProfileDisplay";
 import { supabase } from "@/services/supabaseClient";
 
-interface Student {
+export interface Student {
   id: number;
   name: string | null;
   gender: string | null;
@@ -145,63 +145,32 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
+      {/* Sidebar for group and program selection */}
       <StudentSidebar
         activeGroup={activeGroup}
         activeProgram={activeProgram}
         onSelectGroup={setActiveGroup}
         onSelectProgram={setActiveProgram}
       />
-
       <div className="flex-grow min-w-0 space-y-6">
         {selectedStudent ? (
           <>
-            <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
-              <CardContent className="p-6 text-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold">
-                      {selectedStudent.name}
-                    </h2>
-                    <p className="text-gray-400">
-                      {selectedStudent.gender} • {selectedStudent.dob}
-                    </p>
-                    <p className="text-gray-400">{selectedStudent.program}</p>
-                  </div>
-                  {selectedStudent.image_url && (
-                    <img
-                      src={selectedStudent.image_url}
-                      alt={selectedStudent.name || ""}
-                      className="w-24 h-24 rounded-full border-4 border-zinc-700 object-cover"
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <StudentProfileDisplay
+              student={selectedStudent}
+              aiSummary={aiSummary}
+              recommendedCareer={recommendedCareer}
+              loading={loading}
+            />
 
-            <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
-              <CardContent className="p-6 text-gray-100">
-                <h3 className="text-lime-400 font-semibold mb-3">
-                  AI Student Summary {loading && <span>(Updating...)</span>}
-                </h3>
-                <p className="whitespace-pre-line">{aiSummary}</p>
-              </CardContent>
-            </Card>
-
-            {selectedStudent.analysis && (
-              <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
-                <CardContent className="p-6">
-                  <StudentRadarChart data={selectedStudent.analysis} />
-                  <div className="mt-4 text-center">
-                    <h4 className="text-lime-400 font-semibold mb-1">
-                      Recommended Career Path:
-                    </h4>
-                    <p className="text-white whitespace-pre-line">
-                      {recommendedCareer}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* 🔹 Student List Section */}
+            <StudentSelector
+              students={students}
+              selectedStudentId={selectedStudent?.id || null}
+              onSelectStudent={(id) => {
+                const found = students.find((s) => s.id === id) || null;
+                setSelectedStudent(found);
+              }}
+            />
           </>
         ) : (
           <p className="text-gray-400">Select a course to view students.</p>

@@ -1,100 +1,94 @@
 // src/app/dashboard/StudentProfileDisplay.tsx
+"use client";
 import React from "react";
+import { Card, CardContent } from "@/components/card";
 import StudentRadarChart from "./StudentRadarChart";
+import Image from "next/image";
 
-// StudentProfile type (replace with real type when available)
-interface StudentProfile {
+interface Student {
   id: number;
-  name: string;
-  program: string;
-  gender: string;
-  imageUrl: string;
-  description: string;
-  cgpa: number;
-  coCurricularPoints: number;
-  analysis: {
-    recommendedCareer: string;
-    chartData: number[];
-  };
+  name: string | null;
+  gender: string | null;
+  dob: string | null;
+  image_url: string | null;
+  description: string | null;
+  program: string | null;
+  analysis: { [key: string]: number } | null;
 }
 
 interface StudentProfileDisplayProps {
-  student: StudentProfile;
-  onViewReport: (student: StudentProfile) => void;
+  student: Student | null;
+  aiSummary: string;
+  recommendedCareer: string;
+  loading: boolean;
 }
-
-// Reusable small info chip
-const InfoChip: React.FC<{ icon?: React.ReactNode; text: string }> = ({
-  icon,
-  text,
-}) => (
-  <div className="flex items-center gap-2 bg-black/50 text-white px-3 py-1 rounded-md text-sm font-semibold">
-    {icon}
-    <span>{text}</span>
-  </div>
-);
 
 const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
   student,
-  onViewReport,
+  aiSummary,
+  recommendedCareer,
+  loading,
 }) => {
+  if (!student) {
+    return (
+      <p className="text-gray-400">Select a student to view their details.</p>
+    );
+  }
+
   return (
-    <div className="relative flex flex-col gap-4">
-      {/* Header with name, gender, program, and avatar */}
-      <div className="bg-zinc-700/50 p-4 rounded-t-xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-black tracking-tighter text-white">
-              {student.name}
-            </h2>
-            <div className="flex items-center gap-2 mt-1">
-              <InfoChip text={student.gender} />
-              <InfoChip text={student.program.toUpperCase()} />
+    <>
+      {/* 🔹 Student Basic Info */}
+      <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+        <CardContent className="p-4 text-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">{student.name}</h2>
+              <p className="text-gray-400">
+                {student.gender} • {student.dob}
+              </p>
+              <p className="text-gray-400">{student.program}</p>
             </div>
+            {student.image_url && (
+              <Image
+                src={student.image_url}
+                alt={student.name || ""}
+                width={96}
+                height={96}
+                className="rounded-full border-4 border-zinc-700 object-cover"
+              />
+            )}
           </div>
-          <img
-            src={student.imageUrl}
-            alt={student.name}
-            className="w-24 h-24 rounded-full object-cover border-4 border-zinc-800 shadow-lg"
-          />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Main content: narrative, recommended careers, radar chart */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 p-4 items-start">
-        <div className="xl:col-span-3 space-y-4">
-          <section className="p-4 bg-black/30 text-gray-300 rounded-lg h-64 overflow-y-auto custom-scrollbar">
-            <h3 className="font-bold text-lime-400 mb-2">
-              AI-Generated Narrative Summary
-            </h3>
-            <p className="leading-relaxed whitespace-pre-wrap">
-              {student.description}
-            </p>
-          </section>
+      {/* 🔹 AI Summary */}
+      <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+        <CardContent className="p-6 text-gray-100">
+          <h3 className="text-lime-400 font-semibold mb-3">
+            AI Student Summary{" "}
+            {loading && <span className="text-gray-400">(Updating...)</span>}
+          </h3>
+          <p className="whitespace-pre-line">{aiSummary}</p>
+        </CardContent>
+      </Card>
 
-          <section className="p-4 bg-black/30 text-gray-300 rounded-lg">
-            <h3 className="font-bold text-lime-400 mb-2">
-              Recommended Career Paths
-            </h3>
-            <p>{student.analysis.recommendedCareer}</p>
-          </section>
-        </div>
-
-        <div className="xl:col-span-2 w-full h-96">
-          <StudentRadarChart data={student.analysis.chartData} />
-        </div>
-      </div>
-
-      {/* View full report button */}
-      <div className="px-4 pb-2 flex justify-end">
-        <button
-          onClick={() => onViewReport(student)}
-          className="px-6 py-2 bg-black text-yellow-400 font-bold rounded-full border-2 border-yellow-400/50 hover:bg-yellow-400 hover:text-black transition-all"
-        >
-          View Full Report
-        </button>
-      </div>
-    </div>
+      {/* 🔹 Radar Chart & Career Recommendation */}
+      {student.analysis && (
+        <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+          <CardContent className="p-4">
+            <StudentRadarChart data={student.analysis} />
+            <div className="mt-4 text-center">
+              <h4 className="text-lime-400 font-semibold mb-1">
+                Recommended Career Path:
+              </h4>
+              <p className="text-white whitespace-pre-line">
+                {recommendedCareer}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
   );
 };
 
