@@ -5,6 +5,7 @@ import StudentSidebar from "./DashboardSidebar";
 import StudentSelector from "./StudentSelector";
 import StudentProfileDisplay from "./StudentProfileDisplay";
 import { supabase } from "@/services/supabaseClient";
+import { Session } from "@supabase/supabase-js";
 
 export interface Student {
   id: number;
@@ -25,7 +26,12 @@ export interface Student {
   last_hash?: string | null;
 }
 
-export default function DashboardPage() {
+// ✅ Accept session prop
+export default function DashboardPage({
+  session,
+}: {
+  session: Session | null;
+}) {
   const [activeGroup, setActiveGroup] = useState("Degree");
   const [activeProgram, setActiveProgram] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
@@ -42,7 +48,6 @@ export default function DashboardPage() {
 
     const fetchAndAnalyze = async () => {
       try {
-        // Avoid refetch if same program and same hash
         if (prevProgram.current === activeProgram) {
           console.log("🟢 Program already loaded — skipping re-fetch");
           return;
@@ -67,7 +72,6 @@ export default function DashboardPage() {
 
         if (!firstStudent) return;
 
-        // 🧮 Compute hash from key academic data
         const coreDataHash = JSON.stringify({
           cgpa: firstStudent.cgpa,
           programming_score: firstStudent.programming_score,
@@ -99,7 +103,6 @@ export default function DashboardPage() {
           return;
         }
 
-        // 🧠 Generate new AI data
         console.log("⚙️ Regenerating AI summary & career...");
         setLoading(true);
         setAiSummary("Generating AI summary...");
@@ -118,7 +121,6 @@ export default function DashboardPage() {
         setAiSummary(summary);
         setRecommendedCareer(career);
 
-        // Save new metadata
         await supabase
           .from("students")
           .update({
@@ -145,7 +147,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
-      {/* Sidebar for group and program selection */}
       <StudentSidebar
         activeGroup={activeGroup}
         activeProgram={activeProgram}
@@ -161,8 +162,6 @@ export default function DashboardPage() {
               recommendedCareer={recommendedCareer}
               loading={loading}
             />
-
-            {/* 🔹 Student List Section */}
             <StudentSelector
               students={students}
               selectedStudentId={selectedStudent?.id || null}
@@ -174,6 +173,20 @@ export default function DashboardPage() {
           </>
         ) : (
           <p className="text-gray-400">Select a course to view students.</p>
+        )}
+
+        {/* ✅ Example: Only visible to logged-in lecturers/admin */}
+        {session && (
+          <div className="bg-zinc-800 p-4 rounded-xl border border-zinc-700">
+            <h2 className="text-xl font-semibold mb-2">Lecturer Tools</h2>
+            <p className="text-gray-400">
+              You are logged in as{" "}
+              <span className="text-white font-medium">
+                {session.user.email}
+              </span>
+              .
+            </p>
+          </div>
         )}
       </div>
     </div>

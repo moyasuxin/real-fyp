@@ -1,22 +1,24 @@
-// src/components/Header.tsx
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { Session } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   session: Session | null;
-  onNavigate: (view: "dashboard" | "login" | "students" | "profile") => void;
   onLogout: () => void;
+  onNavigate?: (view: string) => void; // ✅ Added
 }
 
 const DashboardHeader: React.FC<HeaderProps> = ({
   session,
-  onNavigate,
   onLogout,
+  onNavigate,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -33,7 +35,10 @@ const DashboardHeader: React.FC<HeaderProps> = ({
         {/* Logo + Title */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => onNavigate("dashboard")}
+            onClick={() => {
+              router.push("/dashboard");
+              onNavigate?.("dashboard");
+            }}
             className="p-2 rounded-full bg-gray-800/50 hover:bg-gray-700/50 transition"
           >
             <svg
@@ -84,17 +89,17 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                 </svg>
               </button>
 
-              {/* White dropdown menu */}
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-52 bg-white text-black rounded-lg shadow-lg overflow-hidden z-50 animate-fade-in border border-gray-200">
+                <div className="absolute right-0 mt-2 w-52 bg-white text-black rounded-lg shadow-lg overflow-hidden z-50 border border-gray-200">
                   <ul className="text-sm font-medium">
                     <li>
                       <button
                         onClick={() => {
-                          onNavigate("students");
+                          router.push("/students");
+                          onNavigate?.("students");
                           setMenuOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
                         🎓 Student Manager
                       </button>
@@ -102,10 +107,11 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                     <li>
                       <button
                         onClick={() => {
-                          onNavigate("profile");
+                          router.push("/profile");
+                          onNavigate?.("profile");
                           setMenuOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
                         👤 Profile
                       </button>
@@ -116,7 +122,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                           onLogout();
                           setMenuOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
                       >
                         🚪 Logout
                       </button>
@@ -127,7 +133,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
             </>
           ) : (
             <button
-              onClick={() => onNavigate("login")}
+              onClick={() => router.push("/login")}
               className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-md hover:bg-yellow-500 transition"
             >
               Lecturer Login

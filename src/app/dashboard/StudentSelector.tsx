@@ -18,7 +18,7 @@ const ArrowButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="absolute top-1/2 -translate-y-1/2 bg-[#313236] p-2 rounded-md z-10 hover:bg-zinc-600 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+    className="bg-zinc-800/70 hover:bg-zinc-700/80 p-2 rounded-full backdrop-blur-sm shadow-md"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -67,35 +67,39 @@ const StudentSelector: React.FC<StudentSelectorProps> = ({
   if (!students.length) return null;
 
   return (
-    <div className="relative w-full max-w-5xl items-center justify-center">
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-8 z-20">
-        <ArrowButton direction="left" onClick={() => scroll("left")} />
-      </div>
+    <div className="relative w-full max-w-5xl flex justify-center items-center">
+      <div className="relative bg-[#313236] border-2 border-zinc-700/50 rounded-2xl px-3 py-2 w-full flex items-center overflow-hidden">
+        {/* Left Arrow (slightly overlapping cards) */}
+        <div className="z-10 -mr-2">
+          <ArrowButton direction="left" onClick={() => scroll("left")} />
+        </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="bg-[#313236] border-2 border-zinc-700/50 rounded-2xl p-4 flex items-center gap-4 overflow-x-auto scroll-smooth"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {/* Hide scrollbar for WebKit browsers */}
-        <style>{`
-          .overflow-x-auto::-webkit-scrollbar {
-            display: none;
-          }
-        `}</style>
+        {/* Scrollable Cards */}
+        <div
+          ref={scrollContainerRef}
+          className="flex items-center gap-4 overflow-x-auto scroll-smooth flex-1 px-2"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <style>{`
+        .overflow-x-auto::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
 
-        {students.map((student) => (
-          <StudentCard
-            key={student.id}
-            student={student}
-            isSelected={selectedStudentId === student.id}
-            onSelect={() => onSelectStudent(student.id)}
-          />
-        ))}
-      </div>
+          {students.map((student) => (
+            <StudentCard
+              key={student.id}
+              student={student}
+              isSelected={selectedStudentId === student.id}
+              onSelect={() => onSelectStudent(student.id)}
+            />
+          ))}
+        </div>
 
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-8 z-20">
-        <ArrowButton direction="right" onClick={() => scroll("right")} />
+        {/* Right Arrow (partly outside container) */}
+        <div className="z-10 -ml-2 translate-x-2">
+          <ArrowButton direction="right" onClick={() => scroll("right")} />
+        </div>
       </div>
     </div>
   );
