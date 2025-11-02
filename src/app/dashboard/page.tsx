@@ -1,5 +1,5 @@
-// src/app/dashboard/page.tsx
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import StudentSidebar from "./DashboardSidebar";
 import StudentSelector from "./StudentSelector";
@@ -26,12 +26,7 @@ export interface Student {
   last_hash?: string | null;
 }
 
-// ✅ Accept session prop
-export default function DashboardPage({
-  session,
-}: {
-  session: Session | null;
-}) {
+export default function DashboardPage() {
   const [activeGroup, setActiveGroup] = useState("Degree");
   const [activeProgram, setActiveProgram] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
@@ -39,19 +34,23 @@ export default function DashboardPage({
   const [aiSummary, setAiSummary] = useState<string>("");
   const [recommendedCareer, setRecommendedCareer] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
   const prevProgram = useRef<string>("");
   const prevHash = useRef<string>("");
 
+  // ✅ Check session once (for lecturer tools visibility)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+  }, []);
+
+  // ✅ Program change logic
   useEffect(() => {
     if (!activeProgram) return;
 
     const fetchAndAnalyze = async () => {
       try {
-        if (prevProgram.current === activeProgram) {
-          console.log("🟢 Program already loaded — skipping re-fetch");
-          return;
-        }
+        if (prevProgram.current === activeProgram) return;
 
         const res = await fetch(`/api/students?program=${activeProgram}`);
         if (!res.ok) throw new Error("Failed to fetch students");
@@ -84,16 +83,13 @@ export default function DashboardPage({
         const lastUpdated = firstStudent.last_summary_updated
           ? new Date(firstStudent.last_summary_updated)
           : null;
-
         const hoursSinceLast = lastUpdated
           ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
           : Infinity;
-
         const hasChanged = coreDataHash !== firstStudent.last_hash;
         const needsRefresh = hasChanged || hoursSinceLast >= 6;
 
         if (!needsRefresh) {
-          console.log("✅ Using cached AI summary and career.");
           setAiSummary(firstStudent.description || "No summary available.");
           setRecommendedCareer(
             firstStudent.recommended_career || "Not available."
@@ -103,7 +99,6 @@ export default function DashboardPage({
           return;
         }
 
-        console.log("⚙️ Regenerating AI summary & career...");
         setLoading(true);
         setAiSummary("Generating AI summary...");
         setRecommendedCareer("Analyzing career path...");
@@ -173,20 +168,6 @@ export default function DashboardPage({
           </>
         ) : (
           <p className="text-gray-400">Select a course to view students.</p>
-        )}
-
-        {/* ✅ Example: Only visible to logged-in lecturers/admin */}
-        {session && (
-          <div className="bg-zinc-800 p-4 rounded-xl border border-zinc-700">
-            <h2 className="text-xl font-semibold mb-2">Lecturer Tools</h2>
-            <p className="text-gray-400">
-              You are logged in as{" "}
-              <span className="text-white font-medium">
-                {session.user.email}
-              </span>
-              .
-            </p>
-          </div>
         )}
       </div>
     </div>

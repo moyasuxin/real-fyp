@@ -2,6 +2,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { ReactNode } from "react";
+import ClientLayoutWrapper from "@/components/ClientLayout";
 
 export const metadata: Metadata = {
   title: "Student Dashboard",
@@ -12,7 +13,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#1a1b1e] text-gray-100 font-sans antialiased transition-all duration-300">
-        <main>{children}</main>
+        {/* ✅ Client logic (session + conditional header) goes here */}
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );
