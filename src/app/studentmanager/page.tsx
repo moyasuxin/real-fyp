@@ -24,9 +24,10 @@ ChartJS.register(
 
 interface Student {
   id: number;
-  name: string;
-  program: string;
-  cgpa: number;
+  name: string | null;
+  gender: string | null;
+  program: string | null;
+  cgpa: number | string | null;
   programming_score: number;
   design_score: number;
   it_infrastructure_score: number;
@@ -400,7 +401,9 @@ export default function StudentManagerPage() {
                 >
                   <td className="py-2">{s.name}</td>
                   <td>{s.program}</td>
-                  <td>{s.cgpa ? parseFloat(s.cgpa as any).toFixed(2) : "-"}</td>
+                  <td>
+                    {s.cgpa ? parseFloat(s.cgpa.toString()).toFixed(2) : "-"}
+                  </td>
                   <td>{s.course_id || "-"}</td>
                   <td>{s.unit || 3.0}</td>
                   <td>
