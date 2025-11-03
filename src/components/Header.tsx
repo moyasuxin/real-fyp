@@ -95,8 +95,8 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                     <li>
                       <button
                         onClick={() => {
-                          router.push("/students");
-                          onNavigate?.("students");
+                          router.push("/studentmanager");
+                          onNavigate?.("studentmanager");
                           setMenuOpen(false);
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-100"

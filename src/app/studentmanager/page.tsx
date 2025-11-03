@@ -400,7 +400,7 @@ export default function StudentManagerPage() {
                 >
                   <td className="py-2">{s.name}</td>
                   <td>{s.program}</td>
-                  <td>{s.cgpa?.toFixed(2)}</td>
+                  <td>{s.cgpa ? parseFloat(s.cgpa as any).toFixed(2) : "-"}</td>
                   <td>{s.course_id || "-"}</td>
                   <td>{s.unit || 3.0}</td>
                   <td>
