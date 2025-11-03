@@ -76,7 +76,8 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
       {student.analysis && (
         <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
           <CardContent className="p-4">
-            <StudentRadarChart data={student.analysis} />
+            <StudentRadarChart student={student.analysis} />{" "}
+            {/* ✅ changed data → student */}
             <div className="mt-4 text-center">
               <h4 className="text-lime-400 font-semibold mb-1">
                 Recommended Career Path:

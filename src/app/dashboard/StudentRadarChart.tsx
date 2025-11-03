@@ -23,13 +23,26 @@ ChartJS.register(
 );
 
 interface StudentRadarChartProps {
-  data: { [key: string]: number };
+  student: {
+    programming_score?: string | number;
+    design_score?: string | number;
+    it_infrastructure_score?: string | number;
+    co_curricular_points?: string | number;
+    feedback_sentiment_score?: string | number;
+    professional_engagement_score?: string | number;
+  };
 }
 
-const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ data }) => {
-  const chartValues = Array.isArray(data.chartData)
-    ? data.chartData
-    : Object.values(data || {});
+const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ student }) => {
+  // ✅ Pull from DB columns and default to 0 if missing
+  const chartValues = [
+    Number(student.programming_score) || 0,
+    Number(student.design_score) || 0,
+    Number(student.it_infrastructure_score) || 0,
+    Number(student.co_curricular_points) || 0,
+    Number(student.feedback_sentiment_score) || 0,
+    Number(student.professional_engagement_score) || 0,
+  ];
 
   const labels = [
     "Programming",

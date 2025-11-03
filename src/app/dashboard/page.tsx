@@ -10,21 +10,30 @@ import { Session } from "@supabase/supabase-js";
 
 export interface Student {
   id: number;
-  name: string | null;
-  gender: string | null;
-  dob: string | null;
-  image_url: string | null;
+  name: string;
+  gender: "Male" | "Female" | "Other";
+  dob: string;
+  image_url: string;
   description: string | null;
   analysis: { [key: string]: number } | null;
-  program: string | null;
-  cgpa?: number | null;
-  programming_score?: number | null;
-  design_score?: number | null;
-  it_infrastructure_score?: number | null;
-  co_curricular_points?: number | null;
+  level: string;
+  program: string;
+  created_at?: string | null;
+  cgpa?: string | null;
+  programming_score?: string | null;
+  design_score?: string | null;
+  it_infrastructure_score?: string | null;
+  co_curricular_points?: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  portfolio_url?: string | null;
   recommended_career?: string | null;
+  feedback?: string | null;
+  social_media?: string | null;
   last_summary_updated?: string | null;
   last_hash?: string | null;
+  feedback_sentiment_score?: number | null;
+  professional_engagement_score?: number | null;
 }
 
 export default function DashboardPage() {
@@ -46,6 +55,7 @@ export default function DashboardPage() {
   }, []);
 
   // ✅ Program change logic
+  // ✅ Program change logic
   useEffect(() => {
     if (!activeProgram) return;
 
@@ -60,8 +70,9 @@ export default function DashboardPage() {
 
         const parsedData = data.map((student) => {
           try {
-            if (typeof student.analysis === "string")
+            if (typeof student.analysis === "string") {
               student.analysis = JSON.parse(student.analysis);
+            }
           } catch {}
           return student;
         });
@@ -72,12 +83,16 @@ export default function DashboardPage() {
 
         if (!firstStudent) return;
 
+        // ✅ Include all relevant data for hashing
         const coreDataHash = JSON.stringify({
-          cgpa: firstStudent.cgpa,
-          programming_score: firstStudent.programming_score,
-          design_score: firstStudent.design_score,
-          it_infrastructure_score: firstStudent.it_infrastructure_score,
-          co_curricular_points: firstStudent.co_curricular_points,
+          cgpa: firstStudent.cgpa ?? "0",
+          programming_score: firstStudent.programming_score ?? "0",
+          design_score: firstStudent.design_score ?? "0",
+          it_infrastructure_score: firstStudent.it_infrastructure_score ?? "0",
+          co_curricular_points: firstStudent.co_curricular_points ?? "0",
+          feedback_sentiment_score: firstStudent.feedback_sentiment_score ?? 0,
+          professional_engagement_score:
+            firstStudent.professional_engagement_score ?? 0,
         });
 
         const now = new Date();
@@ -87,6 +102,7 @@ export default function DashboardPage() {
         const hoursSinceLast = lastUpdated
           ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
           : Infinity;
+
         const hasChanged = coreDataHash !== firstStudent.last_hash;
         const needsRefresh = hasChanged || hoursSinceLast >= 6;
 
@@ -100,6 +116,7 @@ export default function DashboardPage() {
           return;
         }
 
+        // ✅ Regenerate summary and scores
         setLoading(true);
         setAiSummary("Generating AI summary...");
         setRecommendedCareer("Analyzing career path...");
@@ -114,14 +131,25 @@ export default function DashboardPage() {
         const summary = aiData.summary || "No summary generated.";
         const career = aiData.recommendedCareer || "No career generated.";
 
-        setAiSummary(summary);
-        setRecommendedCareer(career);
+        // ✅ Re-fetch updated record from Supabase after Gemini update
+        const { data: updatedStudent } = await supabase
+          .from("students")
+          .select("*")
+          .eq("id", firstStudent.id)
+          .single();
+
+        if (updatedStudent) {
+          setSelectedStudent(updatedStudent);
+          setAiSummary(updatedStudent.description || summary);
+          setRecommendedCareer(updatedStudent.recommended_career || career);
+        } else {
+          setAiSummary(summary);
+          setRecommendedCareer(career);
+        }
 
         await supabase
           .from("students")
           .update({
-            description: summary,
-            recommended_career: career,
             last_summary_updated: now.toISOString(),
             last_hash: coreDataHash,
           })
@@ -140,7 +168,6 @@ export default function DashboardPage() {
 
     fetchAndAnalyze();
   }, [activeProgram]);
-
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
       <StudentSidebar
