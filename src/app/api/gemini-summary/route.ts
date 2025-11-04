@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/services/supabaseClient";
 
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -61,7 +60,7 @@ ${cocurricularLine}
 ${optionalLinks ? optionalLinks + "\n" : ""}
 `;
 
-    // 🧠 Gemini Prompt
+    // 🧠 Your Original Gemini Prompt (kept intact)
     const prompt = `
 You are an AI that analyzes and summarizes student performance and recommends careers.
 Write clearly in **simple English** and avoid difficult words.
@@ -90,71 +89,72 @@ ${studentInfo}
 
 Lecturer/Admin Comments:
 ${formattedComments}
-
-
 `;
 
-    // Call Gemini API
-    const geminiRes = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-        process.env.GEMINI_API_KEY,
-        {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-        }),
-      }
-    );
-
-    const data = await geminiRes.json();
-    const rawText =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-      "No summary generated.";
-
-    // 🧩 Split into summary + career
-    const [summaryPart, careerPart] = rawText.split(/Recommended Career Path[:\-]?\s*/i);
-    const summary =
-      summaryPart?.replace(/^Summary[:\-]?\s*/i, "").trim() || "No summary generated.";
-
-    // 🧩 Extract clean job titles only
-    const cleanedCareer =
-      careerPart
-        ?.replace(/\*\*/g, "")
-        .replace(/[\n\r]/g, " ")
-        .replace(/Recommended Career Path.*?:/gi, "")
-        .trim() || "";
-
-    const regex =
-      /\b([A-Z][a-z]+(?: [A-Z][a-z]+)* (?:Engineer|Developer|Designer|Analyst|Manager|Administrator|Scientist|Architect|Specialist))\b/g;
-    const matches = cleanedCareer.match(regex);
-    const recommendedCareer =
-      matches && matches.length > 0
-        ? [...new Set(matches)].join(", ")
-        : cleanedCareer || "Not available.";
-
-    // Update student record in Supabase
-    const { error: updateError } = await supabase
-      .from("students")
-      .update({
-        description: summary,
-        recommended_career: recommendedCareer,
-      })
-      .eq("id", student.id);
-
-    if (updateError) {
-      console.error("Supabase update failed:", updateError);
-      return NextResponse.json({ error: "Failed to update student record" }, { status: 500 });
+  // 🧠 Call Gemini API
+  const geminiRes = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+      process.env.GEMINI_API_KEY,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      }),
     }
+  );
 
-    return NextResponse.json({
-      summary,
-      recommendedCareer,
-      success: true,
-       });
+  const data = await geminiRes.json();
+  const rawText =
+    data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+    "No summary generated.";
+
+  // 🧩 Split into summary + career
+  const [summaryPart, careerPart] = rawText.split(/Recommended Career Path[:\-]?\s*/i);
+  const summary =
+    summaryPart?.replace(/^Summary[:\-]?\s*/i, "").trim() || "No summary generated.";
+
+  const cleanedCareer =
+    careerPart
+      ?.replace(/\*\*/g, "")
+      .replace(/[\n\r]/g, " ")
+      .replace(/Recommended Career Path.*?:/gi, "")
+      .trim() || "";
+
+  const regex =
+    /\b([A-Z][a-z]+(?: [A-Z][a-z]+)* (?:Engineer|Developer|Designer|Analyst|Manager|Administrator|Scientist|Architect|Specialist))\b/g;
+  const matches = cleanedCareer.match(regex);
+  const recommendedCareer =
+    matches && matches.length > 0
+      ? [...new Set(matches)].join(", ")
+      : cleanedCareer || "Not available.";
+
+
+
+    // 🧩 Update Supabase student record
+  const { error: updateError } = await supabase
+  .from("students")
+  .update({
+    description: summary,
+    recommended_career: recommendedCareer,
+  })
+  .eq("id", student.id);
+
+
+  if (updateError) {
+    console.error("Supabase update failed:", updateError);
+    return NextResponse.json({ error: "Failed to update student record" }, { status: 500 });
+  }
+
+  // 🧩 Final response
+  return NextResponse.json({
+    summary,
+    recommendedCareer,
+    success: true,
+  });
+
   } catch (error) {
     console.error("Gemini Summary API error:", error);
-
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-  } 
+  }
 }

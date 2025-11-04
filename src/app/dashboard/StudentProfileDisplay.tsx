@@ -1,4 +1,3 @@
-// src/app/dashboard/StudentProfileDisplay.tsx
 "use client";
 import React from "react";
 import { Card, CardContent } from "@/components/card";
@@ -13,7 +12,12 @@ interface Student {
   image_url: string | null;
   description: string | null;
   program: string | null;
-  analysis: { [key: string]: number } | null;
+  programming_score?: string | number | null;
+  design_score?: string | number | null;
+  it_infrastructure_score?: string | number | null;
+  co_curricular_points?: string | number | null;
+  feedback_sentiment_score?: string | number | null;
+  professional_engagement_score?: string | number | null;
 }
 
 interface StudentProfileDisplayProps {
@@ -73,22 +77,29 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
       </Card>
 
       {/* 🔹 Radar Chart & Career Recommendation */}
-      {student.analysis && (
-        <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
-          <CardContent className="p-4">
-            <StudentRadarChart student={student.analysis} />{" "}
-            {/* ✅ changed data → student */}
-            <div className="mt-4 text-center">
-              <h4 className="text-lime-400 font-semibold mb-1">
-                Recommended Career Path:
-              </h4>
-              <p className="text-white whitespace-pre-line">
-                {recommendedCareer}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
+        <CardContent className="p-4">
+          <StudentRadarChart
+            student={{
+              programming_score: student.programming_score,
+              design_score: student.design_score,
+              it_infrastructure_score: student.it_infrastructure_score,
+              co_curricular_points: student.co_curricular_points,
+              feedback_sentiment_score: student.feedback_sentiment_score,
+              professional_engagement_score:
+                student.professional_engagement_score,
+            }}
+          />
+          <div className="mt-4 text-center">
+            <h4 className="text-lime-400 font-semibold mb-1">
+              Recommended Career Path:
+            </h4>
+            <p className="text-white whitespace-pre-line">
+              {recommendedCareer}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 };

@@ -15,7 +15,6 @@ export interface Student {
   dob: string;
   image_url: string;
   description: string | null;
-  analysis: { [key: string]: number } | null;
   level: string;
   program: string;
   created_at?: string | null;
@@ -55,7 +54,6 @@ export default function DashboardPage() {
   }, []);
 
   // ✅ Program change logic
-  // ✅ Program change logic
   useEffect(() => {
     if (!activeProgram) return;
 
@@ -70,9 +68,6 @@ export default function DashboardPage() {
 
         const parsedData = data.map((student) => {
           try {
-            if (typeof student.analysis === "string") {
-              student.analysis = JSON.parse(student.analysis);
-            }
           } catch {}
           return student;
         });

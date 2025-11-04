@@ -30,9 +30,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#1a1b1e] text-gray-100">
-      {/* ✅ Added required prop `onLogout` */}
-      <DashboardHeader session={session} onLogout={handleLogout} />
-
       <main className="container mx-auto py-12 text-center">
         <h1 className="text-4xl font-bold mb-4">
           Welcome to Student Dashboard
