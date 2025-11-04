@@ -2,17 +2,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/services/supabaseClient";
 
-// ✅ Define expected structure of Gemini AI output
-interface GeminiResponse {
-  summary?: string;
-  recommendedCareer?: string;
-  programming_score?: number;
-  design_score?: number;
-  it_infrastructure_score?: number;
-  co_curricular_points?: number;
-  feedback_sentiment_score?: number;
-  professional_engagement_score?: number;
-}
 
 export async function POST(req: Request) {
   try {
@@ -24,11 +13,13 @@ export async function POST(req: Request) {
     }
 
     // 🧩 Fetch lecturer/admin comments
-    const { data: comments } = await supabase
+    const { data: comments, error: commentError } = await supabase
       .from("student_comments")
       .select("commenter_name, content, created_at")
       .eq("student_id", student.id)
       .order("created_at", { ascending: false });
+
+    if (commentError) console.error("Error fetching comments:", commentError);
 
     const formattedComments =
       comments && comments.length > 0
@@ -61,37 +52,53 @@ export async function POST(req: Request) {
 - Program: ${student.program || "Not specified"}
 - CGPA: ${student.cgpa || "N/A"}
 - Gender: ${student.gender || "N/A"}
+- Programming Score: ${student.programming_score || "N/A"}
+- Design Score: ${student.design_score || "N/A"}
+- IT Infrastructure Score: ${student.it_infrastructure_score || "N/A"}
+- Feedback Sentiment Score: ${student.feedback_sentiment_score || "N/A"}
+- Professional Engagement Score: ${student.professional_engagement_score || "N/A"}
 ${cocurricularLine}
-${optionalLinks}
+${optionalLinks ? optionalLinks + "\n" : ""}
 `;
 
     // 🧠 Gemini Prompt
     const prompt = `
-You are an AI that analyzes students and recommends careers.
+You are an AI that analyzes and summarizes student performance and recommends careers.
+Write clearly in **simple English** and avoid difficult words.
 
+“The scores have already been computed using a machine learning model. Do not infer or modify them — just interpret the meaning.”
+Focus on:
+- The student's strongest and weakest skill areas (based on the numbers).
+- Academic performance (CGPA).
+- Mention provided student info only if provided in data.
+- Skip GitHub, LinkedIn, and Portfolio if missing.
+- Use friendly and natural language.
+- Avoid phrases like "demonstrated" or "evidenced".
+
+Then, under "Recommended Career Path:", list only **2–3 short job titles** separated by commas (no sentences, no explanation).
+
+Example Output:
+Summary: Lim Chun Xin, a self-proclaimed architect of logic, walks the fine line between curiosity and chaos. Though a student by title, he’s far more of an experimenter—one who dissects the digital world to understand what makes it tick.
+Born and raised in the quiet town of Kuala Pilah, Chun Xin’s story doesn’t begin with grandeur, but with relentless tinkering. Whether crafting an AI-powered system to predict human potential or building games that teach through play, he sees code not as commands, but as conversations between man and machine.
+Those who’ve worked with him describe him as analytical, quick-witted, and... occasionally detached. “I don’t ignore emotions—I just process them differently,” he once remarked, when asked about his calm demeanor amidst chaos. An ENTP by type, he thrives in debate, challenges the obvious, and sees flaws not as failures, but as data waiting to be interpreted.
+There are whispers of a project—an AI system said to understand more than just numbers; one that reads potential itself. Whether it’s ambition or obsession that drives him is unclear. What is clear is this: Lim Chun Xin is not content with simply writing code—he intends to teach machines how to understand humanity.
+“Perfection isn’t the goal,” he once said. “Comprehension is.”
+
+Recommended Career Path: Software Developer, AI Specialist, Systems Analyst
 For this student:
 ${studentInfo}
 
-Comments:
+Lecturer/Admin Comments:
 ${formattedComments}
 
-Return output in JSON only.
-{
-  "summary": "short natural summary",
-  "recommendedCareer": "2–3 job titles separated by commas",
-  "programming_score": number (0–100),
-  "design_score": number (0–100),
-  "it_infrastructure_score": number (0–100),
-  "co_curricular_points": number (0–100),
-  "feedback_sentiment_score": number (0–100),
-  "professional_engagement_score": number (0–100)
-}
+
 `;
 
-    // 🧠 Call Gemini API
+    // Call Gemini API
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+        process.env.GEMINI_API_KEY,
+        {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -101,50 +108,38 @@ Return output in JSON only.
     );
 
     const data = await geminiRes.json();
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    const rawText =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+      "No summary generated.";
 
-    // 🧩 Parse JSON safely
-    const match = rawText.match(/\{[\s\S]*\}/);
-    let parsed: GeminiResponse = {};
-    if (match) {
-      try {
-        parsed = JSON.parse(match[0]);
-      } catch (e) {
-        console.error("JSON parse error:", e);
-      }
-    }
+    // 🧩 Split into summary + career
+    const [summaryPart, careerPart] = rawText.split(/Recommended Career Path[:\-]?\s*/i);
+    const summary =
+      summaryPart?.replace(/^Summary[:\-]?\s*/i, "").trim() || "No summary generated.";
 
-    const {
-      summary,
-      recommendedCareer,
-      programming_score,
-      design_score,
-      it_infrastructure_score,
-      co_curricular_points,
-      feedback_sentiment_score,
-      professional_engagement_score,
-    } = parsed;
+    // 🧩 Extract clean job titles only
+    const cleanedCareer =
+      careerPart
+        ?.replace(/\*\*/g, "")
+        .replace(/[\n\r]/g, " ")
+        .replace(/Recommended Career Path.*?:/gi, "")
+        .trim() || "";
 
-    // ✅ Validation check before saving
-    const safeNumber = (val: unknown): number | null =>
-      typeof val === "number" && !isNaN(val) ? val : null;
+    const regex =
+      /\b([A-Z][a-z]+(?: [A-Z][a-z]+)* (?:Engineer|Developer|Designer|Analyst|Manager|Administrator|Scientist|Architect|Specialist))\b/g;
+    const matches = cleanedCareer.match(regex);
+    const recommendedCareer =
+      matches && matches.length > 0
+        ? [...new Set(matches)].join(", ")
+        : cleanedCareer || "Not available.";
 
-    const updatedData = {
-      description: summary || null,
-      recommended_career: recommendedCareer || null,
-      programming_score: safeNumber(programming_score),
-      design_score: safeNumber(design_score),
-      it_infrastructure_score: safeNumber(it_infrastructure_score),
-      co_curricular_points: safeNumber(co_curricular_points),
-      feedback_sentiment_score: safeNumber(feedback_sentiment_score),
-      professional_engagement_score: safeNumber(professional_engagement_score),
-      last_summary_updated: new Date().toISOString(),
-    };
-
-    // 🧩 Update student record in Supabase
+    // Update student record in Supabase
     const { error: updateError } = await supabase
       .from("students")
-      .update(updatedData)
+      .update({
+        description: summary,
+        recommended_career: recommendedCareer,
+      })
       .eq("id", student.id);
 
     if (updateError) {
@@ -152,25 +147,14 @@ Return output in JSON only.
       return NextResponse.json({ error: "Failed to update student record" }, { status: 500 });
     }
 
-    // ✅ Return structured response
     return NextResponse.json({
+      summary,
+      recommendedCareer,
       success: true,
-      summary: summary || "",
-      recommendedCareer: recommendedCareer || "",
-      scores: {
-        programming_score: safeNumber(programming_score),
-        design_score: safeNumber(design_score),
-        it_infrastructure_score: safeNumber(it_infrastructure_score),
-        co_curricular_points: safeNumber(co_curricular_points),
-        feedback_sentiment_score: safeNumber(feedback_sentiment_score),
-        professional_engagement_score: safeNumber(professional_engagement_score),
-      },
-    });
+       });
   } catch (error) {
     console.error("Gemini Summary API error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate summary and career" },
-      { status: 500 }
-    );
-  }
+
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  } 
 }
