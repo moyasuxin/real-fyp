@@ -2,11 +2,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/services/supabaseClient";
 
 interface HeaderProps {
   session: Session | null;
   onLogout: () => void;
-  onNavigate?: (view: string) => void; // ✅ Added
+  onNavigate?: (view: string) => void;
 }
 
 const DashboardHeader: React.FC<HeaderProps> = ({
@@ -18,7 +19,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Close dropdown when clicking outside
+  // ✅ Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -29,10 +30,21 @@ const DashboardHeader: React.FC<HeaderProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Handle logout + redirect
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      onLogout?.(); // still call the parent handler if needed
+      router.push("/dashboard"); // redirect to dashboard after logout
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <header className="relative z-30 bg-black/30 backdrop-blur-sm p-3 border-b-2 border-lime-400 transition-all duration-300">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Logo + Title */}
+        {/* 🔹 Logo + Title */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => {
@@ -64,7 +76,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Account Section */}
+        {/* 🔹 Account Section */}
         <div className="relative" ref={menuRef}>
           {session ? (
             <>
@@ -118,10 +130,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                     </li>
                     <li>
                       <button
-                        onClick={() => {
-                          onLogout();
-                          setMenuOpen(false);
-                        }}
+                        onClick={handleLogout}
                         className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
                       >
                         🚪 Logout
