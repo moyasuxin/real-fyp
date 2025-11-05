@@ -39,6 +39,17 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
     );
   }
 
+  // 🧠 Convert all nulls to undefined to satisfy TS type safety
+  const safeStudentData = {
+    programming_score: student.programming_score ?? undefined,
+    design_score: student.design_score ?? undefined,
+    it_infrastructure_score: student.it_infrastructure_score ?? undefined,
+    co_curricular_points: student.co_curricular_points ?? undefined,
+    feedback_sentiment_score: student.feedback_sentiment_score ?? undefined,
+    professional_engagement_score:
+      student.professional_engagement_score ?? undefined,
+  };
+
   return (
     <>
       {/* 🔹 Student Basic Info */}
@@ -79,17 +90,7 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
       {/* 🔹 Radar Chart & Career Recommendation */}
       <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
         <CardContent className="p-4">
-          <StudentRadarChart
-            student={{
-              programming_score: student.programming_score,
-              design_score: student.design_score,
-              it_infrastructure_score: student.it_infrastructure_score,
-              co_curricular_points: student.co_curricular_points,
-              feedback_sentiment_score: student.feedback_sentiment_score,
-              professional_engagement_score:
-                student.professional_engagement_score,
-            }}
-          />
+          <StudentRadarChart student={safeStudentData} />
           <div className="mt-4 text-center">
             <h4 className="text-lime-400 font-semibold mb-1">
               Recommended Career Path:

@@ -63,7 +63,8 @@ ${optionalLinks ? optionalLinks + "\n" : ""}
     // 🧠 Your Original Gemini Prompt (kept intact)
     const prompt = `
 You are an AI that analyzes and summarizes student performance and recommends careers.
-Write clearly in **simple English** and avoid difficult words.
+Write clearly in **simple English** and avoid difficult words.  
+Do **not** include any introductions like “Here’s an analysis” or “Summary:” — start directly with the description.
 
 “The scores have already been computed using a machine learning model. Do not infer or modify them — just interpret the meaning.”
 Focus on:
@@ -111,8 +112,14 @@ ${formattedComments}
 
   // 🧩 Split into summary + career
   const [summaryPart, careerPart] = rawText.split(/Recommended Career Path[:\-]?\s*/i);
-  const summary =
-    summaryPart?.replace(/^Summary[:\-]?\s*/i, "").trim() || "No summary generated.";
+// 🧹 Clean up unwanted prefixes from AI output
+let summary = summaryPart || "No summary generated.";
+
+// Remove any generic introductions like "Here's an analysis..." or "Summary:"
+summary = summary
+  .replace(/^.*?(Here('|’)s an analysis|Summary)[:\-]?\s*/i, "")
+  .replace(/^["'\s]+|["'\s]+$/g, "") // trim quotes and spaces
+  .trim();
 
   const cleanedCareer =
     careerPart

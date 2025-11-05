@@ -1,4 +1,3 @@
-// src/app/dashboard/page.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -48,12 +47,12 @@ export default function DashboardPage() {
   const prevProgram = useRef<string>("");
   const prevHash = useRef<string>("");
 
-  // ✅ Check session once (for lecturer tools visibility)
+  // ✅ Check session once (for lecturer/admin tool visibility)
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
   }, []);
 
-  // ✅ Program change logic
+  // ✅ Fetch and auto-analyze when program changes
   useEffect(() => {
     if (!activeProgram) return;
 
@@ -75,10 +74,9 @@ export default function DashboardPage() {
         setStudents(parsedData);
         const firstStudent = parsedData[0];
         setSelectedStudent(firstStudent);
-
         if (!firstStudent) return;
 
-        // ✅ Include all relevant data for hashing
+        // ✅ Core data for hash check
         const coreDataHash = JSON.stringify({
           cgpa: firstStudent.cgpa ?? "0",
           programming_score: firstStudent.programming_score ?? "0",
@@ -111,58 +109,83 @@ export default function DashboardPage() {
           return;
         }
 
-        // ✅ Regenerate summary and scores
-        setLoading(true);
-        setAiSummary("Generating AI summary...");
-        setRecommendedCareer("Analyzing career path...");
-
-        const aiRes = await fetch("/api/gemini-summary", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ student: firstStudent }),
-        });
-
-        const aiData = await aiRes.json();
-        const summary = aiData.summary || "No summary generated.";
-        const career = aiData.recommendedCareer || "No career generated.";
-
-        // ✅ Re-fetch updated record from Supabase after Gemini update
-        const { data: updatedStudent } = await supabase
-          .from("students")
-          .select("*")
-          .eq("id", firstStudent.id)
-          .single();
-
-        if (updatedStudent) {
-          setSelectedStudent(updatedStudent);
-          setAiSummary(updatedStudent.description || summary);
-          setRecommendedCareer(updatedStudent.recommended_career || career);
-        } else {
-          setAiSummary(summary);
-          setRecommendedCareer(career);
-        }
-
-        await supabase
-          .from("students")
-          .update({
-            last_summary_updated: now.toISOString(),
-            last_hash: coreDataHash,
-          })
-          .eq("id", firstStudent.id);
-
+        // ✅ Auto regenerate if needed
+        await regenerateSummary(firstStudent, coreDataHash);
         prevProgram.current = activeProgram;
         prevHash.current = coreDataHash;
       } catch (error) {
         console.error("Dashboard unified error:", error);
         setAiSummary("❌ Failed to load AI summary.");
         setRecommendedCareer("❌ Failed to load career prediction.");
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchAndAnalyze();
   }, [activeProgram]);
+
+  // ✅ Reusable function to refresh AI summary manually or automatically
+  const regenerateSummary = async (student: Student, coreDataHash: string) => {
+    try {
+      setLoading(true);
+      setAiSummary("Generating AI summary...");
+      setRecommendedCareer("Analyzing career path...");
+
+      const aiRes = await fetch("/api/gemini-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student }),
+      });
+
+      const aiData = await aiRes.json();
+      const summary = aiData.summary || "No summary generated.";
+      const career = aiData.recommendedCareer || "No career generated.";
+
+      const { data: updatedStudent } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", student.id)
+        .single();
+
+      if (updatedStudent) {
+        setSelectedStudent(updatedStudent);
+        setAiSummary(updatedStudent.description || summary);
+        setRecommendedCareer(updatedStudent.recommended_career || career);
+      } else {
+        setAiSummary(summary);
+        setRecommendedCareer(career);
+      }
+
+      await supabase
+        .from("students")
+        .update({
+          last_summary_updated: new Date().toISOString(),
+          last_hash: coreDataHash,
+        })
+        .eq("id", student.id);
+    } catch (error) {
+      console.error("Manual refresh error:", error);
+      setAiSummary("❌ Failed to refresh AI summary.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Manual refresh handler
+  const handleManualRefresh = async () => {
+    if (!selectedStudent) return;
+    const coreDataHash = JSON.stringify({
+      cgpa: selectedStudent.cgpa ?? "0",
+      programming_score: selectedStudent.programming_score ?? "0",
+      design_score: selectedStudent.design_score ?? "0",
+      it_infrastructure_score: selectedStudent.it_infrastructure_score ?? "0",
+      co_curricular_points: selectedStudent.co_curricular_points ?? "0",
+      feedback_sentiment_score: selectedStudent.feedback_sentiment_score ?? 0,
+      professional_engagement_score:
+        selectedStudent.professional_engagement_score ?? 0,
+    });
+    await regenerateSummary(selectedStudent, coreDataHash);
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-4 animate-fade-in">
       <StudentSidebar
@@ -171,15 +194,32 @@ export default function DashboardPage() {
         onSelectGroup={setActiveGroup}
         onSelectProgram={setActiveProgram}
       />
+
       <div className="flex-grow min-w-0 space-y-6">
         {selectedStudent ? (
           <>
+            {/* ✅ Display student info */}
             <StudentProfileDisplay
               student={selectedStudent}
               aiSummary={aiSummary}
               recommendedCareer={recommendedCareer}
               loading={loading}
             />
+
+            {/* ✅ Refresh button visible only to lecturers/admin */}
+            {session && (
+              <div className="flex justify-end">
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Refreshing..." : "🔄 Refresh AI Summary"}
+                </button>
+              </div>
+            )}
+
+            {/* ✅ Student selector */}
             <StudentSelector
               students={students}
               selectedStudentId={selectedStudent?.id || null}
