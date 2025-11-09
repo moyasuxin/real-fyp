@@ -1,35 +1,40 @@
+// src/app/studentmanager/page.tsx
 "use client";
 import React, { useState } from "react";
 import { useStudents } from "./hooks/useStudents";
-import StudentChart from "./components/StudentChart";
-import StudentForm from "./components/StudentForm";
-import StudentTable from "./components/StudentTable";
+import Sidebar from "./components/Sidebar";
+import ChartView from "./components/StudentChart";
+import ManageView from "./components/StudentManageTable";
+import StudentEdit from "./components/StudentEdit";
+import { Student } from "./types/student";
 
 export default function StudentManagerPage() {
-  const { students, loading, addStudent, deleteStudent } = useStudents();
-  const [formOpen, setFormOpen] = useState(false);
+  const { students, loading, deleteStudent } = useStudents();
+  const [activeTab, setActiveTab] = useState<"chart" | "manage">("manage");
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   return (
-    <div className="text-white space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Student Manager</h1>
-        <button
-          onClick={() => setFormOpen(!formOpen)}
-          className="bg-lime-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-lime-500 transition-colors"
-        >
-          {formOpen ? "Close Form" : "Add Student"}
-        </button>
-      </div>
+    <div className="flex text-gray-100 h-screen bg-[#1a1b1e]">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <StudentChart students={students} />
+      <main className="flex-1 p-8 overflow-y-auto flex justify-center items-start">
+        {activeTab === "chart" && <ChartView students={students} />}
 
-      {formOpen && <StudentForm onSubmit={addStudent} loading={loading} />}
-
-      <StudentTable
-        students={students}
-        loading={loading}
-        onDelete={deleteStudent}
-      />
+        {activeTab === "manage" &&
+          (selectedStudent ? (
+            <StudentEdit
+              student={selectedStudent}
+              onClose={() => setSelectedStudent(null)}
+            />
+          ) : (
+            <ManageView
+              students={students}
+              loading={loading}
+              onDelete={deleteStudent}
+              onEdit={(student) => setSelectedStudent(student)}
+            />
+          ))}
+      </main>
     </div>
   );
 }

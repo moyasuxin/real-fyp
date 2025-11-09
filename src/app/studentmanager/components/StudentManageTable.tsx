@@ -1,3 +1,4 @@
+// src/app/studentmanager/components/StudentManageTable.tsx
 "use client";
 import React from "react";
 import { Student } from "../types/student";
@@ -6,22 +7,35 @@ interface Props {
   students: Student[];
   loading: boolean;
   onDelete: (id: number) => void;
+  onEdit: (student: Student | null) => void; // ✅ allow null
 }
 
-export default function StudentTable({ students, loading, onDelete }: Props) {
+export default function StudentManageTable({
+  students,
+  loading,
+  onDelete,
+  onEdit,
+}: Props) {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="bg-zinc-800 p-6 rounded-2xl shadow-lg">
-      <h2 className="text-xl font-semibold mb-4">All Students</h2>
+    <div className="bg-zinc-800 p-6 rounded-2xl shadow-lg w-full">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">All Students</h2>
+        <button
+          onClick={() => onEdit(null)} // null = trigger add mode
+          className="bg-lime-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-lime-500 transition-colors"
+        >
+          + Add Student
+        </button>
+      </div>
+
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="text-lime-300 border-b border-gray-700">
             <th className="py-2">Name</th>
             <th>Program</th>
             <th>CGPA</th>
-            <th>Course ID</th>
-            <th>Unit</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -29,13 +43,16 @@ export default function StudentTable({ students, loading, onDelete }: Props) {
           {students.map((s) => (
             <tr
               key={s.id}
-              className="border-b border-gray-700 hover:bg-gray-800/50"
+              className="border-b border-gray-700 hover:bg-gray-800/50 cursor-pointer"
             >
-              <td className="py-2">{s.name}</td>
+              <td
+                className="py-2 text-blue-400 hover:underline"
+                onClick={() => onEdit(s)}
+              >
+                {s.name}
+              </td>
               <td>{s.program}</td>
               <td>{s.cgpa ? parseFloat(s.cgpa.toString()).toFixed(2) : "-"}</td>
-              <td>{s.course_id || "-"}</td>
-              <td>{s.unit || 3.0}</td>
               <td>
                 <button
                   onClick={() => onDelete(s.id)}
