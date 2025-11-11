@@ -2,6 +2,7 @@
 "use client";
 import React from "react";
 import { Student } from "../types/student";
+import CourseSection from "./CourseSection";
 
 interface Props {
   student: Student | null;
@@ -9,20 +10,7 @@ interface Props {
 }
 
 export default function StudentEdit({ student, onClose }: Props) {
-  if (!student) {
-    return (
-      <div className="bg-zinc-800 p-6 rounded-2xl shadow-md w-full">
-        <h2 className="text-xl font-semibold mb-4">Add New Student</h2>
-        <p>Coming soon: student creation form here...</p>
-        <button
-          onClick={onClose}
-          className="mt-4 bg-gray-700 px-4 py-2 rounded-lg"
-        >
-          Back
-        </button>
-      </div>
-    );
-  }
+  if (!student) return null;
 
   return (
     <div className="bg-zinc-800 p-6 rounded-2xl shadow-md w-full space-y-4">
@@ -36,7 +24,7 @@ export default function StudentEdit({ student, onClose }: Props) {
         </button>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1 text-gray-300">
         <p>
           <strong>Program:</strong> {student.program}
         </p>
@@ -46,17 +34,7 @@ export default function StudentEdit({ student, onClose }: Props) {
         </p>
       </div>
 
-      <hr className="border-gray-600" />
-
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Course History</h3>
-        <ul className="space-y-1">
-          {/* Placeholder for future Supabase course data */}
-          <li className="text-gray-400 italic">
-            No course data yet (coming soon)
-          </li>
-        </ul>
-      </div>
+      <CourseSection studentId={student.id} />
     </div>
   );
 }

@@ -7,63 +7,67 @@ export interface Course {
   id: number;
   student_id: number;
   course_name: string;
-  course_code: string;
-  grade: string;
-  point: number;
-  unit: number;
-  description: string | null;
+  course_code?: string | null;
+  grade?: string | null;
+  unit?: number | null;
+  description?: string | null;
+  created_at?: string;
 }
 
 export function useCourses(studentId?: number) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all or by student_id
+  // 🔹 Fetch courses for this student
   useEffect(() => {
+    if (!studentId) return;
     const fetchCourses = async () => {
       setLoading(true);
-      let query = supabase.from("courses").select("*");
-      if (studentId) query = query.eq("student_id", studentId);
+      const { data, error } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("student_id", studentId)
+        .order("id", { ascending: true });
 
-      const { data, error } = await query.order("id", { ascending: true });
       if (error) console.error("Error fetching courses:", error);
-      else setCourses(data || []);
+      else if (data) setCourses(data);
+
       setLoading(false);
     };
 
     fetchCourses();
   }, [studentId]);
 
-  // Add a course
-  const addCourse = async (newCourse: Omit<Course, "id">) => {
+  // 🔹 Add a new course
+  const addCourse = async (course: Omit<Course, "id">) => {
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("courses")
-        .insert([newCourse])
-        .select();
-      if (error) throw error;
-      if (data && data.length > 0)
-        setCourses((prev) => [...prev, data[0]]);
-    } catch (err) {
-      console.error("Error adding course:", err);
-    } finally {
-      setLoading(false);
-    }
+    const { data, error } = await supabase
+      .from("courses")
+      .insert([
+        {
+          student_id: course.student_id,
+          course_name: course.course_name,
+          course_code: course.course_code ?? null,
+          grade: course.grade ?? null,
+          unit: course.unit ?? null,
+          description: course.description ?? null,
+        },
+      ])
+      .select("*");
+
+    if (error) console.error("Error adding course:", error);
+    else if (data?.[0]) setCourses((prev) => [...prev, data[0]]);
+
+    setLoading(false);
   };
 
-  // Delete a course
+  // 🔹 Delete a course
   const deleteCourse = async (id: number) => {
     setLoading(true);
-    try {
-      const { error } = await supabase.from("courses").delete().eq("id", id);
-      if (error) throw error;
-      setCourses((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
-      console.error("Error deleting course:", err);
-    } finally {
-      setLoading(false);
-    }
+    const { error } = await supabase.from("courses").delete().eq("id", id);
+    if (error) console.error("Error deleting course:", error);
+    else setCourses((prev) => prev.filter((c) => c.id !== id));
+    setLoading(false);
   };
 
   return { courses, loading, addCourse, deleteCourse };
