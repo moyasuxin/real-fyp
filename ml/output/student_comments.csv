@@ -1,0 +1,504 @@
+id,student_id,commenter_id,commenter_name,content,created_at
+1,1,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.169455
+2,1,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.169459
+3,2,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.169999
+4,3,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.170219
+5,5,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.170535
+6,7,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.170900
+7,8,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.171048
+8,8,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.171050
+9,9,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.171244
+10,10,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.171459
+11,12,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.171771
+12,14,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.172087
+13,14,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.172089
+14,18,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.172775
+15,19,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.172973
+16,21,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.173410
+17,21,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.173412
+18,22,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.173612
+19,22,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.173615
+20,23,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.173780
+21,23,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.173782
+22,24,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.173959
+23,25,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.174168
+24,25,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.174172
+25,27,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.174489
+26,27,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.174491
+27,29,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.174917
+28,29,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.174919
+29,30,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.175051
+30,30,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.175053
+31,32,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.175317
+32,34,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.175523
+33,35,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.175744
+34,35,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.175748
+35,36,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.175949
+36,36,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.175950
+37,37,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.176056
+38,37,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.176058
+39,38,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.176260
+40,38,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.176262
+41,40,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.176601
+42,41,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.176701
+43,42,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.176886
+44,42,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.176888
+45,43,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.177058
+46,43,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.177060
+47,44,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.177271
+48,45,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.177476
+49,46,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.177677
+50,46,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.177679
+51,48,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.177994
+52,49,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.178164
+53,50,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.178365
+54,50,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.178367
+55,51,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.178466
+56,52,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.178615
+57,54,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.178976
+58,57,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.179463
+59,58,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.179616
+60,59,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.179752
+61,59,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.179754
+62,60,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.179945
+63,60,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.179947
+64,61,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.180147
+65,62,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.180881
+66,64,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.181678
+67,68,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.183462
+68,69,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.183794
+69,71,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.184356
+70,74,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.184989
+71,75,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.185202
+72,75,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.185204
+73,76,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.185361
+74,76,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.185363
+75,77,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.185558
+76,78,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.185713
+77,78,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.185715
+78,79,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.185886
+79,81,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.186301
+80,81,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.186302
+81,82,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.186503
+82,82,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.186505
+83,84,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.186855
+84,84,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.186857
+85,85,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.187051
+86,86,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.187247
+87,86,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.187251
+88,88,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.187911
+89,88,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.187913
+90,89,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.188168
+91,89,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.188173
+92,90,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.188506
+93,92,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.189303
+94,92,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.189307
+95,93,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.189535
+96,94,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.189693
+97,95,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.189907
+98,95,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.189909
+99,97,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.190329
+100,97,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.190331
+101,98,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.190538
+102,99,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.190704
+103,99,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.190706
+104,100,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.190815
+105,100,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.190817
+106,101,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.191027
+107,101,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.191029
+108,102,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.191188
+109,104,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.191498
+110,106,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.191847
+111,107,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.192051
+112,107,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.192053
+113,108,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.192207
+114,109,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.192402
+115,110,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.192553
+116,110,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.192555
+117,111,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.192707
+118,111,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.192709
+119,112,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.192808
+120,112,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.192810
+121,115,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.193301
+122,115,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.193303
+123,116,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.193455
+124,116,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.193456
+125,117,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.193651
+126,117,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.193653
+127,118,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.193846
+128,120,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.194199
+129,122,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.194841
+130,123,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.195025
+131,126,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.195840
+132,127,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.196039
+133,129,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.196439
+134,129,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.196442
+135,130,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.196742
+136,131,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.196947
+137,131,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.196949
+138,133,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.197345
+139,133,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.197347
+140,134,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.197510
+141,134,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.197512
+142,135,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.197709
+143,136,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.197912
+144,136,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.197914
+145,139,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.198401
+146,139,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.198404
+147,143,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.199143
+148,144,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.199351
+149,145,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.199547
+150,146,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.199704
+151,146,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.199706
+152,147,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.199859
+153,151,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.200503
+154,151,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.200505
+155,152,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.200707
+156,152,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.200708
+157,153,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.200840
+158,153,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.200841
+159,155,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.201192
+160,156,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.201531
+161,159,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.202047
+162,159,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.202049
+163,161,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.202388
+164,161,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.202391
+165,162,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.202614
+166,163,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.202735
+167,165,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.203076
+168,165,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.203078
+169,166,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.203246
+170,166,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.203248
+171,168,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.203892
+172,168,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.203894
+173,169,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.204059
+174,171,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.204460
+175,172,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.204573
+176,172,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.204575
+177,173,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.204821
+178,173,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.204837
+179,174,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.204945
+180,174,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.204947
+181,175,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.205202
+182,177,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.205516
+183,178,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.205738
+184,180,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.206001
+185,182,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.206306
+186,182,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.206309
+187,183,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.206513
+188,183,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.206515
+189,185,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.206811
+190,185,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.206812
+191,187,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.207099
+192,188,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.207263
+193,189,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.207457
+194,190,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.207607
+195,190,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.207608
+196,191,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.207758
+197,192,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.207958
+198,192,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.207960
+199,193,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.208164
+200,193,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.208166
+201,195,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.208809
+202,195,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.208814
+203,196,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.209023
+204,196,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.209026
+205,198,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.209423
+206,198,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.209425
+207,199,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.209654
+208,200,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.209822
+209,200,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.209824
+210,201,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.209937
+211,202,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.210141
+212,202,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.210143
+213,203,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.210303
+214,204,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.210466
+215,205,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.210617
+216,205,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.210619
+217,207,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.210909
+218,207,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.210911
+219,208,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.211058
+220,208,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.211060
+221,210,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.211317
+222,212,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.211621
+223,213,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.211777
+224,214,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.211978
+225,215,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.212175
+226,216,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.212368
+227,216,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.212370
+228,220,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.212951
+229,220,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.212953
+230,221,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.213098
+231,221,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.213100
+232,222,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.213249
+233,223,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.213448
+234,223,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.213450
+235,224,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.213640
+236,224,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.213641
+237,225,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.213826
+238,226,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.213981
+239,226,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.213983
+240,227,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.214184
+241,228,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.214382
+242,228,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.214383
+243,230,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.214683
+244,231,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.214842
+245,231,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.214844
+246,232,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.215119
+247,233,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.215248
+248,234,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.215485
+249,234,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.215487
+250,235,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.215648
+251,237,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.216021
+252,238,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.216182
+253,240,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.216448
+254,240,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.216451
+255,241,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.216553
+256,241,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.216555
+257,242,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.216720
+258,243,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.216821
+259,244,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.216974
+260,244,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.216978
+261,245,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.217179
+262,246,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.217381
+263,246,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.217383
+264,248,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.217790
+265,252,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.218332
+266,252,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.218334
+267,253,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.218493
+268,254,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.218699
+269,254,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.218701
+270,255,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.218922
+271,256,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.219059
+272,256,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.219061
+273,257,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.219213
+274,257,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.219216
+275,259,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.219414
+276,259,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.219416
+277,260,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.219620
+278,262,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.219973
+279,263,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.220135
+280,264,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.220237
+281,265,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.220404
+282,265,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.220406
+283,266,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.220570
+284,266,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.220571
+285,267,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.220782
+286,267,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.220784
+287,268,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.220883
+288,268,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.220885
+289,270,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.221257
+290,272,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.221617
+291,272,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.221618
+292,273,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.221775
+293,273,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.221777
+294,274,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.221939
+295,274,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.221941
+296,276,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.222225
+297,276,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.222228
+298,278,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.222909
+299,278,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.222912
+300,279,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.223201
+301,280,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.223433
+302,280,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.223435
+303,281,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.223679
+304,281,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.223681
+305,283,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.224072
+306,283,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.224074
+307,287,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.224926
+308,288,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.225089
+309,288,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.225091
+310,289,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.225260
+311,291,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.225616
+312,292,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.225842
+313,295,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.226373
+314,295,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.226375
+315,296,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.226524
+316,296,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.226526
+317,299,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.227057
+318,299,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.227059
+319,300,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.227222
+320,300,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.227223
+321,301,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.227377
+322,302,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.227537
+323,303,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.227682
+324,303,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.227684
+325,304,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.227896
+326,304,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.227898
+327,305,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.228054
+328,307,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.228417
+329,308,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.228625
+330,308,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.228627
+331,309,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.228879
+332,309,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.228881
+333,310,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.229061
+334,313,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.229827
+335,314,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.230046
+336,314,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.230048
+337,315,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.230253
+338,315,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.230255
+339,316,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.230474
+340,316,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.230475
+341,317,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.230636
+342,317,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.230638
+343,318,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.230849
+344,318,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.230851
+345,320,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.231180
+346,320,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.231183
+347,321,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.231335
+348,321,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.231337
+349,322,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.231539
+350,325,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.232034
+351,327,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.232285
+352,328,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.232452
+353,328,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.232454
+354,329,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.232630
+355,330,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.232737
+356,331,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.232950
+357,333,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.233364
+358,334,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.233529
+359,337,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.234039
+360,337,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.234041
+361,338,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.234239
+362,339,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.234386
+363,339,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.234388
+364,340,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.234547
+365,341,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.234706
+366,341,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.234710
+367,343,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.235011
+368,343,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.235013
+369,344,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.235180
+370,344,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.235182
+371,346,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.235590
+372,346,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.235591
+373,347,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.235756
+374,349,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.236338
+375,349,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.236340
+376,351,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.236766
+377,352,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.236876
+378,353,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.237112
+379,354,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.237313
+380,355,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.237651
+381,356,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.237924
+382,357,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.238158
+383,358,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.238417
+384,358,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.238420
+385,359,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.238590
+386,360,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.238746
+387,363,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.239282
+388,363,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.239284
+389,367,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.240105
+390,367,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.240107
+391,369,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.241434
+392,370,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.241595
+393,370,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.241600
+394,376,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.242638
+395,379,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.243289
+396,380,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.243443
+397,382,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.243759
+398,382,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.243761
+399,384,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.244125
+400,384,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.244128
+401,387,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.244544
+402,387,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.244547
+403,390,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.245119
+404,390,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.245121
+405,391,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.245263
+406,391,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.245265
+407,394,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.245785
+408,396,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.246089
+409,396,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.246092
+410,398,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.246403
+411,398,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.246405
+412,399,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.246572
+413,399,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.246574
+414,401,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.246885
+415,401,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.246887
+416,403,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.247195
+417,403,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.247196
+418,406,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.247705
+419,407,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.247915
+420,409,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.248326
+421,411,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.248689
+422,412,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.248847
+423,412,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.248850
+424,413,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.248971
+425,415,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.249372
+426,416,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.249524
+427,417,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.249769
+428,419,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.250283
+429,420,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.250511
+430,421,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.250727
+431,423,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.250998
+432,423,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.251001
+433,424,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.251294
+434,424,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.251298
+435,425,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.251604
+436,426,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.251901
+437,426,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.251903
+438,428,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.252192
+439,429,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.252435
+440,429,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.252437
+441,431,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.252779
+442,432,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.252965
+443,432,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.252967
+444,434,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.253354
+445,434,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.253356
+446,436,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.253636
+447,436,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.253638
+448,440,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.254307
+449,442,,Lecturer Ali,Excellent project work.,2025-11-14T16:59:41.254574
+450,442,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.254576
+451,445,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.255161
+452,447,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.255576
+453,447,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.255578
+454,448,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.255744
+455,448,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.255746
+456,450,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.256012
+457,454,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.256777
+458,455,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.257040
+459,455,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.257042
+460,456,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.257335
+461,456,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.257338
+462,457,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.257532
+463,458,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.257837
+464,460,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.258297
+465,461,,Lecturer Ali,Needs improvement in assignments.,2025-11-14T16:59:41.258451
+466,464,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.258993
+467,464,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.258995
+468,465,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.259204
+469,466,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.259405
+470,466,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.259407
+471,467,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.259623
+472,468,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.259822
+473,469,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.260026
+474,469,,Lecturer Ali,"Good progress, active in class.",2025-11-14T16:59:41.260028
+475,471,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.260276
+476,471,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.260278
+477,472,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.260431
+478,472,,Lecturer Tan,Attendance inconsistent but improving.,2025-11-14T16:59:41.260434
+479,474,,Lecturer Tan,Needs improvement in assignments.,2025-11-14T16:59:41.260655
+480,475,,Lecturer Ali,Strong teamwork and communication skills.,2025-11-14T16:59:41.260801
+481,477,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.261098
+482,479,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.261355
+483,481,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.261649
+484,482,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.261801
+485,482,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.261803
+486,483,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.261994
+487,483,,Lecturer Siti,Needs improvement in assignments.,2025-11-14T16:59:41.261997
+488,484,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.262132
+489,484,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.262134
+490,485,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.262330
+491,486,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.262485
+492,486,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.262487
+493,488,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.262830
+494,488,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.262832
+495,489,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.263028
+496,491,,Lecturer Siti,"Good progress, active in class.",2025-11-14T16:59:41.263387
+497,492,,Lecturer Tan,"Good progress, active in class.",2025-11-14T16:59:41.263538
+498,492,,Lecturer Tan,Strong teamwork and communication skills.,2025-11-14T16:59:41.263541
+499,495,,Lecturer Siti,Strong teamwork and communication skills.,2025-11-14T16:59:41.264130
+500,498,,Lecturer Siti,Excellent project work.,2025-11-14T16:59:41.264604
+501,498,,Lecturer Tan,Excellent project work.,2025-11-14T16:59:41.264606
+502,499,,Lecturer Siti,Attendance inconsistent but improving.,2025-11-14T16:59:41.264759
+503,500,,Lecturer Ali,Attendance inconsistent but improving.,2025-11-14T16:59:41.264952
