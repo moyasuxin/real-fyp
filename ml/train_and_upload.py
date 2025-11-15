@@ -10,7 +10,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from dotenv import load_dotenv
 
 # ─────────────────────────────────────────────
-# Load environment (for Supabase upload)
+# Load environment variables
 # ─────────────────────────────────────────────
 load_dotenv()
 
@@ -33,7 +33,6 @@ df_comments = pd.read_csv("ml/output/student_comments.csv", on_bad_lines="skip")
 # ─────────────────────────────────────────────
 def build_training_df(df_students, df_courses, df_comments):
 
-    # Normalize grades
     grade_map = {
         "A+": 4.0, "A": 4.0, "A-": 3.67,
         "B+": 3.33, "B": 3.0, "B-": 2.67,
@@ -45,22 +44,20 @@ def build_training_df(df_students, df_courses, df_comments):
     df_courses["grade_norm"] = df_courses["grade"].fillna("").str.upper().str.strip()
     df_courses["grade_point"] = df_courses["grade_norm"].map(grade_map)
 
-    # Aggregate course stats
     course_stats = df_courses.groupby("student_id").agg(
         total_units=("credit_hour", "sum"),
         avg_grade_point=("grade_point", "mean"),
         num_courses=("id", "count"),
     ).reset_index()
 
-    # Aggregate comments
+    # Comments
     if not df_comments.empty:
-        comment_stats = df_comments.groupby("student_id").content.apply(
-            lambda s: s.str.len().sum()
-        ).reset_index(name="comments_total_len")
+        comment_stats = df_comments.groupby("student_id")["content"] \
+            .apply(lambda s: s.str.len().sum()) \
+            .reset_index(name="comments_total_len")
     else:
         comment_stats = pd.DataFrame(columns=["student_id", "comments_total_len"])
 
-    # Merge into training table
     df = (
         df_students[["id"]]
         .merge(course_stats, left_on="id", right_on="student_id", how="left")
@@ -71,7 +68,7 @@ def build_training_df(df_students, df_courses, df_comments):
 
     X = df[["total_units", "avg_grade_point", "num_courses", "comments_total_len"]]
 
-    # Synthetic labels — TO BE REPLACED WITH REAL DATA
+    # Synthetic labels
     y = pd.DataFrame({
         "programming_score": X['avg_grade_point'] * 25 + X['num_courses'] * 0.5,
         "design_score": X['avg_grade_point'] * 20 + X['comments_total_len'] * 0.01,
@@ -92,14 +89,14 @@ def train_local_model():
 
     print("Training dataset shape:", X.shape)
 
-    # Split train/test
+    # Split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
 
-    model = MultiOutputRegressor(RandomForestRegressor(
-        n_estimators=200, random_state=42
-    ))
+    model = MultiOutputRegressor(
+        RandomForestRegressor(n_estimators=200, random_state=42)
+    )
 
     print("Training model...")
     model.fit(X_train, y_train)
@@ -113,12 +110,11 @@ def train_local_model():
     # Evaluation
     # ─────────────────────────────────────────────
     y_pred = model.predict(X_test)
-
     results = {}
 
     for i, col in enumerate(y.columns):
         mae = mean_absolute_error(y_test.iloc[:, i], y_pred[:, i])
-        rmse = mean_squared_error(y_test.iloc[:, i], y_pred[:, i], squared=False)
+        rmse = mean_squared_error(y_test.iloc[:, i], y_pred[:, i]) ** 0.5  # FIXED
         r2 = r2_score(y_test.iloc[:, i], y_pred[:, i])
 
         results[col] = {
