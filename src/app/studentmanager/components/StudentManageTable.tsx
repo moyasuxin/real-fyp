@@ -8,6 +8,7 @@ interface Props {
   loading: boolean;
   onDelete: (id: number) => void;
   onEdit: (student: Student | null) => void; // ✅ allow null
+  onAdd: () => void; // ⭐ NEW
 }
 
 export default function StudentManageTable({
@@ -15,6 +16,7 @@ export default function StudentManageTable({
   loading,
   onDelete,
   onEdit,
+  onAdd, // ⭐ NEW
 }: Props) {
   if (loading) return <p>Loading...</p>;
 
@@ -23,7 +25,7 @@ export default function StudentManageTable({
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">All Students</h2>
         <button
-          onClick={() => onEdit(null)} // null = trigger add mode
+          onClick={onAdd}
           className="bg-lime-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-lime-500 transition-colors"
         >
           + Add Student
