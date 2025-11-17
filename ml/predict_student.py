@@ -489,20 +489,48 @@ def predict_scores(student_id: int):
             it_infrastructure_score = effective_gpa * 20
         
         # === 4. CO-CURRICULAR POINTS ===
-        # Formula: (Activity_Points × 10) + (Soft_Skills_Courses × 8) + (MPU_GPA × 15)
+        # Formula: AI-analyzed scores + Soft Skills courses
         # Based on: Malaysian Qualifications Agency (2017), Kuh (2008)
         
-        # Fetch actual co-curricular activities from database
-        cocurricular_res = supabase.table("cocurricular_activities").select("points").eq("student_id", student_id).execute()
-        total_activity_points = 0
-        if cocurricular_res.data:
-            total_activity_points = sum(activity.get("points", 0) for activity in cocurricular_res.data)
+        # Fetch AI-analyzed co-curricular activities from database
+        cocurricular_res = supabase.table("cocurricular_activities").select(
+            "ai_impact_score, ai_leadership_score, ai_relevance_score"
+        ).eq("student_id", student_id).execute()
         
+        ai_total_impact = 0
+        ai_total_leadership = 0
+        ai_total_relevance = 0
+        activity_count = 0
+        
+        if cocurricular_res.data:
+            activity_count = len(cocurricular_res.data)
+            for activity in cocurricular_res.data:
+                ai_total_impact += activity.get("ai_impact_score", 0)
+                ai_total_leadership += activity.get("ai_leadership_score", 0)
+                ai_total_relevance += activity.get("ai_relevance_score", 0)
+        
+        # Average AI scores across all activities (if any)
+        avg_impact = ai_total_impact / activity_count if activity_count > 0 else 0
+        avg_leadership = ai_total_leadership / activity_count if activity_count > 0 else 0
+        avg_relevance = ai_total_relevance / activity_count if activity_count > 0 else 0
+        
+        # Soft skills courses as supplementary indicator
         soft_skills_count = extended_features.get("soft_skills_courses", 0)
         soft_skills_gpa = extended_features.get("soft_skills_gpa", effective_gpa)
         
-        # New formula: Actual activities (60%) + Soft skills courses (40%)
-        co_curricular_points = (total_activity_points * 10) + (soft_skills_count * 8) + (soft_skills_gpa * 15)
+        # Weighted formula: 
+        # - AI Impact (30%): Overall significance and achievements
+        # - AI Leadership (25%): Leadership and initiative
+        # - AI Relevance (20%): Computing field relevance
+        # - Activity quantity (10%): Number of activities (up to 10 points per activity)
+        # - Soft skills courses (15%): Academic soft skills development
+        co_curricular_points = (
+            (avg_impact * 0.30) +
+            (avg_leadership * 0.25) +
+            (avg_relevance * 0.20) +
+            (min(activity_count * 10, 100) * 0.10) +
+            ((soft_skills_count * 8) + (soft_skills_gpa * 15)) * 0.15
+        )
         
         # === 5. FEEDBACK SENTIMENT SCORE ===
         # Formula: MIN(100, 50 + (Comments_Length × 0.05) + (Faculty_Interactions × 10))

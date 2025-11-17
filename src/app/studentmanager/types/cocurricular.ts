@@ -1,15 +1,19 @@
 // src/app/studentmanager/types/cocurricular.ts
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/services/supabaseClient";
 
 export interface CocurricularActivity {
   id: number;
   student_id: number;
-  activity_name: string;
-  activity_type: string | null;
-  activity_date: string | null;
-  description: string | null;
-  points: number;
+  organization_name: string;
+  organization_type: string | null;
+  position: string | null;
+  responsibilities: string | null;
+  activity_period: string | null;
+  ai_impact_score: number;
+  ai_leadership_score: number;
+  ai_relevance_score: number;
+  ai_summary: string | null;
   created_at?: string;
 }
 

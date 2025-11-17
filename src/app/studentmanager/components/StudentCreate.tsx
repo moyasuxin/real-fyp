@@ -23,11 +23,12 @@ type CourseInput = {
 };
 
 type CocurricularInput = {
-  activity_name: string;
-  activity_type: string;
-  activity_date: string;
-  description: string;
-  points: number;
+  organization_name: string;
+  organization_type: string;
+  position: string;
+  responsibilities: string;
+  start_date: string;
+  end_date: string;
 };
 
 export default function StudentCreate({ onClose }: Props) {
@@ -69,11 +70,12 @@ export default function StudentCreate({ onClose }: Props) {
 
   const [cocurricular, setCocurricular] = useState<CocurricularInput[]>([
     {
-      activity_name: "",
-      activity_type: "Club",
-      activity_date: "",
-      description: "",
-      points: 1,
+      organization_name: "",
+      organization_type: "Computing Club",
+      position: "",
+      responsibilities: "",
+      start_date: "",
+      end_date: "",
     },
   ]);
 
@@ -142,11 +144,12 @@ export default function StudentCreate({ onClose }: Props) {
     setCocurricular([
       ...cocurricular,
       {
-        activity_name: "",
-        activity_type: "Club",
-        activity_date: "",
-        description: "",
-        points: 1,
+        organization_name: "",
+        organization_type: "Computing Club",
+        position: "",
+        responsibilities: "",
+        start_date: "",
+        end_date: "",
       },
     ]);
   };
@@ -226,16 +229,48 @@ export default function StudentCreate({ onClose }: Props) {
 
     // Insert co-curricular activities
     for (const a of cocurricular) {
-      if (!a.activity_name) continue;
+      if (!a.organization_name || !a.responsibilities) continue;
 
-      await supabase.from("cocurricular_activities").insert({
-        student_id: studentId,
-        activity_name: a.activity_name,
-        activity_type: a.activity_type || null,
-        activity_date: a.activity_date || null,
-        description: a.description || null,
-        points: a.points,
+      // Format activity period from dates
+      let activity_period = null;
+      if (a.start_date) {
+        const startFormatted = new Date(a.start_date).toLocaleDateString(
+          "en-US",
+          { month: "short", year: "numeric" }
+        );
+        if (a.end_date && a.end_date !== a.start_date) {
+          const endFormatted = new Date(a.end_date).toLocaleDateString(
+            "en-US",
+            { month: "short", year: "numeric" }
+          );
+          activity_period = `${startFormatted} - ${endFormatted}`;
+        } else {
+          activity_period = startFormatted;
+        }
+      }
+
+      // Analyze with AI
+      const analysisRes = await fetch("/api/analyze-cocurricular", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...a, activity_period }),
       });
+
+      if (analysisRes.ok) {
+        const aiScores = await analysisRes.json();
+        await supabase.from("cocurricular_activities").insert({
+          student_id: studentId,
+          organization_name: a.organization_name,
+          organization_type: a.organization_type || null,
+          position: a.position || null,
+          responsibilities: a.responsibilities || null,
+          activity_period: activity_period,
+          ai_impact_score: aiScores.impact_score,
+          ai_leadership_score: aiScores.leadership_score,
+          ai_relevance_score: aiScores.relevance_score,
+          ai_summary: aiScores.summary,
+        });
+      }
     }
 
     await fetch(`/api/ml/retrain?studentId=${studentId}`, { method: "POST" });
@@ -540,103 +575,137 @@ export default function StudentCreate({ onClose }: Props) {
           <h3 className="text-lg font-semibold mb-3">
             Co-curricular Activities (Optional)
           </h3>
+          <p className="text-xs text-gray-400 mb-3">
+            ℹ️ AI will analyze your activities and score their impact,
+            leadership, and relevance
+          </p>
 
           {cocurricular.map((a, index) => (
             <div
               key={index}
-              className="border border-gray-700 p-3 rounded-md mb-3"
+              className="border border-gray-700 p-4 rounded-md mb-3"
             >
               <label className="block text-sm text-gray-300 mb-1">
-                Activity Name
+                Organization/Club Name *
               </label>
               <input
                 className="w-full bg-zinc-700 p-2 rounded-md mb-2"
-                placeholder="e.g. Programming Club President"
-                value={a.activity_name}
+                placeholder="e.g. Computing Club, School Basketball Team"
+                value={a.organization_name}
                 onChange={(e) =>
                   updateCocurricularField(
                     index,
-                    "activity_name",
+                    "organization_name",
                     e.target.value
                   )
                 }
               />
 
-              <label className="block text-sm text-gray-300 mb-1">
-                Activity Type
-              </label>
-              <select
-                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
-                value={a.activity_type}
-                onChange={(e) =>
-                  updateCocurricularField(
-                    index,
-                    "activity_type",
-                    e.target.value
-                  )
-                }
-              >
-                <option value="Club">Club</option>
-                <option value="Competition">Competition</option>
-                <option value="Sports">Sports</option>
-                <option value="Volunteering">Volunteering</option>
-                <option value="Leadership">Leadership</option>
-                <option value="Workshop">Workshop/Seminar</option>
-                <option value="Project">Project</option>
-                <option value="Other">Other</option>
-              </select>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">
+                    Organization Type
+                  </label>
+                  <select
+                    className="w-full bg-zinc-700 p-2 rounded-md"
+                    value={a.organization_type}
+                    onChange={(e) =>
+                      updateCocurricularField(
+                        index,
+                        "organization_type",
+                        e.target.value
+                      )
+                    }
+                  >
+                    <option value="Computing Club">Computing Club</option>
+                    <option value="School Club">School Club</option>
+                    <option value="Outside Organization">
+                      Outside Organization
+                    </option>
+                    <option value="Sports Team">Sports Team</option>
+                    <option value="NGO/Charity">NGO/Charity</option>
+                    <option value="Competition Team">Competition Team</option>
+                    <option value="Student Society">Student Society</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
 
-              <label className="block text-sm text-gray-300 mb-1">Date</label>
-              <input
-                type="date"
-                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
-                value={a.activity_date}
-                onChange={(e) =>
-                  updateCocurricularField(
-                    index,
-                    "activity_date",
-                    e.target.value
-                  )
-                }
-              />
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">
+                    Your Position
+                  </label>
+                  <input
+                    className="w-full bg-zinc-700 p-2 rounded-md"
+                    placeholder="e.g. President, Member"
+                    value={a.position}
+                    onChange={(e) =>
+                      updateCocurricularField(index, "position", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">
+                    Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full bg-zinc-700 p-2 rounded-md"
+                    value={a.start_date}
+                    onChange={(e) =>
+                      updateCocurricularField(
+                        index,
+                        "start_date",
+                        e.target.value
+                      )
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-300 mb-1">
+                    End Date (optional)
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full bg-zinc-700 p-2 rounded-md"
+                    value={a.end_date}
+                    min={a.start_date}
+                    onChange={(e) =>
+                      updateCocurricularField(index, "end_date", e.target.value)
+                    }
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Leave empty for single day event
+                  </p>
+                </div>
+              </div>
 
               <label className="block text-sm text-gray-300 mb-1">
-                Points (1-10)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="10"
-                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
-                value={a.points}
-                onChange={(e) =>
-                  updateCocurricularField(
-                    index,
-                    "points",
-                    parseInt(e.target.value) || 1
-                  )
-                }
-              />
-
-              <label className="block text-sm text-gray-300 mb-1">
-                Description
+                Responsibilities & Achievements *
               </label>
               <textarea
-                className="w-full bg-zinc-700 p-2 rounded-md"
-                rows={2}
-                placeholder="e.g. Led team of 10 students"
-                value={a.description}
+                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
+                rows={3}
+                placeholder="Describe what you did, your contributions, and achievements. Be specific!&#10;Example: Led 10 members, organized 3 workshops with 100+ participants, won 1st place in hackathon"
+                value={a.responsibilities}
                 onChange={(e) =>
-                  updateCocurricularField(index, "description", e.target.value)
+                  updateCocurricularField(
+                    index,
+                    "responsibilities",
+                    e.target.value
+                  )
                 }
               />
 
               <button
                 type="button"
-                className="mt-2 text-red-400"
+                className="mt-2 text-red-400 hover:text-red-600"
                 onClick={() => removeCocurricularRow(index)}
               >
-                Remove
+                Remove Activity
               </button>
             </div>
           ))}

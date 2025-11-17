@@ -13,34 +13,77 @@ export default function CocurricularSection({ studentId }: Props) {
     useCocurricular(studentId);
   const [mlLoading, setMlLoading] = useState(false);
   const [mlStage, setMlStage] = useState("Initializing...");
+  const [analyzing, setAnalyzing] = useState(false);
   const [newActivity, setNewActivity] = useState({
-    activity_name: "",
-    activity_type: "Club",
-    activity_date: "",
-    description: "",
-    points: 1,
+    organization_name: "",
+    organization_type: "Computing Club",
+    position: "",
+    responsibilities: "",
+    start_date: "",
+    end_date: "",
   });
 
   const handleAddActivity = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newActivity.activity_name) return alert("Enter activity name!");
+    if (!newActivity.organization_name)
+      return alert("Enter organization name!");
+    if (!newActivity.responsibilities)
+      return alert("Enter responsibilities/duties!");
 
+    setAnalyzing(true);
     setMlLoading(true);
-    setMlStage("Adding co-curricular activity...");
+    setMlStage("Analyzing activity with AI...");
 
     try {
+      // Format activity period from dates
+      let activity_period = null;
+      if (newActivity.start_date) {
+        const startFormatted = new Date(
+          newActivity.start_date
+        ).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        if (
+          newActivity.end_date &&
+          newActivity.end_date !== newActivity.start_date
+        ) {
+          const endFormatted = new Date(
+            newActivity.end_date
+          ).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+          activity_period = `${startFormatted} - ${endFormatted}`;
+        } else {
+          activity_period = startFormatted;
+        }
+      }
+
+      // Step 1: Analyze with Gemini AI
+      const analysisRes = await fetch("/api/analyze-cocurricular", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...newActivity, activity_period }),
+      });
+
+      if (!analysisRes.ok) throw new Error("AI analysis failed");
+      const aiScores = await analysisRes.json();
+
+      setMlStage("Saving activity...");
+
+      // Step 2: Add activity with AI scores
       await addActivity({
         student_id: studentId,
-        activity_name: newActivity.activity_name,
-        activity_type: newActivity.activity_type || null,
-        activity_date: newActivity.activity_date || null,
-        description: newActivity.description || null,
-        points: newActivity.points,
+        organization_name: newActivity.organization_name,
+        organization_type: newActivity.organization_type || null,
+        position: newActivity.position || null,
+        responsibilities: newActivity.responsibilities || null,
+        activity_period: activity_period,
+        ai_impact_score: aiScores.impact_score,
+        ai_leadership_score: aiScores.leadership_score,
+        ai_relevance_score: aiScores.relevance_score,
+        ai_summary: aiScores.summary,
       });
 
       setMlStage("Updating ML scores...");
       await new Promise((r) => setTimeout(r, 1000));
 
+      // Step 3: Retrain ML
       const res = await fetch(`/api/ml/retrain?studentId=${studentId}`, {
         method: "POST",
       });
@@ -50,16 +93,18 @@ export default function CocurricularSection({ studentId }: Props) {
       setMlStage("✅ Done!");
       await new Promise((r) => setTimeout(r, 800));
     } catch (err) {
-      alert("Error during ML retraining.");
+      alert("Error during activity analysis or ML retraining.");
       console.error(err);
     } finally {
+      setAnalyzing(false);
       setMlLoading(false);
       setNewActivity({
-        activity_name: "",
-        activity_type: "Club",
-        activity_date: "",
-        description: "",
-        points: 1,
+        organization_name: "",
+        organization_type: "Computing Club",
+        position: "",
+        responsibilities: "",
+        start_date: "",
+        end_date: "",
       });
     }
   };
@@ -99,133 +144,201 @@ export default function CocurricularSection({ studentId }: Props) {
       ) : activities.length === 0 ? (
         <p className="text-gray-400 italic">No activities yet</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {activities.map((a) => (
             <li
               key={a.id}
-              className="flex justify-between items-center border border-gray-700 p-3 rounded-md"
+              className="border border-gray-700 p-4 rounded-md space-y-2"
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <strong>{a.activity_name}</strong>
-                  {a.activity_type && (
-                    <span className="text-xs bg-blue-600 px-2 py-0.5 rounded">
-                      {a.activity_type}
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <strong className="text-lg">{a.organization_name}</strong>
+                    {a.organization_type && (
+                      <span className="text-xs bg-blue-600 px-2 py-0.5 rounded">
+                        {a.organization_type}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-300">
+                    <span className="font-semibold">
+                      {a.position || "Member"}
                     </span>
+                    {a.activity_period && <span> • {a.activity_period}</span>}
+                  </div>
+                  {a.responsibilities && (
+                    <p className="text-sm text-gray-400 mt-2">
+                      {a.responsibilities}
+                    </p>
                   )}
-                  <span className="text-xs text-yellow-400">
-                    {a.points} {a.points === 1 ? "point" : "points"}
-                  </span>
                 </div>
-                <div className="text-sm text-gray-400">
-                  {a.activity_date &&
-                    new Date(a.activity_date).toLocaleDateString()}
-                  {a.description && ` — ${a.description}`}
+                <button
+                  onClick={() => handleDelete(a.id)}
+                  className="text-red-400 hover:text-red-600 ml-4"
+                >
+                  Delete
+                </button>
+              </div>
+
+              {/* AI Analysis Scores */}
+              <div className="flex gap-4 pt-2 border-t border-gray-700">
+                <div className="text-center">
+                  <div className="text-xs text-gray-400">Impact</div>
+                  <div className="text-sm font-semibold text-blue-400">
+                    {a.ai_impact_score}/100
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-400">Leadership</div>
+                  <div className="text-sm font-semibold text-green-400">
+                    {a.ai_leadership_score}/100
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-400">Relevance</div>
+                  <div className="text-sm font-semibold text-purple-400">
+                    {a.ai_relevance_score}/100
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={() => handleDelete(a.id)}
-                className="text-red-400 hover:text-red-600"
-              >
-                Delete
-              </button>
+              {a.ai_summary && (
+                <div className="text-xs text-gray-400 italic pt-1">
+                  💡 {a.ai_summary}
+                </div>
+              )}
             </li>
           ))}
         </ul>
       )}
 
       {/* Add New Activity */}
-      <form onSubmit={handleAddActivity} className="space-y-2 pt-2">
+      <form
+        onSubmit={handleAddActivity}
+        className="space-y-3 pt-2 border-t border-gray-700"
+      >
+        <div className="text-sm text-gray-400 mb-2">
+          ℹ️ AI will analyze your activity and automatically score its impact,
+          leadership, and relevance
+        </div>
+
         <div>
           <label className="block text-sm text-gray-300 mb-1">
-            Activity Name *
+            Organization/Club Name *
           </label>
           <input
             className="w-full bg-gray-700 p-2 rounded-md"
-            placeholder="e.g. Programming Club President"
-            value={newActivity.activity_name}
+            placeholder="e.g. Computing Club, School Basketball Team, Red Cross"
+            value={newActivity.organization_name}
             onChange={(e) =>
-              setNewActivity({ ...newActivity, activity_name: e.target.value })
+              setNewActivity({
+                ...newActivity,
+                organization_name: e.target.value,
+              })
             }
           />
         </div>
 
         <div>
           <label className="block text-sm text-gray-300 mb-1">
-            Activity Type
+            Organization Type
           </label>
           <select
             className="w-full bg-gray-700 p-2 rounded-md"
-            value={newActivity.activity_type}
+            value={newActivity.organization_type}
             onChange={(e) =>
-              setNewActivity({ ...newActivity, activity_type: e.target.value })
+              setNewActivity({
+                ...newActivity,
+                organization_type: e.target.value,
+              })
             }
           >
-            <option value="Club">Club</option>
-            <option value="Competition">Competition</option>
-            <option value="Sports">Sports</option>
-            <option value="Volunteering">Volunteering</option>
-            <option value="Leadership">Leadership</option>
-            <option value="Workshop">Workshop/Seminar</option>
-            <option value="Project">Project</option>
+            <option value="Computing Club">Computing Club</option>
+            <option value="School Club">School Club</option>
+            <option value="Outside Organization">Outside Organization</option>
+            <option value="Sports Team">Sports Team</option>
+            <option value="NGO/Charity">NGO/Charity</option>
+            <option value="Competition Team">Competition Team</option>
+            <option value="Student Society">Student Society</option>
             <option value="Other">Other</option>
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">Date</label>
-          <input
-            type="date"
-            className="w-full bg-gray-700 p-2 rounded-md"
-            value={newActivity.activity_date}
-            onChange={(e) =>
-              setNewActivity({ ...newActivity, activity_date: e.target.value })
-            }
-          />
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              Your Position
+            </label>
+            <input
+              className="w-full bg-gray-700 p-2 rounded-md"
+              placeholder="e.g. President, Member, Volunteer"
+              value={newActivity.position}
+              onChange={(e) =>
+                setNewActivity({ ...newActivity, position: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              Start Date *
+            </label>
+            <input
+              type="date"
+              className="w-full bg-gray-700 p-2 rounded-md"
+              value={newActivity.start_date}
+              onChange={(e) =>
+                setNewActivity({ ...newActivity, start_date: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              End Date (optional)
+            </label>
+            <input
+              type="date"
+              className="w-full bg-gray-700 p-2 rounded-md"
+              value={newActivity.end_date}
+              min={newActivity.start_date}
+              onChange={(e) =>
+                setNewActivity({ ...newActivity, end_date: e.target.value })
+              }
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              Leave empty for single day event
+            </p>
+          </div>
         </div>
 
         <div>
           <label className="block text-sm text-gray-300 mb-1">
-            Points (1-10)
+            Responsibilities & Achievements *
           </label>
-          <input
-            type="number"
-            min="1"
-            max="10"
+          <textarea
             className="w-full bg-gray-700 p-2 rounded-md"
-            value={newActivity.points}
+            rows={4}
+            placeholder="Describe what you did, your contributions, and any achievements. Be specific!&#10;&#10;Example: Led a team of 10 members to organize 3 coding workshops with 100+ participants. Developed the club website using React and managed social media presence. Won 1st place in inter-university hackathon."
+            value={newActivity.responsibilities}
             onChange={(e) =>
               setNewActivity({
                 ...newActivity,
-                points: parseInt(e.target.value) || 1,
+                responsibilities: e.target.value,
               })
             }
           />
           <p className="text-xs text-gray-400 mt-1">
-            1-3: Participation • 4-6: Active role • 7-10: Leadership/Award
+            💡 Include: team size, events organized, projects completed, awards
+            won, skills used
           </p>
-        </div>
-
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">
-            Description (Optional)
-          </label>
-          <textarea
-            className="w-full bg-gray-700 p-2 rounded-md"
-            rows={2}
-            placeholder="e.g. Led team of 10 students, organized 5 events"
-            value={newActivity.description}
-            onChange={(e) =>
-              setNewActivity({ ...newActivity, description: e.target.value })
-            }
-          />
         </div>
 
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-md w-full"
+          disabled={analyzing}
+          className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-md w-full disabled:opacity-50"
         >
-          Add Activity
+          {analyzing ? "🤖 AI Analyzing..." : "🚀 Add & Analyze Activity"}
         </button>
       </form>
       <MLLoadingModal show={mlLoading} stage={mlStage} />
