@@ -1,3 +1,4 @@
+//src/app/dashboard/StudentProfileDisplay.tsx
 "use client";
 import React from "react";
 import { Card, CardContent } from "@/components/card";

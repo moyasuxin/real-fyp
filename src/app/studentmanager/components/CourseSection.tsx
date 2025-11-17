@@ -16,8 +16,8 @@ export default function CourseSection({ studentId }: Props) {
     course_name: "",
     course_code: "",
     grade: "",
-    unit: 3,
-    description: "",
+    credit_hour: 3,
+    course_description: "",
   });
 
   const handleAddCourse = async (e: React.FormEvent) => {
@@ -34,8 +34,8 @@ export default function CourseSection({ studentId }: Props) {
         course_name: newCourse.course_name,
         course_code: newCourse.course_code || null,
         grade: newCourse.grade,
-        unit: newCourse.unit,
-        description: newCourse.description || null,
+        credit_hour: newCourse.credit_hour,
+        course_description: newCourse.course_description || null,
       });
 
       setMlStage("Waiting for ML process...");
@@ -63,8 +63,8 @@ export default function CourseSection({ studentId }: Props) {
         course_name: "",
         course_code: "",
         grade: "",
-        unit: 3,
-        description: "",
+        credit_hour: 3,
+        course_description: "",
       });
     }
   };
@@ -86,8 +86,8 @@ export default function CourseSection({ studentId }: Props) {
             >
               <span>
                 <strong>{c.course_name}</strong>{" "}
-                {c.course_code ? `(${c.course_code}) ` : ""}— {c.unit} unit —
-                Grade: {c.grade || "-"}
+                {c.course_code ? `(${c.course_code}) ` : ""}— {c.credit_hour}{" "}
+                credit hours — Grade: {c.grade || "-"}
               </span>
               <button
                 onClick={() => deleteCourse(c.id)}
@@ -137,7 +137,10 @@ export default function CourseSection({ studentId }: Props) {
             placeholder="e.g. A, B+, CR"
             value={newCourse.grade}
             onChange={(e) =>
-              setNewCourse({ ...newCourse, grade: e.target.value })
+              setNewCourse({
+                ...newCourse,
+                grade: e.target.value.toUpperCase(),
+              })
             }
           />
         </div>
@@ -151,11 +154,11 @@ export default function CourseSection({ studentId }: Props) {
             step="0.1"
             className="w-full bg-gray-700 p-2 rounded-md"
             placeholder="e.g. 3"
-            value={newCourse.unit}
+            value={newCourse.credit_hour}
             onChange={(e) =>
               setNewCourse({
                 ...newCourse,
-                unit: e.target.value ? parseFloat(e.target.value) : 0,
+                credit_hour: e.target.value ? parseFloat(e.target.value) : 0,
               })
             }
           />
@@ -168,9 +171,9 @@ export default function CourseSection({ studentId }: Props) {
           <input
             className="w-full bg-gray-700 p-2 rounded-md"
             placeholder="e.g. Software project-related subject"
-            value={newCourse.description}
+            value={newCourse.course_description}
             onChange={(e) =>
-              setNewCourse({ ...newCourse, description: e.target.value })
+              setNewCourse({ ...newCourse, course_description: e.target.value })
             }
           />
         </div>

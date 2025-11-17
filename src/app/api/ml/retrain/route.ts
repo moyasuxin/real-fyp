@@ -2,6 +2,12 @@
 
 import { NextResponse } from "next/server";
 import { supabase } from "@/services/supabaseClient";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { existsSync } from "fs";
+import path from "path";
+
+const execAsync = promisify(exec);
 
 // Define proper type for course data
 interface Course {
@@ -12,7 +18,7 @@ interface Course {
   grade?: string | null;
   credit_hour?: number | null;
   unit?: number | null;
-  description?: string | null;
+  course_description?: string | null;
   created_at?: string | null;
 }
 
@@ -78,24 +84,77 @@ export async function POST(req: Request) {
     }
 
     // 2️⃣ Compute GPA
-    const result = computeGPA(courses);
+    const gpaResult = computeGPA(courses);
 
-    // 3️⃣ Save CGPA to students table
+    // 3️⃣ Run Python ML prediction script
+    const projectRoot = process.cwd();
+    const pythonScript = path.join(projectRoot, "ml", "predict_student.py");
+    const pythonPath = path.join(projectRoot, "ml", ".venv", "Scripts", "python.exe");
+
+    let mlScores = null;
+    let mlError = null;
+
+    try {
+      // Check if virtual environment exists, otherwise use system python
+      const pythonCommand = existsSync(pythonPath)
+        ? `"${pythonPath}"`
+        : "python";
+
+      const { stdout, stderr } = await execAsync(
+        `${pythonCommand} "${pythonScript}" ${studentId}`,
+        {
+          cwd: projectRoot,
+          timeout: 30000, // 30 second timeout
+        }
+      );
+
+      if (stderr && !stderr.includes("Warning")) {
+        console.error("Python stderr:", stderr);
+      }
+
+      const result = JSON.parse(stdout);
+
+      if (result.success) {
+        mlScores = result.scores;
+      } else {
+        mlError = result.error;
+        console.error("ML prediction failed:", result.error);
+      }
+    } catch (err) {
+      mlError = err instanceof Error ? err.message : "Unknown error";
+      console.error("Error running ML prediction:", err);
+    }
+
+    // 4️⃣ Update student record with GPA and ML scores
+    const updateData: Record<string, string> = {
+      cgpa: gpaResult.gpa.toString(),
+    };
+
+    if (mlScores) {
+      updateData.programming_score = mlScores.programming_score.toString();
+      updateData.design_score = mlScores.design_score.toString();
+      updateData.it_infrastructure_score = mlScores.it_infrastructure_score.toString();
+      updateData.co_curricular_points = mlScores.co_curricular_points.toString();
+      updateData.feedback_sentiment_score = mlScores.feedback_sentiment_score.toString();
+    }
+
     const { error: updateError } = await supabase
       .from("students")
-      .update({ cgpa: result.gpa.toString() })
+      .update(updateData)
       .eq("id", studentId);
 
     if (updateError) {
-      console.error("Error updating student CGPA:", updateError);
-      return NextResponse.json({ error: "Failed to update CGPA" }, { status: 500 });
+      console.error("Error updating student:", updateError);
+      return NextResponse.json({ error: "Failed to update student" }, { status: 500 });
     }
 
-    // 4️⃣ Return the result (for ML or logging)
+    // 5️⃣ Return the result
     return NextResponse.json({
-      message: "GPA computed successfully",
+      message: "Student profile updated successfully",
       studentId,
-      ...result,
+      gpa: gpaResult,
+      ml_scores: mlScores,
+      ml_error: mlError,
     });
   } catch (err) {
     console.error("Error in retrain route:", err);

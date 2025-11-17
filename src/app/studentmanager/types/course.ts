@@ -9,8 +9,8 @@ export interface Course {
   course_name: string;
   course_code?: string | null;
   grade?: string | null;
-  unit?: number | null;
-  description?: string | null;
+  credit_hour?: number | null;
+  course_description?: string | null;
   created_at?: string;
 }
 
@@ -41,22 +41,33 @@ export function useCourses(studentId?: number) {
   // 🔹 Add a new course
   const addCourse = async (course: Omit<Course, "id">) => {
     setLoading(true);
+    // Accept both `unit` and `credit_hour` in the payload to be tolerant
+    const cWithUnit = course as Omit<Course, "id"> & { unit?: number | null };
+    const creditHourValue = cWithUnit.unit ?? course.credit_hour ?? null;
+
+    const insertPayload = {
+      student_id: course.student_id,
+      course_name: course.course_name,
+      course_code: course.course_code ?? null,
+      grade: course.grade ?? null,
+      credit_hour: creditHourValue,
+      course_description: course.course_description ?? null,
+    };
+
     const { data, error } = await supabase
       .from("courses")
-      .insert([
-        {
-          student_id: course.student_id,
-          course_name: course.course_name,
-          course_code: course.course_code ?? null,
-          grade: course.grade ?? null,
-          unit: course.unit ?? null,
-          description: course.description ?? null,
-        },
-      ])
+      .insert([insertPayload])
       .select("*");
 
-    if (error) console.error("Error adding course:", error);
-    else if (data?.[0]) setCourses((prev) => [...prev, data[0]]);
+    if (error) {
+      try {
+        console.error("Error adding course:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      } catch (err) {
+        console.error("Error adding course (non-serializable):", error, err);
+      }
+    } else if (data?.[0]) {
+      setCourses((prev) => [...prev, data[0]]);
+    }
 
     setLoading(false);
   };
