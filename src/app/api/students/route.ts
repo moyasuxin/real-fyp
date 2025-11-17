@@ -13,7 +13,20 @@ export async function GET(req: Request) {
     const query = supabase.from("students").select("*");
 
     if (program) {
-      query.ilike("program", program);
+      // First, try to fetch the full program name from the programs table
+      const { data: programData } = await supabase
+        .from("programs")
+        .select("program_long")
+        .eq("program_short", program)
+        .single();
+
+      if (programData) {
+        // Use the full program name for filtering
+        query.ilike("program", `%${programData.program_long}%`);
+      } else {
+        // Fallback: search for the short code in the program field
+        query.ilike("program", `%${program}%`);
+      }
     }
 
     const { data, error } = await query;

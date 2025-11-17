@@ -18,14 +18,14 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 BUCKET = os.environ.get("SUPABASE_BUCKET", "ml-models")
 MODEL_FILE = os.environ.get("MODEL_FILE_NAME", "model.joblib")
-LOCAL_MODEL_PATH = f"ml/{MODEL_FILE}"
+LOCAL_MODEL_PATH = MODEL_FILE
 
 # ─────────────────────────────────────────────
 # Load dataset from ml/output
 # ─────────────────────────────────────────────
-df_students = pd.read_csv("ml/output/students.csv")
-df_courses = pd.read_csv("ml/output/courses.csv")
-df_comments = pd.read_csv("ml/output/student_comments.csv", on_bad_lines="skip")
+df_students = pd.read_csv("output/students.csv")
+df_courses = pd.read_csv("output/courses.csv")
+df_comments = pd.read_csv("output/student_comments.csv", on_bad_lines="skip")
 
 
 # ─────────────────────────────────────────────
@@ -68,13 +68,14 @@ def build_training_df(df_students, df_courses, df_comments):
 
     X = df[["total_units", "avg_grade_point", "num_courses", "comments_total_len"]]
 
-    # Synthetic labels
+    # Synthetic labels (6 outputs)
     y = pd.DataFrame({
         "programming_score": X['avg_grade_point'] * 25 + X['num_courses'] * 0.5,
         "design_score": X['avg_grade_point'] * 20 + X['comments_total_len'] * 0.01,
         "it_infrastructure_score": X['avg_grade_point'] * 22,
         "co_curricular_points": X['num_courses'] * 2 + X['total_units'],
-        "feedback_sentiment_score": X['comments_total_len'] * 0.05
+        "feedback_sentiment_score": X['comments_total_len'] * 0.05,
+        "professional_engagement_score": X['comments_total_len'] * 0.1 + X['avg_grade_point'] * 10
     }, index=X.index)
 
     return X, y
@@ -102,7 +103,6 @@ def train_local_model():
     model.fit(X_train, y_train)
 
     # Save model
-    os.makedirs(os.path.dirname(LOCAL_MODEL_PATH), exist_ok=True)
     joblib.dump(model, LOCAL_MODEL_PATH)
     print("Model saved locally:", LOCAL_MODEL_PATH)
 

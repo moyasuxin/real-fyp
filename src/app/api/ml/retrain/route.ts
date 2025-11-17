@@ -136,6 +136,7 @@ export async function POST(req: Request) {
       updateData.it_infrastructure_score = mlScores.it_infrastructure_score.toString();
       updateData.co_curricular_points = mlScores.co_curricular_points.toString();
       updateData.feedback_sentiment_score = mlScores.feedback_sentiment_score.toString();
+      updateData.professional_engagement_score = mlScores.professional_engagement_score.toString();
     }
 
     const { error: updateError } = await supabase
