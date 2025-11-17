@@ -64,23 +64,22 @@ const StudentCard: React.FC<StudentCardProps> = ({
         <div className="flex-grow flex items-center justify-between p-2 bg-[#D1D5DB]">
           {/* Left Info Block */}
           <div className="flex flex-col items-start h-full self-stretch">
-            <span className="font-bold text-sm text-zinc-600 tracking-tighter">
-              INFO
-            </span>
             <span className="text-xs text-zinc-400">EDIT</span>
             <div className="flex-grow" />
             <span className="text-[10px] text-zinc-400 leading-none">
-              AGENT FILE
+              STUDENT FILE
             </span>
           </div>
 
           {/* Right Name Block */}
-          <div className="flex flex-col items-end text-right">
-            <span className="font-bold text-zinc-800 text-lg leading-tight whitespace-nowrap">
+          <div className="flex flex-col items-end text-right max-w-[100px]">
+            <span className="font-bold text-zinc-800 text-base leading-tight truncate w-full">
               {student.name || "UNNAMED"}
             </span>
             {student.alias && (
-              <span className="text-sm text-zinc-500">{student.alias}</span>
+              <span className="text-sm text-zinc-500 truncate w-full">
+                {student.alias}
+              </span>
             )}
           </div>
         </div>

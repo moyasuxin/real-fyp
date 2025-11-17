@@ -2,6 +2,31 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/services/supabaseClient";
 
+// Helper function to retry API calls
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || response.status === 400) {
+        return response;
+      }
+      if ((response.status === 503 || response.status === 429) && i < maxRetries - 1) {
+        const waitTime = Math.pow(2, i) * 1000;
+        console.log(`Retry ${i + 1}/${maxRetries} after ${waitTime}ms due to ${response.status}...`);
+        await new Promise(r => setTimeout(r, waitTime));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      const waitTime = Math.pow(2, i) * 1000;
+      console.log(`Retry ${i + 1}/${maxRetries} after ${waitTime}ms due to network error...`);
+      await new Promise(r => setTimeout(r, waitTime));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -31,6 +56,29 @@ export async function POST(req: Request) {
             )
             .join("\n")
         : "No comments available.";
+
+    // 🎯 Fetch co-curricular activities
+    const { data: cocurricular, error: cocurricularError } = await supabase
+      .from("cocurricular_activities")
+      .select("*")
+      .eq("student_id", student.id)
+      .order("created_at", { ascending: false });
+
+    if (cocurricularError) console.error("Error fetching co-curricular activities:", cocurricularError);
+
+    let cocurricularDetails = "";
+    if (cocurricular && cocurricular.length > 0) {
+      const formattedActivities = cocurricular.map((activity) => {
+        const scores = `Impact: ${activity.ai_impact_score}/100, Leadership: ${activity.ai_leadership_score}/100, Relevance: ${activity.ai_relevance_score}/100`;
+        return `  • ${activity.organization_name} (${activity.organization_type || "Organization"})
+    Position: ${activity.position || "Member"}${activity.activity_period ? ` | Period: ${activity.activity_period}` : ""}
+    Responsibilities: ${activity.responsibilities}
+    AI Analysis: ${scores}
+    Summary: ${activity.ai_summary || "N/A"}`;
+      }).join("\n\n");
+      
+      cocurricularDetails = `\n\nCo-curricular Activities (${cocurricular.length} total):\n${formattedActivities}`;
+    }
 
     // 🌐 Fetch profile analysis data if URLs exist
     let profileDetails = "";
@@ -98,6 +146,7 @@ export async function POST(req: Request) {
 - Professional Engagement Score: ${student.professional_engagement_score || "N/A"}
 ${cocurricularLine}
 ${profileDetails}
+${cocurricularDetails}
 `;
 
     // 🧠 Your Original Gemini Prompt (kept intact)
@@ -118,10 +167,12 @@ Focus on:
 - The student's strongest and weakest skill areas (using descriptive terms only, never numbers).
 - Academic performance (CGPA can be mentioned).
 - **If "Online Presence Analysis" section is provided: Integrate specific project names, programming languages, and skills into the narrative naturally.**
+- **If "Co-curricular Activities" section is provided: Highlight their leadership roles, impact, and involvement. Mention specific organizations and achievements naturally in the narrative.**
 - DO NOT mention URLs or say things like "explore their GitHub" or "visit their profile".
 - Use the actual scraped data to describe their work (e.g., "has developed 5 projects including react-dashboard and mobile-game using JavaScript and Python").
 - Use friendly and natural language.
 - Avoid phrases like "demonstrated" or "evidenced".
+- When discussing co-curricular activities, integrate them into the story (e.g., "served as president of the Computing Club where they led workshops for 100+ students").
 
 Then, under "Recommended Career Path:", list only **2–3 short job titles** separated by commas (no sentences, no explanation).
 
@@ -141,7 +192,10 @@ ${formattedComments}
 `;
 
   // 🧠 Call Gemini API
-  const geminiRes = await fetch(
+  console.log("=== Gemini Summary API Called ===");
+  console.log("Calling Gemini API for student:", student.name, "ID:", student.id);
+  
+  const geminiRes = await fetchWithRetry(
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
       process.env.GEMINI_API_KEY,
     {
@@ -150,13 +204,30 @@ ${formattedComments}
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       }),
-    }
+    },
+    3 // Retry up to 3 times
   );
 
+  console.log("Gemini API response status:", geminiRes.status);
+  
+  if (!geminiRes.ok) {
+    const errorText = await geminiRes.text().catch(() => "Unknown error");
+    console.error("Gemini API error:", geminiRes.status, errorText);
+    throw new Error(`Gemini API failed: ${geminiRes.status} - ${geminiRes.statusText}`);
+  }
+
   const data = await geminiRes.json();
+  console.log("Gemini response received, candidates:", data?.candidates?.length);
+  
   const rawText =
     data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
     "No summary generated.";
+
+  if (rawText === "No summary generated.") {
+    console.error("Gemini returned empty response:", JSON.stringify(data, null, 2));
+  } else {
+    console.log("Gemini text response (first 150 chars):", rawText.substring(0, 150) + "...");
+  }
 
   // 🧩 Split into summary + career
   const [summaryPart, careerPart] = rawText.split(/Recommended Career Path[:\-]?\s*/i);
@@ -184,6 +255,9 @@ summary = summary
       ? [...new Set(matches)].join(", ")
       : cleanedCareer || "Not available.";
 
+  console.log("Parsed summary length:", summary.length);
+  console.log("Parsed career:", recommendedCareer);
+
 
 
     // 🧩 Update Supabase student record
@@ -201,6 +275,8 @@ summary = summary
     return NextResponse.json({ error: "Failed to update student record" }, { status: 500 });
   }
 
+  console.log("✅ Summary generated and saved successfully");
+  
   // 🧩 Final response
   return NextResponse.json({
     summary,
@@ -210,6 +286,14 @@ summary = summary
 
   } catch (error) {
     console.error("Gemini Summary API error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    
+    // Provide detailed error information
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Error details:", errorMessage);
+    
+    return NextResponse.json({ 
+      error: "Internal Server Error",
+      details: errorMessage
+    }, { status: 500 });
   }
 }

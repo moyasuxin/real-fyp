@@ -27,7 +27,7 @@ export function useCocurricular(studentId: number) {
       .from("cocurricular_activities")
       .select("*")
       .eq("student_id", studentId)
-      .order("activity_date", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching co-curricular activities:", error);

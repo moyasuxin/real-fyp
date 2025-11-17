@@ -142,16 +142,34 @@ export default function DashboardPage() {
       setAiSummary("Generating AI summary...");
       setRecommendedCareer("Analyzing career path...");
 
+      console.log("🔄 Calling Gemini Summary API for student:", student.name);
+
       const aiRes = await fetch("/api/gemini-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ student }),
       });
 
+      console.log("API Response status:", aiRes.status);
+
+      if (!aiRes.ok) {
+        const errorData = await aiRes.json();
+        console.error("❌ Gemini Summary API failed:", errorData);
+        throw new Error(
+          errorData.details || errorData.error || "API request failed"
+        );
+      }
+
       const aiData = await aiRes.json();
+      console.log("✅ API Response received:", {
+        summaryLength: aiData.summary?.length || 0,
+        career: aiData.recommendedCareer,
+      });
+
       const summary = aiData.summary || "No summary generated.";
       const career = aiData.recommendedCareer || "No career generated.";
 
+      // Fetch the updated student from database
       const { data: updatedStudent } = await supabase
         .from("students")
         .select("*")
@@ -162,6 +180,10 @@ export default function DashboardPage() {
         setSelectedStudent(updatedStudent);
         setAiSummary(updatedStudent.description || summary);
         setRecommendedCareer(updatedStudent.recommended_career || career);
+        console.log("📊 Updated from database:", {
+          description: updatedStudent.description?.substring(0, 50) + "...",
+          career: updatedStudent.recommended_career,
+        });
       } else {
         setAiSummary(summary);
         setRecommendedCareer(career);
@@ -176,7 +198,9 @@ export default function DashboardPage() {
         .eq("id", student.id);
     } catch (error) {
       console.error("Manual refresh error:", error);
-      setAiSummary("❌ Failed to refresh AI summary.");
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setAiSummary(`❌ Failed to refresh AI summary: ${errorMsg}`);
+      setRecommendedCareer("❌ Generation failed");
     } finally {
       setLoading(false);
     }

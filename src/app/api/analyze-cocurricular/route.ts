@@ -1,16 +1,53 @@
 // src/app/api/analyze-cocurricular/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
+// Helper function to retry API calls
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || response.status === 400) {
+        // Return successful responses or client errors (don't retry 400s)
+        return response;
+      }
+      if (response.status === 503 && i < maxRetries - 1) {
+        // Wait before retrying (exponential backoff)
+        await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
 export async function POST(req: NextRequest) {
+  console.log("=== Co-curricular Analysis API Called ===");
   try {
     const { organization_name, organization_type, position, responsibilities, activity_period } = await req.json();
+    console.log("Request data:", { organization_name, organization_type, position, responsibilities: responsibilities?.substring(0, 50) + "..." });
 
     if (!organization_name || !responsibilities) {
+      console.error("Validation failed: Missing required fields");
       return NextResponse.json(
         { error: "Organization name and responsibilities are required" },
         { status: 400 }
       );
     }
+
+    // Check if API key exists
+    if (!process.env.GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured");
+      return NextResponse.json(
+        { error: "API key not configured" },
+        { status: 500 }
+      );
+    }
+    
+    console.log("API key found, preparing Gemini request...");
 
     const prompt = `You are an expert evaluator of student co-curricular activities and their impact on computing/IT career readiness.
 
@@ -58,8 +95,9 @@ Return ONLY valid JSON in this exact format:
   "summary": "string"
 }`;
 
-    // Call Gemini API using REST endpoint (same as gemini-summary)
-    const geminiRes = await fetch(
+    // Call Gemini API using REST endpoint with retry logic
+    console.log("Calling Gemini API...");
+    const geminiRes = await fetchWithRetry(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
         process.env.GEMINI_API_KEY,
       {
@@ -68,19 +106,28 @@ Return ONLY valid JSON in this exact format:
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
         }),
-      }
+      },
+      3 // Retry up to 3 times on 503 errors
     );
 
+    console.log("Gemini API response status:", geminiRes.status);
+    
     if (!geminiRes.ok) {
-      throw new Error(`Gemini API error: ${geminiRes.status}`);
+      const errorText = await geminiRes.text().catch(() => "Unknown error");
+      console.error(`Gemini API error ${geminiRes.status}:`, errorText);
+      throw new Error(`Gemini API error: ${geminiRes.status} - ${geminiRes.statusText}`);
     }
 
     const data = await geminiRes.json();
+    console.log("Gemini raw response received, extracting text...");
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
     if (!text) {
+      console.error("Gemini returned empty response:", JSON.stringify(data, null, 2));
       throw new Error("No response from Gemini AI");
     }
+    
+    console.log("Gemini text response:", text.substring(0, 100) + "...");
     
     // Extract JSON from response (handle markdown code blocks)
     let jsonText = text.trim();
@@ -91,23 +138,51 @@ Return ONLY valid JSON in this exact format:
     }
 
     const analysis = JSON.parse(jsonText);
+    console.log("Parsed analysis:", analysis);
 
     // Validate scores are within range
     const validateScore = (score: number) => Math.max(0, Math.min(100, score || 0));
     
-    return NextResponse.json({
+    const response = {
       impact_score: validateScore(analysis.impact_score),
       leadership_score: validateScore(analysis.leadership_score),
       relevance_score: validateScore(analysis.relevance_score),
       summary: analysis.summary || "Activity analyzed successfully",
-    });
+    };
+    
+    console.log("Returning successful response:", response);
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error("Co-curricular analysis error:", error);
+    
+    // More detailed error logging
+    let errorType = "UNKNOWN_ERROR";
+    let errorMessage = "Unknown error";
+    
+    if (error instanceof SyntaxError) {
+      console.error("JSON parsing failed - Gemini response may not be valid JSON");
+      errorType = "JSON_PARSE_ERROR";
+      errorMessage = "Failed to parse AI response";
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+      if (error.message.includes("503")) {
+        errorType = "SERVICE_UNAVAILABLE";
+        errorMessage = "Gemini AI is temporarily unavailable. Please try again in a few moments.";
+      } else if (error.message.includes("429")) {
+        errorType = "RATE_LIMIT";
+        errorMessage = "API rate limit exceeded. Please wait a moment and try again.";
+      } else if (error.message.includes("API key")) {
+        errorType = "AUTH_ERROR";
+        errorMessage = "API authentication failed";
+      }
+    }
+    
     return NextResponse.json(
       { 
         error: "Failed to analyze activity",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: errorMessage,
+        type: errorType
       },
       { status: 500 }
     );

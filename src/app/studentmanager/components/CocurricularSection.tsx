@@ -61,8 +61,25 @@ export default function CocurricularSection({ studentId }: Props) {
         body: JSON.stringify({ ...newActivity, activity_period }),
       });
 
-      if (!analysisRes.ok) throw new Error("AI analysis failed");
+      if (!analysisRes.ok) {
+        const errorData = await analysisRes.json();
+        console.error("AI analysis failed:", errorData);
+
+        // Provide user-friendly error messages
+        let errorMsg =
+          errorData.details || errorData.error || analysisRes.statusText;
+        if (errorData.type === "SERVICE_UNAVAILABLE") {
+          errorMsg =
+            "⚠️ Gemini AI is temporarily busy. Please wait 10 seconds and try again.";
+        } else if (errorData.type === "RATE_LIMIT") {
+          errorMsg =
+            "⚠️ Too many requests. Please wait a minute and try again.";
+        }
+
+        throw new Error(errorMsg);
+      }
       const aiScores = await analysisRes.json();
+      console.log("AI Scores received:", aiScores);
 
       setMlStage("Saving activity...");
 
@@ -88,13 +105,18 @@ export default function CocurricularSection({ studentId }: Props) {
         method: "POST",
       });
 
-      if (!res.ok) throw new Error("ML failed");
+      if (!res.ok) {
+        const mlError = await res.text();
+        console.error("ML retrain failed:", mlError);
+        throw new Error(`ML retrain failed: ${mlError}`);
+      }
 
       setMlStage("✅ Done!");
       await new Promise((r) => setTimeout(r, 800));
     } catch (err) {
-      alert("Error during activity analysis or ML retraining.");
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      alert(`Error: ${errorMessage}\n\nCheck browser console for details.`);
+      console.error("Full error details:", err);
     } finally {
       setAnalyzing(false);
       setMlLoading(false);

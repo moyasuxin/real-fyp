@@ -258,6 +258,7 @@ export default function StudentCreate({ onClose }: Props) {
 
       if (analysisRes.ok) {
         const aiScores = await analysisRes.json();
+        console.log("AI analysis for activity:", a.organization_name, aiScores);
         await supabase.from("cocurricular_activities").insert({
           student_id: studentId,
           organization_name: a.organization_name,
