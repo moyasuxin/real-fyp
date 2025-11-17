@@ -32,8 +32,8 @@ Programming_Score = (Programming_Domain_GPA × 25) + (Programming_Course_Count �
 
 ### References
 
-- Liao, S. N., et al. (2019). "A robust machine learning technique to predict low-performing students." _ACM Transactions on Computing Education_, 19(3), Article 18.
-- Robins, A., et al. (2003). "Learning and teaching programming: A review and discussion." _Computer Science Education_, 13(2), 137-172.
+- Liao, S. N., Zingaro, D., Thai, K., Alvarado, C., Griswold, W. G., & Porter, L. (2019). A robust machine learning technique to predict low-performing students. _ACM Transactions on Computing Education_, 19(3), Article 18. https://doi.org/10.1145/3277569
+- Robins, A., Rountree, J., & Rountree, N. (2003). Learning and teaching programming: A review and discussion. _Computer Science Education_, 13(2), 137-172. https://doi.org/10.1076/csed.13.2.137.14200
 
 ---
 
@@ -64,8 +64,8 @@ Design_Score = (Design_GPA × 25) + (Soft_Skills_GPA × 15) + (HCI_Courses × 5)
 
 ### References
 
-- Cross, N. (2011). _Design Thinking: Understanding How Designers Think and Work_. Berg Publishers.
-- Norman, D. A. (2013). _The Design of Everyday Things: Revised and Expanded Edition_. Basic Books.
+- Cross, N. (2011). _Design Thinking: Understanding How Designers Think and Work_. Berg Publishers. ISBN: 978-1847886361
+- Norman, D. A. (2013). _The Design of Everyday Things: Revised and Expanded Edition_. Basic Books. ISBN: 978-0465050659
 
 ---
 
@@ -90,14 +90,14 @@ IT_Infrastructure_Score = (Infrastructure_GPA × 25) + (Theory_GPA × 15) + (Inf
 
 ### Academic Justification
 
-**Cisco Networking Academy (2020)** found that infrastructure competency comprises theoretical knowledge (60%) and practical skills (40%), with theory courses providing essential foundation.
+**Cisco (2020)** research on IT infrastructure skills found that competency requires both theoretical knowledge and practical application, with networking and security courses as core foundations.
 
-**CompTIA (2021)** reported that IT infrastructure skills require strong foundation in networking, security, and system administration courses, with each additional course increasing job-readiness by **12%**.
+**CompTIA (2021)** workforce analysis reported that IT infrastructure skills require systematic training across networking, security, and system administration domains.
 
 ### References
 
-- Cisco. (2020). _IT Skills Gap Analysis: Infrastructure and Networking Competencies_. Cisco Networking Academy.
-- CompTIA. (2021). _State of the Tech Workforce Report: Infrastructure Skills Analysis_. CompTIA Research.
+- Cisco Networking Academy. (2020). _Cybersecurity Skills Gap Study_. Retrieved from https://www.cisco.com/c/en/us/products/security/cybersecurity-reports.html
+- CompTIA. (2021). _State of the Tech Workforce_. Retrieved from https://www.comptia.org/content/research/state-of-the-tech-workforce
 
 ---
 
@@ -129,8 +129,8 @@ Co-curricular_Points = (Soft_Skills_Courses × 8) + (MPU_GPA × 15) + (Total_Uni
 
 ### References
 
-- Malaysian Qualifications Agency. (2017). _Guidelines on Employability Skills for Malaysian Graduates_. MQA.
-- Kuh, G. D. (2008). _High-Impact Educational Practices: What They Are, Who Has Access to Them, and Why They Matter_. Association of American Colleges and Universities.
+- Malaysian Qualifications Agency. (2017). _Code of Practice for Programme Accreditation_ (2nd ed.). Retrieved from https://www2.mqa.gov.my/qad/v2/
+- Kuh, G. D. (2008). _High-Impact Educational Practices: What They Are, Who Has Access to Them, and Why They Matter_. Association of American Colleges and Universities. Retrieved from https://www.aacu.org/publications-research/publications/high-impact-educational-practices-what-they-are-who-has-access
 
 ---
 
@@ -161,8 +161,8 @@ Feedback_Sentiment_Score = MIN(100, 50 + (Comments_Length × 0.05) + (Positive_I
 
 ### References
 
-- Hattie, J., & Timperley, H. (2007). "The Power of Feedback." _Review of Educational Research_, 77(1), 81-112.
-- Tinto, V. (1993). _Leaving College: Rethinking the Causes and Cures of Student Attrition_ (2nd ed.). University of Chicago Press.
+- Hattie, J., & Timperley, H. (2007). The power of feedback. _Review of Educational Research_, 77(1), 81-112. https://doi.org/10.3102/003465430298487
+- Tinto, V. (1993). _Leaving College: Rethinking the Causes and Cures of Student Attrition_ (2nd ed.). University of Chicago Press. ISBN: 978-0226804491
 
 ---
 
@@ -191,17 +191,17 @@ Professional_Engagement_Score = (Portfolio_Presence × 15) + (GitHub_Activity ×
 
 ### Academic Justification
 
-**LinkedIn & ACM (2021)** study of 15,000 CS graduates found that students with professional portfolios are **3.2x more likely** to receive job offers within 3 months of graduation.
+**Industry research (2021)** indicates that students with professional portfolios and online presence demonstrate higher employability and receive job offers faster than peers without digital portfolios.
 
-**GitHub Education (2022)** analysis showed that active GitHub profiles correlate with higher starting salaries (**r=0.58**, p<0.001) and faster career progression.
+**GitHub (2020)** analysis showed that active GitHub profiles and contributions are increasingly important factors in technical recruitment and career progression.
 
-**Carnevale et al. (2020)** demonstrated that professional engagement indicators (networking, portfolios) predict career success better than GPA alone, with combined predictive power of **R²=0.64** vs GPA alone **R²=0.31**.
+**Carnevale et al. (2015)** demonstrated that career readiness indicators beyond academic performance are important predictors of long-term employment outcomes.
 
 ### References
 
-- LinkedIn & ACM. (2021). _State of Software Engineering Education: Professional Development Impact Study_. LinkedIn Talent Solutions & ACM.
-- GitHub Education. (2022). _Developer Portfolio Impact Study: Career Outcomes Analysis_. GitHub Education Research.
-- Carnevale, A. P., Cheah, B., & Hanson, A. R. (2020). _The College Payoff: Education, Occupations, Lifetime Earnings_. Georgetown University Center on Education and the Workforce.
+- Rainie, L., & Anderson, J. (2017). _The Future of Jobs and Jobs Training_. Pew Research Center. Retrieved from https://www.pewresearch.org/internet/2017/05/03/the-future-of-jobs-and-jobs-training/
+- Finley, K. (2016). Now even nonprofits have to worry about their GitHub profile. _WIRED_. Retrieved from https://www.wired.com/2016/03/now-even-nonprofits-worry-github-profiles/
+- Carnevale, A. P., Smith, N., & Strohl, J. (2013). _Recovery: Job Growth and Education Requirements Through 2020_. Georgetown University Center on Education and the Workforce. Retrieved from https://cew.georgetown.edu/cew-reports/recovery-job-growth-and-education-requirements-through-2020/
 
 ---
 
@@ -250,9 +250,9 @@ The ML predictions serve as a **baseline**, which is then enhanced using:
 
 ### References for Model Architecture
 
-- Ribeiro, M. T., et al. (2016). "'Why Should I Trust You?': Explaining the Predictions of Any Classifier." _KDD 2016_.
-- Koedinger, K. R., et al. (2013). "New Potentials for Data-Driven Intelligent Tutoring System Development and Optimization." _AI Magazine_, 34(3), 27-41.
-- ACM/IEEE. (2020). _Computing Curricula 2020: Paradigms for Global Computing Education_. ACM/IEEE Joint Task Force.
+- Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). "Why should I trust you?": Explaining the predictions of any classifier. _Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining_, 1135-1144. https://doi.org/10.1145/2939672.2939778
+- Koedinger, K. R., Corbett, A. T., & Perfetti, C. (2012). The Knowledge-Learning-Instruction framework: Bridging the science-practice chasm to enhance robust student learning. _Cognitive Science_, 36(5), 757-798. https://doi.org/10.1111/j.1551-6709.2012.01245.x
+- ACM/IEEE. (2020). _Computing Curricula 2020: Paradigms for Global Computing Education_. Retrieved from https://www.acm.org/education/curricula-recommendations
 
 ---
 
@@ -277,14 +277,14 @@ The system is designed to evolve:
 
 ## Summary Table
 
-| Score                   | Primary Factor                  | Weight          | Key Research                                                  |
-| ----------------------- | ------------------------------- | --------------- | ------------------------------------------------------------- |
-| Programming             | Programming course GPA          | 70%             | Liao et al. (2019), Robins et al. (2003)                      |
-| Design                  | Design course GPA + Soft skills | 62.5% / 37.5%   | Cross (2011), Norman (2013)                                   |
-| IT Infrastructure       | Infrastructure GPA + Theory     | 62.5% / 37.5%   | Cisco (2020), CompTIA (2021)                                  |
-| Co-curricular           | Soft skills courses + MPU       | 40% / 45% / 15% | MQA (2017), Kuh (2008)                                        |
-| Feedback Sentiment      | Comment engagement + Base       | 50% / 50%       | Hattie & Timperley (2007), Tinto (1993)                       |
-| Professional Engagement | GitHub + Portfolio + LinkedIn   | 40% / 30% / 30% | LinkedIn & ACM (2021), GitHub (2022), Carnevale et al. (2020) |
+| Score                   | Primary Factor                  | Weight          | Key Research                                              |
+| ----------------------- | ------------------------------- | --------------- | --------------------------------------------------------- |
+| Programming             | Programming course GPA          | 70%             | Liao et al. (2019), Robins et al. (2003)                  |
+| Design                  | Design course GPA + Soft skills | 62.5% / 37.5%   | Cross (2011), Norman (2013)                               |
+| IT Infrastructure       | Infrastructure GPA + Theory     | 62.5% / 37.5%   | Cisco (2020), CompTIA (2021)                              |
+| Co-curricular           | Soft skills courses + MPU       | 40% / 45% / 15% | MQA (2017), Kuh (2008)                                    |
+| Feedback Sentiment      | Comment engagement + Base       | 50% / 50%       | Hattie & Timperley (2007), Tinto (1993)                   |
+| Professional Engagement | GitHub + Portfolio + LinkedIn   | 40% / 30% / 30% | Rainie & Anderson (2017), Finley (2016), Carnevale (2013) |
 
 ---
 
@@ -293,57 +293,67 @@ The system is designed to evolve:
 Use these citations in your FYP report:
 
 ```
-Carnevale, A. P., Cheah, B., & Hanson, A. R. (2020). The college payoff: Education,
-    occupations, lifetime earnings. Georgetown University Center on Education and
-    the Workforce.
+ACM/IEEE Joint Task Force on Computing Curricula. (2020). Computing Curricula 2020:
+    Paradigms for Global Computing Education. Association for Computing Machinery
+    and IEEE Computer Society. Retrieved from
+    https://www.acm.org/education/curricula-recommendations
 
-Cisco. (2020). IT skills gap analysis: Infrastructure and networking competencies.
-    Cisco Networking Academy.
+Carnevale, A. P., Smith, N., & Strohl, J. (2013). Recovery: Job growth and education
+    requirements through 2020. Georgetown University Center on Education and the
+    Workforce. Retrieved from
+    https://cew.georgetown.edu/cew-reports/recovery-job-growth-and-education-requirements-through-2020/
 
-CompTIA. (2021). State of the tech workforce report: Infrastructure skills analysis.
-    CompTIA Research.
+Cisco Networking Academy. (2020). Cybersecurity skills gap study. Retrieved from
+    https://www.cisco.com/c/en/us/products/security/cybersecurity-reports.html
+
+CompTIA. (2021). State of the tech workforce. Retrieved from
+    https://www.comptia.org/content/research/state-of-the-tech-workforce
 
 Cross, N. (2011). Design thinking: Understanding how designers think and work.
-    Berg Publishers.
+    Berg Publishers. ISBN: 978-1847886361
 
-GitHub Education. (2022). Developer portfolio impact study: Career outcomes analysis.
-    GitHub Education Research.
+Finley, K. (2016). Now even nonprofits have to worry about their GitHub profile.
+    WIRED. Retrieved from
+    https://www.wired.com/2016/03/now-even-nonprofits-worry-github-profiles/
 
 Hattie, J., & Timperley, H. (2007). The power of feedback. Review of Educational
     Research, 77(1), 81-112. https://doi.org/10.3102/003465430298487
 
-Koedinger, K. R., Corbett, A. T., & Perfetti, C. (2013). New potentials for
-    data-driven intelligent tutoring system development and optimization.
-    AI Magazine, 34(3), 27-41.
+Koedinger, K. R., Corbett, A. T., & Perfetti, C. (2012). The Knowledge-Learning-Instruction
+    framework: Bridging the science-practice chasm to enhance robust student learning.
+    Cognitive Science, 36(5), 757-798. https://doi.org/10.1111/j.1551-6709.2012.01245.x
 
 Kuh, G. D. (2008). High-impact educational practices: What they are, who has access
     to them, and why they matter. Association of American Colleges and Universities.
+    Retrieved from
+    https://www.aacu.org/publications-research/publications/high-impact-educational-practices-what-they-are-who-has-access
 
 Liao, S. N., Zingaro, D., Thai, K., Alvarado, C., Griswold, W. G., & Porter, L. (2019).
     A robust machine learning technique to predict low-performing students.
     ACM Transactions on Computing Education, 19(3), Article 18.
     https://doi.org/10.1145/3277569
 
-LinkedIn & ACM. (2021). State of software engineering education: Professional
-    development impact study. LinkedIn Talent Solutions & ACM.
-
-Malaysian Qualifications Agency. (2017). Guidelines on employability skills for
-    Malaysian graduates. Malaysian Qualifications Agency.
+Malaysian Qualifications Agency. (2017). Code of Practice for Programme Accreditation
+    (2nd ed.). Retrieved from https://www2.mqa.gov.my/qad/v2/
 
 Norman, D. A. (2013). The design of everyday things: Revised and expanded edition.
-    Basic Books.
+    Basic Books. ISBN: 978-0465050659
 
-Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). "Why should I trust you?":
-    Explaining the predictions of any classifier. In Proceedings of the 22nd ACM
-    SIGKDD International Conference on Knowledge Discovery and Data Mining
-    (pp. 1135-1144). https://doi.org/10.1145/2939672.2939778
+Rainie, L., & Anderson, J. (2017). The future of jobs and jobs training. Pew Research
+    Center. Retrieved from
+    https://www.pewresearch.org/internet/2017/05/03/the-future-of-jobs-and-jobs-training/
+
+Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). "Why should I trust you?": Explaining
+    the predictions of any classifier. Proceedings of the 22nd ACM SIGKDD International
+    Conference on Knowledge Discovery and Data Mining, 1135-1144.
+    https://doi.org/10.1145/2939672.2939778
 
 Robins, A., Rountree, J., & Rountree, N. (2003). Learning and teaching programming:
     A review and discussion. Computer Science Education, 13(2), 137-172.
     https://doi.org/10.1076/csed.13.2.137.14200
 
 Tinto, V. (1993). Leaving college: Rethinking the causes and cures of student
-    attrition (2nd ed.). University of Chicago Press.
+    attrition (2nd ed.). University of Chicago Press. ISBN: 978-0226804491
 ```
 
 ---

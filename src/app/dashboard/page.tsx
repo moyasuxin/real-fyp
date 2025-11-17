@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [aiSummary, setAiSummary] = useState<string>("");
   const [recommendedCareer, setRecommendedCareer] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
 
   const prevProgram = useRef<string>("");
@@ -58,12 +59,21 @@ export default function DashboardPage() {
 
     const fetchAndAnalyze = async () => {
       try {
-        if (prevProgram.current === activeProgram) return;
+        setPageLoading(true);
+        setSelectedStudent(null);
+        setAiSummary("");
+        setRecommendedCareer("");
 
         const res = await fetch(`/api/students?program=${activeProgram}`);
         if (!res.ok) throw new Error("Failed to fetch students");
         const data: Student[] = await res.json();
-        if (!data?.length) return;
+
+        if (!data?.length) {
+          setStudents([]);
+          setPageLoading(false);
+          prevProgram.current = activeProgram;
+          return;
+        }
 
         const parsedData = data.map((student) => {
           try {
@@ -117,6 +127,8 @@ export default function DashboardPage() {
         console.error("Dashboard unified error:", error);
         setAiSummary("❌ Failed to load AI summary.");
         setRecommendedCareer("❌ Failed to load career prediction.");
+      } finally {
+        setPageLoading(false);
       }
     };
 
@@ -196,7 +208,14 @@ export default function DashboardPage() {
       />
 
       <div className="flex-grow min-w-0 space-y-6">
-        {selectedStudent ? (
+        {pageLoading ? (
+          <div className="flex flex-col items-center justify-center min-h-[500px] space-y-4">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-400 animate-pulse">
+              Loading student data...
+            </p>
+          </div>
+        ) : selectedStudent ? (
           <>
             {/* ✅ Display student info */}
             <StudentProfileDisplay
@@ -229,8 +248,23 @@ export default function DashboardPage() {
               }}
             />
           </>
+        ) : students.length === 0 && activeProgram ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+            <div className="text-6xl">📭</div>
+            <p className="text-gray-400 text-lg">
+              No students found in this program.
+            </p>
+            <p className="text-gray-500 text-sm">
+              Try selecting a different program from the sidebar.
+            </p>
+          </div>
         ) : (
-          <p className="text-gray-400">Select a course to view students.</p>
+          <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+            <div className="text-6xl">👈</div>
+            <p className="text-gray-400 text-lg">
+              Select a program to view students.
+            </p>
+          </div>
         )}
       </div>
     </div>
