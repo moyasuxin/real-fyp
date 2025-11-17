@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Student } from "../types/student";
 import CourseSection from "./CourseSection";
+import CocurricularSection from "./CocurricularSection";
 import { supabase } from "@/services/supabaseClient";
 
 interface Props {
@@ -120,6 +121,7 @@ export default function StudentEdit({ student, onClose }: Props) {
       </div>
 
       <CourseSection studentId={student.id} />
+      <CocurricularSection studentId={student.id} />
     </div>
   );
 }

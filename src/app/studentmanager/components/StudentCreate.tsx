@@ -22,6 +22,14 @@ type CourseInput = {
   description: string;
 };
 
+type CocurricularInput = {
+  activity_name: string;
+  activity_type: string;
+  activity_date: string;
+  description: string;
+  points: number;
+};
+
 export default function StudentCreate({ onClose }: Props) {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,6 +64,16 @@ export default function StudentCreate({ onClose }: Props) {
       grade: "",
       credit_hour: 3,
       description: "",
+    },
+  ]);
+
+  const [cocurricular, setCocurricular] = useState<CocurricularInput[]>([
+    {
+      activity_name: "",
+      activity_type: "Club",
+      activity_date: "",
+      description: "",
+      points: 1,
     },
   ]);
 
@@ -120,6 +138,37 @@ export default function StudentCreate({ onClose }: Props) {
     setCourses(temp);
   };
 
+  const addCocurricularRow = () => {
+    setCocurricular([
+      ...cocurricular,
+      {
+        activity_name: "",
+        activity_type: "Club",
+        activity_date: "",
+        description: "",
+        points: 1,
+      },
+    ]);
+  };
+
+  const removeCocurricularRow = (index: number) => {
+    const temp = [...cocurricular];
+    temp.splice(index, 1);
+    setCocurricular(temp);
+  };
+
+  const updateCocurricularField = (
+    index: number,
+    field: keyof CocurricularInput,
+    value: string | number
+  ) => {
+    setCocurricular((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
   const updateCourseField = (
     index: number,
     field: keyof CourseInput,
@@ -172,6 +221,20 @@ export default function StudentCreate({ onClose }: Props) {
         grade: c.grade || null,
         credit_hour: c.credit_hour,
         description: c.description || null,
+      });
+    }
+
+    // Insert co-curricular activities
+    for (const a of cocurricular) {
+      if (!a.activity_name) continue;
+
+      await supabase.from("cocurricular_activities").insert({
+        student_id: studentId,
+        activity_name: a.activity_name,
+        activity_type: a.activity_type || null,
+        activity_date: a.activity_date || null,
+        description: a.description || null,
+        points: a.points,
       });
     }
 
@@ -469,6 +532,121 @@ export default function StudentCreate({ onClose }: Props) {
             className="w-full bg-blue-600 p-2 rounded-md"
           >
             + Add Another Course
+          </button>
+        </div>
+
+        {/* Co-curricular Activities */}
+        <div className="bg-zinc-900 p-4 rounded-md">
+          <h3 className="text-lg font-semibold mb-3">
+            Co-curricular Activities (Optional)
+          </h3>
+
+          {cocurricular.map((a, index) => (
+            <div
+              key={index}
+              className="border border-gray-700 p-3 rounded-md mb-3"
+            >
+              <label className="block text-sm text-gray-300 mb-1">
+                Activity Name
+              </label>
+              <input
+                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
+                placeholder="e.g. Programming Club President"
+                value={a.activity_name}
+                onChange={(e) =>
+                  updateCocurricularField(
+                    index,
+                    "activity_name",
+                    e.target.value
+                  )
+                }
+              />
+
+              <label className="block text-sm text-gray-300 mb-1">
+                Activity Type
+              </label>
+              <select
+                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
+                value={a.activity_type}
+                onChange={(e) =>
+                  updateCocurricularField(
+                    index,
+                    "activity_type",
+                    e.target.value
+                  )
+                }
+              >
+                <option value="Club">Club</option>
+                <option value="Competition">Competition</option>
+                <option value="Sports">Sports</option>
+                <option value="Volunteering">Volunteering</option>
+                <option value="Leadership">Leadership</option>
+                <option value="Workshop">Workshop/Seminar</option>
+                <option value="Project">Project</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <label className="block text-sm text-gray-300 mb-1">Date</label>
+              <input
+                type="date"
+                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
+                value={a.activity_date}
+                onChange={(e) =>
+                  updateCocurricularField(
+                    index,
+                    "activity_date",
+                    e.target.value
+                  )
+                }
+              />
+
+              <label className="block text-sm text-gray-300 mb-1">
+                Points (1-10)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
+                value={a.points}
+                onChange={(e) =>
+                  updateCocurricularField(
+                    index,
+                    "points",
+                    parseInt(e.target.value) || 1
+                  )
+                }
+              />
+
+              <label className="block text-sm text-gray-300 mb-1">
+                Description
+              </label>
+              <textarea
+                className="w-full bg-zinc-700 p-2 rounded-md"
+                rows={2}
+                placeholder="e.g. Led team of 10 students"
+                value={a.description}
+                onChange={(e) =>
+                  updateCocurricularField(index, "description", e.target.value)
+                }
+              />
+
+              <button
+                type="button"
+                className="mt-2 text-red-400"
+                onClick={() => removeCocurricularRow(index)}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addCocurricularRow}
+            className="w-full bg-blue-600 p-2 rounded-md"
+          >
+            + Add Another Activity
           </button>
         </div>
 
