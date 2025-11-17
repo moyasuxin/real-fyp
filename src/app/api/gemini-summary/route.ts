@@ -32,15 +32,55 @@ export async function POST(req: Request) {
             .join("\n")
         : "No comments available.";
 
-    // 🧩 Optional links and additional info
-    const optionalLinks = [
-      student.github_url ? `- GitHub: ${student.github_url}` : "",
-      student.linkedin_url ? `- LinkedIn: ${student.linkedin_url}` : "",
-      student.portfolio_url ? `- Portfolio: ${student.portfolio_url}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    // 🌐 Fetch profile analysis data if URLs exist
+    let profileDetails = "";
+    if (student.github_url || student.linkedin_url || student.portfolio_url) {
+      try {
+        const analysisRes = await fetch(`${req.url.split('/api')[0]}/api/analyze-profile`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            github_url: student.github_url || "",
+            linkedin_url: student.linkedin_url || "",
+            portfolio_url: student.portfolio_url || "",
+          }),
+        });
 
+        if (analysisRes.ok) {
+          const analysis = await analysisRes.json();
+          
+          // Build detailed profile information
+          const profileParts = [];
+          
+          if (analysis.github) {
+            const languages = analysis.github.languages.join(", ");
+            const projectCount = analysis.github.projects.length;
+            const projectNames = analysis.github.projects.map((p: { name: string }) => p.name).slice(0, 3).join(", ");
+            profileParts.push(
+              `GitHub: Has ${projectCount} computing projects (${projectNames}${projectCount > 3 ? ', and more' : ''}) using ${languages}`
+            );
+          }
+          
+          if (analysis.portfolio) {
+            const skills = analysis.portfolio.skills.slice(0, 10).join(", ");
+            profileParts.push(`Portfolio: Demonstrates skills in ${skills}`);
+          }
+          
+          if (analysis.linkedin) {
+            profileParts.push(`LinkedIn: Maintains professional networking presence`);
+          }
+          
+          if (profileParts.length > 0) {
+            profileDetails = "\n\nOnline Presence Analysis:\n" + profileParts.map(p => `- ${p}`).join("\n");
+          }
+        }
+      } catch (error) {
+        console.error("Profile analysis failed:", error);
+        // Continue without profile data
+      }
+    }
+
+    // 🧩 Optional links (now without showing URLs, since we have scraped data)
     const cocurricularLine =
       student.co_curricular_points && Number(student.co_curricular_points) > 0
         ? `- Co-curricular Points: ${student.co_curricular_points}`
@@ -57,7 +97,7 @@ export async function POST(req: Request) {
 - Feedback Sentiment Score: ${student.feedback_sentiment_score || "N/A"}
 - Professional Engagement Score: ${student.professional_engagement_score || "N/A"}
 ${cocurricularLine}
-${optionalLinks ? optionalLinks + "\n" : ""}
+${profileDetails}
 `;
 
     // 🧠 Your Original Gemini Prompt (kept intact)
@@ -77,8 +117,9 @@ Do **not** include any introductions like “Here’s an analysis” or “Summa
 Focus on:
 - The student's strongest and weakest skill areas (using descriptive terms only, never numbers).
 - Academic performance (CGPA can be mentioned).
-- Mention provided student info only if provided in data.
-- Skip GitHub, LinkedIn, and Portfolio if missing.
+- **If "Online Presence Analysis" section is provided: Integrate specific project names, programming languages, and skills into the narrative naturally.**
+- DO NOT mention URLs or say things like "explore their GitHub" or "visit their profile".
+- Use the actual scraped data to describe their work (e.g., "has developed 5 projects including react-dashboard and mobile-game using JavaScript and Python").
 - Use friendly and natural language.
 - Avoid phrases like "demonstrated" or "evidenced".
 

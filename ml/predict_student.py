@@ -256,12 +256,21 @@ def build_features(student_id: int, df_courses: pd.DataFrame, df_comments: pd.Da
     Based on educational data mining literature (Romero & Ventura, 2010)
     """
     
+    # Nilai University Grade Point System (4.0 scale)
+    # Based on official transcript grade points per unit
     grade_map = {
-        "A+": 4.0, "A": 4.0, "A-": 3.67,
-        "B+": 3.33, "B": 3.0, "B-": 2.67,
-        "C+": 2.33, "C": 2.0,
-        "D+": 1.33, "D": 1.0,
-        "F": 0.0
+        "A+": 4.0,   # 12.000 grade points for 3 units = 4.0 per unit
+        "A": 4.0,    # 12.000 grade points for 3 units = 4.0 per unit
+        "A-": 3.7,   # 11.100 grade points for 3 units = 3.7 per unit
+        "B+": 3.4,   # 10.200 grade points for 3 units = 3.4 per unit
+        "B": 3.1,    # 9.300 grade points for 3 units = 3.1 per unit
+        "B-": 2.7,   # 8.100 grade points for 3 units = 2.7 per unit
+        "C+": 2.4,   # 7.200 grade points for 3 units = 2.4 per unit
+        "C": 2.1,    # 6.300 grade points for 3 units = 2.1 per unit
+        "C-": 1.8,   # 5.400 grade points for 3 units = 1.8 per unit
+        "D+": 1.7,   # 5.100 grade points for 3 units = 1.7 per unit
+        "D": 1.0,    # 3.000 grade points for 3 units = 1.0 per unit
+        "F": 0.0     # 0.000 grade points
     }
     
     # Default features
