@@ -22,6 +22,28 @@ type CourseInput = {
   description: string;
 };
 
+interface AnalysisResult {
+  github?: {
+    repositories: string[];
+    languages: string[];
+    projects: Array<{
+      name: string;
+      description: string;
+      topics: string[];
+    }>;
+  };
+  portfolio?: {
+    projects: string[];
+    skills: string[];
+  };
+  linkedin?: {
+    experience: string[];
+    skills: string[];
+  };
+  summary: string;
+  computingRelevance: number;
+}
+
 export default function StudentCreate({ onClose }: Props) {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,9 +57,17 @@ export default function StudentCreate({ onClose }: Props) {
     program: "",
     cgpa: "",
     description: "",
+    github_url: "",
+    linkedin_url: "",
+    portfolio_url: "",
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null); // ⭐ NEW
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null
+  );
+  const [showAnalysis, setShowAnalysis] = useState(false);
 
   const [addProgramMode, setAddProgramMode] = useState(false);
   const [newProgram, setNewProgram] = useState({
@@ -70,6 +100,39 @@ export default function StudentCreate({ onClose }: Props) {
       setPrograms(sorted);
     } else {
       setPrograms([]);
+    }
+  };
+
+  const analyzeProfiles = async () => {
+    if (!form.github_url && !form.linkedin_url && !form.portfolio_url) {
+      alert(
+        "Please provide at least one profile URL (GitHub, LinkedIn, or Portfolio)"
+      );
+      return;
+    }
+
+    setAnalyzing(true);
+    setShowAnalysis(false);
+
+    try {
+      const res = await fetch("/api/analyze-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          github_url: form.github_url,
+          linkedin_url: form.linkedin_url,
+          portfolio_url: form.portfolio_url,
+        }),
+      });
+
+      const data = await res.json();
+      setAnalysisResult(data);
+      setShowAnalysis(true);
+    } catch (error) {
+      console.error("Profile analysis failed:", error);
+      alert("Failed to analyze profiles. Please try again.");
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -145,6 +208,9 @@ export default function StudentCreate({ onClose }: Props) {
         program: form.program,
         cgpa: null,
         description: form.description || null,
+        github_url: form.github_url || null,
+        linkedin_url: form.linkedin_url || null,
+        portfolio_url: form.portfolio_url || null,
       })
       .select("id");
 
@@ -210,6 +276,55 @@ export default function StudentCreate({ onClose }: Props) {
     <div className="bg-zinc-800 p-6 rounded-xl w-[700px] space-y-4">
       <h2 className="text-xl font-semibold mb-4">Add New Student</h2>
 
+      {/* Profile Analysis Results */}
+      {showAnalysis && analysisResult && (
+        <div className="bg-gradient-to-r from-blue-900 to-purple-900 p-4 rounded-xl shadow-lg border border-blue-500 mb-4">
+          <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+            🔍 Profile Analysis
+            <span className="text-sm font-normal text-gray-300">
+              Computing Relevance: {analysisResult.computingRelevance}/100
+            </span>
+          </h3>
+
+          <div className="space-y-3 text-sm">
+            <div className="bg-black/30 p-3 rounded-lg">
+              <p className="text-gray-200">{analysisResult.summary}</p>
+            </div>
+
+            {analysisResult.github && (
+              <div className="bg-black/30 p-3 rounded-lg">
+                <h4 className="font-semibold text-green-400 mb-1">💻 GitHub</h4>
+                <div className="text-gray-300">
+                  <div>
+                    Languages: {analysisResult.github.languages.join(", ")}
+                  </div>
+                  <div>Projects: {analysisResult.github.projects.length}</div>
+                </div>
+              </div>
+            )}
+
+            {analysisResult.portfolio && (
+              <div className="bg-black/30 p-3 rounded-lg">
+                <h4 className="font-semibold text-purple-400 mb-1">
+                  🎨 Portfolio
+                </h4>
+                <div className="text-gray-300">
+                  Skills: {analysisResult.portfolio.skills.join(", ")}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAnalysis(false)}
+            className="mt-3 text-sm text-gray-400 hover:text-white"
+          >
+            ✕ Close
+          </button>
+        </div>
+      )}
+
       <form className="space-y-4" onSubmit={handleSubmit}>
         {/* Name */}
         <label className="block text-sm text-gray-300">Name</label>
@@ -259,6 +374,73 @@ export default function StudentCreate({ onClose }: Props) {
           value={form.dob}
           onChange={(e) => setForm({ ...form, dob: e.target.value })}
         />
+
+        {/* Profile URLs */}
+        <div className="bg-zinc-900 p-4 rounded-md space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">
+              Online Profiles (Optional)
+            </h3>
+            <button
+              type="button"
+              onClick={analyzeProfiles}
+              disabled={
+                analyzing ||
+                (!form.github_url && !form.linkedin_url && !form.portfolio_url)
+              }
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {analyzing ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Analyzing...
+                </>
+              ) : (
+                <>🔍 Analyze</>
+              )}
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              GitHub URL
+            </label>
+            <input
+              className="w-full bg-zinc-700 p-2 rounded-md text-sm"
+              placeholder="https://github.com/username"
+              value={form.github_url}
+              onChange={(e) => setForm({ ...form, github_url: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              LinkedIn URL
+            </label>
+            <input
+              className="w-full bg-zinc-700 p-2 rounded-md text-sm"
+              placeholder="https://linkedin.com/in/username"
+              value={form.linkedin_url}
+              onChange={(e) =>
+                setForm({ ...form, linkedin_url: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">
+              Portfolio URL
+            </label>
+            <input
+              className="w-full bg-zinc-700 p-2 rounded-md text-sm"
+              placeholder="https://yourportfolio.com"
+              value={form.portfolio_url}
+              onChange={(e) =>
+                setForm({ ...form, portfolio_url: e.target.value })
+              }
+            />
+          </div>
+        </div>
 
         {/* Program */}
         <label className="block text-sm text-gray-300">Program</label>

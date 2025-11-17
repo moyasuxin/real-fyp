@@ -354,6 +354,7 @@ def predict_scores(student_id: int):
     Load model, fetch data, predict scores for a student.
     Applies domain expertise to map model predictions to appropriate score ranges.
     Handles diploma-only or degree-only students correctly.
+    NOW INCLUDES: Profile analysis from GitHub, LinkedIn, Portfolio URLs.
     """
     
     try:
@@ -369,6 +370,63 @@ def predict_scores(student_id: int):
         
         # Fetch student data from Supabase
         courses, comments = fetch_student_data(student_id)
+        
+        # Fetch student record to get profile URLs
+        student_res = supabase.table("students").select("github_url, linkedin_url, portfolio_url").eq("id", student_id).execute()
+        github_url = ""
+        linkedin_url = ""
+        portfolio_url = ""
+        
+        if student_res.data and len(student_res.data) > 0:
+            github_url = student_res.data[0].get("github_url", "") or ""
+            linkedin_url = student_res.data[0].get("linkedin_url", "") or ""
+            portfolio_url = student_res.data[0].get("portfolio_url", "") or ""
+        
+        # Analyze profiles if URLs exist
+        github_bonus = 0
+        portfolio_bonus = 0
+        linkedin_bonus = 0
+        computing_relevance = 0
+        
+        if github_url or linkedin_url or portfolio_url:
+            try:
+                import requests
+                
+                # Call the profile analysis API
+                analysis_res = requests.post(
+                    "http://localhost:3000/api/analyze-profile",
+                    json={
+                        "github_url": github_url,
+                        "linkedin_url": linkedin_url,
+                        "portfolio_url": portfolio_url,
+                    },
+                    timeout=15
+                )
+                
+                if analysis_res.status_code == 200:
+                    analysis = analysis_res.json()
+                    computing_relevance = analysis.get("computingRelevance", 0)
+                    
+                    # GitHub bonus: based on projects and languages
+                    if analysis.get("github"):
+                        github_data = analysis["github"]
+                        num_projects = len(github_data.get("projects", []))
+                        num_languages = len(github_data.get("languages", []))
+                        github_bonus = min(20, num_projects * 3 + num_languages * 2)
+                    
+                    # Portfolio bonus: based on skills detected
+                    if analysis.get("portfolio"):
+                        portfolio_data = analysis["portfolio"]
+                        num_skills = len(portfolio_data.get("skills", []))
+                        portfolio_bonus = min(15, num_skills * 2)
+                    
+                    # LinkedIn bonus: basic presence
+                    if analysis.get("linkedin"):
+                        linkedin_bonus = 15
+                    
+            except Exception as e:
+                print(f"Warning: Profile analysis failed (non-critical): {e}", file=sys.stderr)
+                # Continue without profile data
         
         # Build features
         X, extended_features = build_features(student_id, courses, comments)
@@ -444,16 +502,20 @@ def predict_scores(student_id: int):
         # Formula: (Portfolio × 15) + (GitHub × 20) + (LinkedIn × 15) + (GPA × 10) + (Comments × 0.1)
         # Based on: LinkedIn & ACM (2021), GitHub Education (2022), Carnevale et al. (2020)
         # 
-        # NOTE: Currently we don't have portfolio/GitHub/LinkedIn in DB, so we base it on:
-        # - Comments (proxy for faculty engagement)
-        # - GPA (academic performance)
-        # Future: Add actual portfolio/GitHub/LinkedIn checks for full 100 points
+        # Now includes actual profile analysis bonuses!
         professional_engagement_score = (comments_len * 0.1) + (effective_gpa * 10)
         
-        # Add bonus if we have actual URLs (when available in future)
-        # if has_github: professional_engagement_score += 20
-        # if has_portfolio: professional_engagement_score += 15
-        # if has_linkedin: professional_engagement_score += 15
+        # Add bonuses from profile analysis
+        professional_engagement_score += github_bonus
+        professional_engagement_score += portfolio_bonus
+        professional_engagement_score += linkedin_bonus
+        
+        # Boost all scores slightly based on computing relevance from profile analysis
+        if computing_relevance > 0:
+            relevance_multiplier = 1 + (computing_relevance / 1000)  # Max 10% boost at 100 relevance
+            programming_score *= relevance_multiplier
+            design_score *= relevance_multiplier
+            it_infrastructure_score *= relevance_multiplier
         
         # Normalize scores to reasonable ranges (0-100 scale)
         scores = {

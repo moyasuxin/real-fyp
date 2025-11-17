@@ -23,6 +23,22 @@ interface ProfileAnalysis {
   computingRelevance: number; // 0-100 score
 }
 
+interface GitHubRepo {
+  name: string;
+  description: string | null;
+  fork: boolean;
+  topics: string[];
+  language: string | null;
+}
+
+interface GitHubRepo {
+  name: string;
+  description: string | null;
+  fork: boolean;
+  topics: string[];
+  language: string | null;
+}
+
 export async function POST(req: Request) {
   try {
     const { github_url, linkedin_url, portfolio_url } = await req.json();
@@ -34,17 +50,20 @@ export async function POST(req: Request) {
 
     // ✅ Analyze GitHub Profile
     if (github_url) {
-      analysis.github = await analyzeGitHub(github_url);
+      const githubResult = await analyzeGitHub(github_url);
+      if (githubResult) analysis.github = githubResult;
     }
 
     // ✅ Analyze Portfolio
     if (portfolio_url) {
-      analysis.portfolio = await analyzePortfolio(portfolio_url);
+      const portfolioResult = await analyzePortfolio(portfolio_url);
+      if (portfolioResult) analysis.portfolio = portfolioResult;
     }
 
     // ✅ Analyze LinkedIn
     if (linkedin_url) {
-      analysis.linkedin = await analyzeLinkedIn(linkedin_url);
+      const linkedinResult = await analyzeLinkedIn(linkedin_url);
+      if (linkedinResult) analysis.linkedin = linkedinResult;
     }
 
     // ✅ Generate AI Summary using Gemini
@@ -139,7 +158,7 @@ async function analyzeGitHub(url: string) {
 
     if (!reposRes.ok) return null;
 
-    const repos = await reposRes.json();
+    const repos: GitHubRepo[] = await reposRes.json();
 
     // Extract computing-related keywords
     const computingKeywords = [
@@ -149,22 +168,22 @@ async function analyzeGitHub(url: string) {
     ];
 
     const projects = repos
-      .filter((repo: any) => !repo.fork && repo.description)
-      .map((repo: any) => ({
+      .filter((repo) => !repo.fork && repo.description)
+      .map((repo) => ({
         name: repo.name,
         description: repo.description || "",
         topics: repo.topics || [],
         language: repo.language || "",
       }))
-      .filter((project: any) => {
+      .filter((project) => {
         const text = `${project.name} ${project.description} ${project.topics.join(" ")} ${project.language}`.toLowerCase();
         return computingKeywords.some(keyword => text.includes(keyword));
       });
 
-    const languages = [...new Set(repos.map((r: any) => r.language).filter(Boolean))];
+    const languages = [...new Set(repos.map((r) => r.language).filter((lang): lang is string => Boolean(lang)))];
 
     return {
-      repositories: repos.map((r: any) => r.name).slice(0, 10),
+      repositories: repos.map((r) => r.name).slice(0, 10),
       languages,
       projects: projects.slice(0, 5),
     };
