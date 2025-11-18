@@ -1,7 +1,7 @@
 // src/app/studentmanager/components/CourseSection.tsx
 "use client";
 import React, { useState } from "react";
-import { useCourses } from "../types/course";
+import { useCourses } from "../hooks/useCourses";
 import MLLoadingModal from "./MLLoadingModal";
 
 interface Props {

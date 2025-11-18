@@ -1,7 +1,7 @@
 // src/app/studentmanager/components/CocurricularSection.tsx
 "use client";
 import React, { useState } from "react";
-import { useCocurricular } from "../types/cocurricular";
+import { useCocurricular } from "../hooks/useCocurricular";
 import MLLoadingModal from "./MLLoadingModal";
 
 interface Props {
