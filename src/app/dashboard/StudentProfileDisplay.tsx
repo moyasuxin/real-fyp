@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/card";
 import StudentRadarChart from "./StudentRadarChart";
 import Image from "next/image";
+import LecturerComments from "./LecturerComments";
 
 interface Student {
   id: number;
@@ -26,6 +27,9 @@ interface StudentProfileDisplayProps {
   aiSummary: string;
   recommendedCareer: string;
   loading: boolean;
+  currentUserId?: string | null;
+  currentUserName?: string | null;
+  isAuthenticated?: boolean;
 }
 
 const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
@@ -33,6 +37,9 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
   aiSummary,
   recommendedCareer,
   loading,
+  currentUserId = null,
+  currentUserName = null,
+  isAuthenticated = false,
 }) => {
   if (!student) {
     return (
@@ -77,14 +84,26 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
         </CardContent>
       </Card>
 
-      {/* 🔹 AI Summary */}
+      {/* 🔹 AI Summary & Lecturer Comments */}
       <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
-        <CardContent className="p-6 text-gray-100">
+        <CardContent className="p-6 text-gray-100 max-h-[600px] overflow-y-auto">
           <h3 className="text-lime-400 font-semibold mb-3">
             AI Student Summary{" "}
             {loading && <span className="text-gray-400">(Updating...)</span>}
           </h3>
-          <p className="whitespace-pre-line">{aiSummary}</p>
+          <p className="whitespace-pre-line mb-6">{aiSummary}</p>
+
+          {/* 🔹 Lecturer Comments Section - Inside same card */}
+          {isAuthenticated && (
+            <div className="mt-6 pt-6 border-t border-zinc-700">
+              <LecturerComments
+                studentId={student.id}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                isAuthenticated={isAuthenticated}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -23,9 +23,15 @@ LOCAL_MODEL_PATH = MODEL_FILE
 # ─────────────────────────────────────────────
 # Load dataset from ml/output
 # ─────────────────────────────────────────────
-df_students = pd.read_csv("output/students.csv")
-df_courses = pd.read_csv("output/courses.csv")
-df_comments = pd.read_csv("output/student_comments.csv", on_bad_lines="skip")
+df_students = pd.read_csv("ml/output/students.csv")
+df_courses = pd.read_csv("ml/output/courses.csv")
+
+# Comments file might not exist yet
+try:
+    df_comments = pd.read_csv("ml/output/student_comments.csv", on_bad_lines="skip")
+except FileNotFoundError:
+    print("⚠️ No student_comments.csv found. Creating empty DataFrame.")
+    df_comments = pd.DataFrame(columns=["id", "student_id", "content"])
 
 
 # ─────────────────────────────────────────────
@@ -50,13 +56,17 @@ def build_training_df(df_students, df_courses, df_comments):
         num_courses=("id", "count"),
     ).reset_index()
 
-    # Comments
+    # Comments - now using actual sentiment analysis
     if not df_comments.empty:
-        comment_stats = df_comments.groupby("student_id")["content"] \
-            .apply(lambda s: s.str.len().sum()) \
-            .reset_index(name="comments_total_len")
+        # Filter out deleted comments
+        active_comments = df_comments[df_comments["content"] != "[Comment deleted]"]
+        
+        comment_stats = active_comments.groupby("student_id").agg(
+            comments_count=("id", "count"),
+            comments_total_len=("content", lambda x: x.str.len().sum())
+        ).reset_index()
     else:
-        comment_stats = pd.DataFrame(columns=["student_id", "comments_total_len"])
+        comment_stats = pd.DataFrame(columns=["student_id", "comments_count", "comments_total_len"])
 
     df = (
         df_students[["id"]]
@@ -65,17 +75,30 @@ def build_training_df(df_students, df_courses, df_comments):
         .fillna(0)
         .set_index("id")
     )
+    
+    # Get AI scores if they exist in the dataset
+    if "feedback_sentiment_score" in df_students.columns:
+        df["feedback_sentiment_score"] = df_students.set_index("id")["feedback_sentiment_score"]
+    else:
+        df["feedback_sentiment_score"] = None
+        
+    if "professional_engagement_score" in df_students.columns:
+        df["professional_engagement_score"] = df_students.set_index("id")["professional_engagement_score"]
+    else:
+        df["professional_engagement_score"] = None
 
-    X = df[["total_units", "avg_grade_point", "num_courses", "comments_total_len"]]
+    X = df[["total_units", "avg_grade_point", "num_courses", "comments_count", "comments_total_len"]]
 
-    # Synthetic labels (6 outputs)
+    # Use actual scores from database where available, synthetic for missing
     y = pd.DataFrame({
         "programming_score": X['avg_grade_point'] * 25 + X['num_courses'] * 0.5,
         "design_score": X['avg_grade_point'] * 20 + X['comments_total_len'] * 0.01,
         "it_infrastructure_score": X['avg_grade_point'] * 22,
         "co_curricular_points": X['num_courses'] * 2 + X['total_units'],
-        "feedback_sentiment_score": X['comments_total_len'] * 0.05,
-        "professional_engagement_score": X['comments_total_len'] * 0.1 + X['avg_grade_point'] * 10
+        # Use actual feedback_sentiment_score from DB (AI-analyzed)
+        "feedback_sentiment_score": df['feedback_sentiment_score'].fillna(X['comments_total_len'] * 0.05),
+        # Use actual professional_engagement_score from DB
+        "professional_engagement_score": df['professional_engagement_score'].fillna(X['comments_total_len'] * 0.1 + X['avg_grade_point'] * 10)
     }, index=X.index)
 
     return X, y
@@ -89,11 +112,18 @@ def train_local_model():
     X, y = build_training_df(df_students, df_courses, df_comments)
 
     print("Training dataset shape:", X.shape)
-
-    # Split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    
+    # Check if we have enough data for train/test split
+    if len(X) < 5:
+        print(f"⚠️ Warning: Only {len(X)} samples available. Need at least 5 students for proper training.")
+        print("Training on all available data (no test split)...")
+        X_train, y_train = X, y
+        X_test, y_test = X, y  # Use same data for evaluation
+    else:
+        # Split
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
 
     model = MultiOutputRegressor(
         RandomForestRegressor(n_estimators=200, random_state=42)

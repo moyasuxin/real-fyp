@@ -36,6 +36,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
       await supabase.auth.signOut();
       onLogout?.(); // still call the parent handler if needed
       router.push("/dashboard"); // redirect to dashboard after logout
+      window.location.reload(); // Force page refresh to clear admin state
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -114,6 +115,18 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                         className="w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
                         🎓 Student Manager
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => {
+                          router.push("/create-account");
+                          onNavigate?.("create-account");
+                          setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        ➕ Create Account
                       </button>
                     </li>
                     <li>

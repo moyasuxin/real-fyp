@@ -44,13 +44,35 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const prevProgram = useRef<string>("");
   const prevHash = useRef<string>("");
 
   // ✅ Check session once (for lecturer/admin tool visibility)
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      if (data.session?.user) {
+        // Fetch user details from admin_users table
+        supabase
+          .from("admin_users")
+          .select("id, username, email")
+          .eq("id", data.session.user.id)
+          .single()
+          .then(({ data: userData }) => {
+            if (userData) {
+              setCurrentUser({
+                id: userData.id,
+                name: userData.username || userData.email || "Admin",
+              });
+            }
+          });
+      }
+    });
   }, []);
 
   // ✅ Fetch and auto-analyze when program changes
@@ -247,6 +269,9 @@ export default function DashboardPage() {
               aiSummary={aiSummary}
               recommendedCareer={recommendedCareer}
               loading={loading}
+              currentUserId={currentUser?.id || null}
+              currentUserName={currentUser?.name || null}
+              isAuthenticated={!!session}
             />
 
             {/* ✅ Refresh button visible only to lecturers/admin */}
