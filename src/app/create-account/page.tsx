@@ -45,9 +45,11 @@ const CreateAccountPage = () => {
       if (dbError) throw dbError;
 
       setSuccess(
-        `✅ ${formData.role === "admin" ? "Admin" : "Lecturer"} account created successfully! Email: ${formData.email}`
+        `✅ ${
+          formData.role === "admin" ? "Admin" : "Lecturer"
+        } account created successfully! Email: ${formData.email}`
       );
-      
+
       // Reset form
       setFormData({
         email: "",
@@ -150,9 +152,7 @@ const CreateAccountPage = () => {
               className="w-full bg-zinc-700 text-white p-3 rounded-lg border border-zinc-600 focus:border-lime-400 focus:outline-none"
               placeholder="••••••••"
             />
-            <p className="text-xs text-gray-400 mt-1">
-              Minimum 6 characters
-            </p>
+            <p className="text-xs text-gray-400 mt-1">Minimum 6 characters</p>
           </div>
 
           <div>
