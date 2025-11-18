@@ -8,12 +8,14 @@ interface HeaderProps {
   session: Session | null;
   onLogout: () => void;
   onNavigate?: (view: string) => void;
+  userRole?: string | null;
 }
 
 const DashboardHeader: React.FC<HeaderProps> = ({
   session,
   onLogout,
   onNavigate,
+  userRole = null,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -117,18 +119,21 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                         🎓 Student Manager
                       </button>
                     </li>
-                    <li>
-                      <button
-                        onClick={() => {
-                          router.push("/create-account");
-                          onNavigate?.("create-account");
-                          setMenuOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                      >
-                        ➕ Create Account
-                      </button>
-                    </li>
+                    {/* Only show Create Account for admins */}
+                    {userRole === "admin" && (
+                      <li>
+                        <button
+                          onClick={() => {
+                            router.push("/create-account");
+                            onNavigate?.("create-account");
+                            setMenuOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          ➕ Create Account
+                        </button>
+                      </li>
+                    )}
                     <li>
                       <button
                         onClick={() => {

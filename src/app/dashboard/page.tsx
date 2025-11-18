@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<{
     id: string;
     name: string;
+    role: string;
   } | null>(null);
 
   const prevProgram = useRef<string>("");
@@ -60,7 +61,7 @@ export default function DashboardPage() {
         // Fetch user details from admin_users table
         supabase
           .from("admin_users")
-          .select("id, username, email")
+          .select("id, username, email, role")
           .eq("id", data.session.user.id)
           .single()
           .then(({ data: userData }) => {
@@ -68,6 +69,7 @@ export default function DashboardPage() {
               setCurrentUser({
                 id: userData.id,
                 name: userData.username || userData.email || "Admin",
+                role: userData.role || "lecturer",
               });
             }
           });
@@ -274,8 +276,8 @@ export default function DashboardPage() {
               isAuthenticated={!!session}
             />
 
-            {/* ✅ Refresh button visible only to lecturers/admin */}
-            {session && (
+            {/* ✅ Refresh button visible only to admins */}
+            {session && currentUser?.role === "admin" && (
               <div className="flex justify-end">
                 <button
                   onClick={handleManualRefresh}
