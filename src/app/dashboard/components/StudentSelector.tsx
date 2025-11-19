@@ -1,7 +1,7 @@
-// src/app/dashboard/StudentSelector.tsx
 "use client";
 import React, { useRef } from "react";
-import StudentCard, { Student } from "./StudentCard";
+import StudentCard from "./StudentCard";
+import type { Student } from "../types";
 
 interface StudentSelectorProps {
   students: Student[];
@@ -55,7 +55,7 @@ const StudentSelector: React.FC<StudentSelectorProps> = ({
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const cardWidth = 200; // Approx card width + gap
+      const cardWidth = 200;
       const scrollAmount = direction === "left" ? -cardWidth : cardWidth;
       scrollContainerRef.current.scrollBy({
         left: scrollAmount,
@@ -69,12 +69,10 @@ const StudentSelector: React.FC<StudentSelectorProps> = ({
   return (
     <div className="relative w-full max-w-5xl flex justify-center items-center">
       <div className="relative bg-[#313236] border-2 border-zinc-700/50 rounded-2xl px-3 py-2 w-full flex items-center overflow-hidden">
-        {/* Left Arrow (slightly overlapping cards) */}
         <div className="z-10 -mr-2">
           <ArrowButton direction="left" onClick={() => scroll("left")} />
         </div>
 
-        {/* Scrollable Cards */}
         <div
           ref={scrollContainerRef}
           className="flex items-center gap-4 overflow-x-auto scroll-smooth flex-1 px-2"
@@ -96,7 +94,6 @@ const StudentSelector: React.FC<StudentSelectorProps> = ({
           ))}
         </div>
 
-        {/* Right Arrow (partly outside container) */}
         <div className="z-10 -ml-2 translate-x-2">
           <ArrowButton direction="right" onClick={() => scroll("right")} />
         </div>

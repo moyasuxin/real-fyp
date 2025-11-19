@@ -1,17 +1,10 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-
-export interface Student {
-  id: number;
-  name: string | null;
-  alias?: string | null;
-  image_url: string | null;
-  bgColor?: string; // optional background accent
-}
+import type { StudentCardData } from "../types";
 
 interface StudentCardProps {
-  student: Student;
+  student: StudentCardData;
   isSelected: boolean;
   onSelect: () => void;
 }

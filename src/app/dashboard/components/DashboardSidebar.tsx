@@ -1,18 +1,6 @@
-// src/app/dashboard/DashboardSidebar.tsx
 "use client";
-import React, { useEffect, useState } from "react";
-
-interface Program {
-  id: number;
-  group_name: string;
-  program_short: string;
-  program_long: string;
-}
-
-interface GroupedPrograms {
-  name: string;
-  programs: Program[];
-}
+import React from "react";
+import { usePrograms } from "../hooks";
 
 interface SidebarProps {
   activeGroup: string;
@@ -21,45 +9,13 @@ interface SidebarProps {
   onSelectProgram: (program: string) => void;
 }
 
-const StudentSidebar: React.FC<SidebarProps> = ({
+const DashboardSidebar: React.FC<SidebarProps> = ({
   activeGroup,
   activeProgram,
   onSelectGroup,
   onSelectProgram,
 }) => {
-  const [groups, setGroups] = useState<GroupedPrograms[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchPrograms() {
-      try {
-        setLoading(true);
-        const res = await fetch("/api/programs");
-        if (!res.ok) {
-          console.error("Failed to fetch programs:", res.statusText);
-          return;
-        }
-        const programs: Program[] = await res.json();
-
-        // Type-safe grouping
-        const grouped = programs.reduce<GroupedPrograms[]>((acc, program) => {
-          const existingGroup = acc.find((g) => g.name === program.group_name);
-          if (existingGroup) {
-            existingGroup.programs.push(program);
-          } else {
-            acc.push({ name: program.group_name, programs: [program] });
-          }
-          return acc;
-        }, []);
-
-        setGroups(grouped);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPrograms();
-  }, []);
+  const { groups, loading } = usePrograms();
 
   return (
     <aside className="flex-shrink-0 w-64 bg-gray-800 text-white p-4 rounded-2xl shadow-lg">
@@ -110,4 +66,4 @@ const StudentSidebar: React.FC<SidebarProps> = ({
   );
 };
 
-export default StudentSidebar;
+export default DashboardSidebar;

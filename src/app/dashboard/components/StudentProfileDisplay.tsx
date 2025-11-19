@@ -1,26 +1,10 @@
-//src/app/dashboard/StudentProfileDisplay.tsx
 "use client";
 import React from "react";
 import { Card, CardContent } from "@/components/card";
 import StudentRadarChart from "./StudentRadarChart";
-import Image from "next/image";
 import LecturerComments from "./LecturerComments";
-
-interface Student {
-  id: number;
-  name: string | null;
-  gender: string | null;
-  dob: string | null;
-  image_url: string | null;
-  description: string | null;
-  program: string | null;
-  programming_score?: string | number | null;
-  design_score?: string | number | null;
-  it_infrastructure_score?: string | number | null;
-  co_curricular_points?: string | number | null;
-  feedback_sentiment_score?: string | number | null;
-  professional_engagement_score?: string | number | null;
-}
+import Image from "next/image";
+import type { Student } from "../types";
 
 interface StudentProfileDisplayProps {
   student: Student | null;
@@ -47,7 +31,6 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
     );
   }
 
-  // 🧠 Convert all nulls to undefined to satisfy TS type safety
   const safeStudentData = {
     programming_score: student.programming_score ?? undefined,
     design_score: student.design_score ?? undefined,
@@ -60,7 +43,7 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
 
   return (
     <>
-      {/* 🔹 Student Basic Info */}
+      {/* Student Basic Info */}
       <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
         <CardContent className="p-4 text-gray-100">
           <div className="flex items-center justify-between">
@@ -84,7 +67,7 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
         </CardContent>
       </Card>
 
-      {/* 🔹 AI Summary & Lecturer Comments */}
+      {/* AI Summary & Lecturer Comments */}
       <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
         <CardContent className="p-6 text-gray-100 max-h-[600px] overflow-y-auto">
           <h3 className="text-lime-400 font-semibold mb-3">
@@ -93,7 +76,6 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
           </h3>
           <p className="whitespace-pre-line mb-6">{aiSummary}</p>
 
-          {/* 🔹 Lecturer Comments Section - Inside same card */}
           {isAuthenticated && (
             <div className="mt-6 pt-6 border-t border-zinc-700">
               <LecturerComments
@@ -107,7 +89,7 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
         </CardContent>
       </Card>
 
-      {/* 🔹 Radar Chart & Career Recommendation */}
+      {/* Radar Chart & Career Recommendation */}
       <Card className="bg-zinc-800 border border-zinc-700 rounded-2xl">
         <CardContent className="p-4">
           <StudentRadarChart student={safeStudentData} />

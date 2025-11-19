@@ -1,4 +1,3 @@
-// src/app/dashboard/StudentRadarChart.tsx
 "use client";
 import React from "react";
 import { Radar } from "react-chartjs-2";
@@ -12,6 +11,7 @@ import {
   Legend,
   ChartOptions,
 } from "chart.js";
+import type { StudentChartData } from "../types";
 
 ChartJS.register(
   RadialLinearScale,
@@ -23,18 +23,10 @@ ChartJS.register(
 );
 
 interface StudentRadarChartProps {
-  student: {
-    programming_score?: string | number;
-    design_score?: string | number;
-    it_infrastructure_score?: string | number;
-    co_curricular_points?: string | number;
-    feedback_sentiment_score?: string | number;
-    professional_engagement_score?: string | number;
-  };
+  student: StudentChartData;
 }
 
 const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ student }) => {
-  // ✅ Pull from DB columns and default to 0 if missing
   const chartValues = [
     Number(student.programming_score) || 0,
     Number(student.design_score) || 0,

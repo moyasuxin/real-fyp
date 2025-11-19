@@ -1,21 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-
-interface Comment {
-  id: number;
-  student_id: number;
-  commenter_id: string;
-  commenter_name: string;
-  content: string;
-  created_at: string;
-}
-
-interface AnalysisResult {
-  sentiment_score: number;
-  is_useful: boolean;
-  summary: string;
-  average_score: number;
-}
+import React, { useState } from "react";
+import { useComments } from "../hooks";
 
 interface LecturerCommentsProps {
   studentId: number;
@@ -30,39 +15,16 @@ const LecturerComments: React.FC<LecturerCommentsProps> = ({
   currentUserName,
   isAuthenticated,
 }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
-    null
-  );
+  const {
+    comments,
+    loading,
+    submitting,
+    analysisResult,
+    submitComment,
+    deleteComment,
+  } = useComments({ studentId });
 
-  // Fetch comments
-  const fetchComments = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/comments?studentId=${studentId}`);
-      const data = await res.json();
-
-      if (res.ok) {
-        setComments(data.comments || []);
-      } else {
-        console.error("Failed to fetch comments:", data.error);
-      }
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchComments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [studentId]);
-
-  // Submit new comment
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -72,43 +34,15 @@ const LecturerComments: React.FC<LecturerCommentsProps> = ({
     }
 
     try {
-      setSubmitting(true);
-      setAnalysisResult(null);
-
-      const res = await fetch("/api/comments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId,
-          commenter_id: currentUserId,
-          commenter_name: currentUserName,
-          content: newComment,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setNewComment("");
-        await fetchComments();
-
-        // Show AI analysis result
-        if (data.analysis) {
-          setAnalysisResult(data.analysis);
-          setTimeout(() => setAnalysisResult(null), 5000);
-        }
-      } else {
-        alert(`Failed to submit comment: ${data.error}`);
-      }
+      await submitComment(newComment, currentUserId, currentUserName);
+      setNewComment("");
     } catch (error) {
-      console.error("Error submitting comment:", error);
-      alert("Failed to submit comment. Please try again.");
-    } finally {
-      setSubmitting(false);
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to submit comment";
+      alert(errorMsg);
     }
   };
 
-  // Delete comment
   const handleDelete = async (commentId: number) => {
     if (
       !confirm(
@@ -119,25 +53,17 @@ const LecturerComments: React.FC<LecturerCommentsProps> = ({
     }
 
     try {
-      const res = await fetch(
-        `/api/comments?commentId=${commentId}&commenterId=${currentUserId}`,
-        { method: "DELETE" }
-      );
-
-      if (res.ok) {
-        await fetchComments();
-      } else {
-        const data = await res.json();
-        alert(`Failed to delete comment: ${data.error}`);
-      }
+      if (!currentUserId) return;
+      await deleteComment(commentId, currentUserId);
     } catch (error) {
-      console.error("Error deleting comment:", error);
-      alert("Failed to delete comment. Please try again.");
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to delete comment";
+      alert(errorMsg);
     }
   };
 
   if (!isAuthenticated) {
-    return null; // Don't show to non-authenticated users
+    return null;
   }
 
   return (
