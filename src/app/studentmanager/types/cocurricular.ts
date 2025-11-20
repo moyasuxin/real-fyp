@@ -2,6 +2,7 @@
 export interface CocurricularActivity {
   id: number;
   student_id: number;
+  event_name: string;
   organization_name: string;
   organization_type: string | null;
   position: string | null;

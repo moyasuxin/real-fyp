@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['example.com', 'randomuser.me', 'uwokktuhfyqcrdrxqbhx.supabase.co'],
+    domains: ['example.com', 'randomuser.me', 'uwokktuhfyqcrdrxqbhx.supabase.co', 'placehold.co'],
   },
   webpack: (config) => {
     config.cache = false;

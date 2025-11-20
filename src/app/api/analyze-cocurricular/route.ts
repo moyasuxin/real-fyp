@@ -27,8 +27,8 @@ async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3)
 export async function POST(req: NextRequest) {
   console.log("=== Co-curricular Analysis API Called ===");
   try {
-    const { organization_name, organization_type, position, responsibilities, activity_period } = await req.json();
-    console.log("Request data:", { organization_name, organization_type, position, responsibilities: responsibilities?.substring(0, 50) + "..." });
+    const { event_name, organization_name, organization_type, position, responsibilities, activity_period } = await req.json();
+    console.log("Request data:", { event_name, organization_name, organization_type, position, responsibilities: responsibilities?.substring(0, 50) + "..." });
 
     if (!organization_name || !responsibilities) {
       console.error("Validation failed: Missing required fields");
@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
 
 Analyze this co-curricular activity and provide scores:
 
+Event Name: ${event_name || "Not specified"}
 Organization: ${organization_name}
 Type: ${organization_type || "Not specified"}
 Position: ${position || "Member"}

@@ -2,6 +2,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/services/supabaseClient";
+import MLLoadingModal from "./MLLoadingModal";
 
 interface Program {
   id: number;
@@ -19,10 +20,11 @@ type CourseInput = {
   course_code: string;
   grade: string;
   credit_hour: number;
-  description: string;
+  course_description: string;
 };
 
 type CocurricularInput = {
+  event_name: string;
   organization_name: string;
   organization_type: string;
   position: string;
@@ -34,6 +36,8 @@ type CocurricularInput = {
 export default function StudentCreate({ onClose }: Props) {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(false);
+  const [mlLoading, setMlLoading] = useState(false);
+  const [mlStage, setMlStage] = useState("Initializing...");
 
   const [form, setForm] = useState({
     name: "",
@@ -64,12 +68,13 @@ export default function StudentCreate({ onClose }: Props) {
       course_code: "",
       grade: "",
       credit_hour: 3,
-      description: "",
+      course_description: "",
     },
   ]);
 
   const [cocurricular, setCocurricular] = useState<CocurricularInput[]>([
     {
+      event_name: "",
       organization_name: "",
       organization_type: "Computing Club",
       position: "",
@@ -105,7 +110,7 @@ export default function StudentCreate({ onClose }: Props) {
 
     const fileName = `${Date.now()}-${file.name}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("student-images") // MAKE SURE BUCKET EXISTS
       .upload(fileName, file);
 
@@ -129,7 +134,7 @@ export default function StudentCreate({ onClose }: Props) {
         course_code: "",
         grade: "",
         credit_hour: 3,
-        description: "",
+        course_description: "",
       },
     ]);
   };
@@ -144,6 +149,7 @@ export default function StudentCreate({ onClose }: Props) {
     setCocurricular([
       ...cocurricular,
       {
+        event_name: "",
         organization_name: "",
         organization_type: "Computing Club",
         position: "",
@@ -187,6 +193,8 @@ export default function StudentCreate({ onClose }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setMlLoading(true);
+    setMlStage("Creating student profile...");
 
     const { data: insertedStudents, error } = await supabase
       .from("students")
@@ -209,11 +217,13 @@ export default function StudentCreate({ onClose }: Props) {
     if (error || !insertedStudents || insertedStudents.length === 0) {
       alert("Error creating student: " + error?.message);
       setLoading(false);
+      setMlLoading(false);
       return;
     }
 
     const studentId = insertedStudents[0].id;
 
+    setMlStage("Inserting courses...");
     for (const c of courses) {
       if (!c.course_name) continue;
 
@@ -223,13 +233,15 @@ export default function StudentCreate({ onClose }: Props) {
         course_code: c.course_code || null,
         grade: c.grade || null,
         credit_hour: c.credit_hour,
-        description: c.description || null,
+        course_description: c.course_description || null,
       });
     }
 
     // Insert co-curricular activities
+    setMlStage("Analyzing co-curricular activities with AI...");
     for (const a of cocurricular) {
-      if (!a.organization_name || !a.responsibilities) continue;
+      if (!a.event_name || !a.organization_name || !a.responsibilities)
+        continue;
 
       // Format activity period from dates
       let activity_period = null;
@@ -261,6 +273,7 @@ export default function StudentCreate({ onClose }: Props) {
         console.log("AI analysis for activity:", a.organization_name, aiScores);
         await supabase.from("cocurricular_activities").insert({
           student_id: studentId,
+          event_name: a.event_name,
           organization_name: a.organization_name,
           organization_type: a.organization_type || null,
           position: a.position || null,
@@ -274,9 +287,14 @@ export default function StudentCreate({ onClose }: Props) {
       }
     }
 
+    setMlStage("Running ML prediction...");
     await fetch(`/api/ml/retrain?studentId=${studentId}`, { method: "POST" });
 
+    setMlStage("✅ Done!");
+    await new Promise((r) => setTimeout(r, 800));
+
     setLoading(false);
+    setMlLoading(false);
     onClose();
   };
 
@@ -340,6 +358,7 @@ export default function StudentCreate({ onClose }: Props) {
         {imagePreview && (
           <img
             src={imagePreview}
+            alt="Student preview"
             className="w-32 h-32 object-cover mt-2 rounded-md"
           />
         )}
@@ -546,9 +565,9 @@ export default function StudentCreate({ onClose }: Props) {
               </label>
               <input
                 className="w-full bg-zinc-700 p-2 rounded-md"
-                value={c.description}
+                value={c.course_description}
                 onChange={(e) =>
-                  updateCourseField(index, "description", e.target.value)
+                  updateCourseField(index, "course_description", e.target.value)
                 }
               />
 
@@ -586,6 +605,18 @@ export default function StudentCreate({ onClose }: Props) {
               key={index}
               className="border border-gray-700 p-4 rounded-md mb-3"
             >
+              <label className="block text-sm text-gray-300 mb-1">
+                Event Name *
+              </label>
+              <input
+                className="w-full bg-zinc-700 p-2 rounded-md mb-2"
+                placeholder="e.g. Hackathon 2023, Leadership Workshop, Charity Run"
+                value={a.event_name}
+                onChange={(e) =>
+                  updateCocurricularField(index, "event_name", e.target.value)
+                }
+              />
+
               <label className="block text-sm text-gray-300 mb-1">
                 Organization/Club Name *
               </label>
@@ -723,7 +754,8 @@ export default function StudentCreate({ onClose }: Props) {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-lime-400 text-black font-semibold py-2 rounded-md"
+          disabled={loading}
+          className="w-full bg-lime-400 text-black font-semibold py-2 rounded-md disabled:opacity-50"
         >
           {loading ? "Processing..." : "Create Student & Analyze"}
         </button>
@@ -736,6 +768,8 @@ export default function StudentCreate({ onClose }: Props) {
           Cancel
         </button>
       </form>
+
+      <MLLoadingModal show={mlLoading} stage={mlStage} />
     </div>
   );
 }

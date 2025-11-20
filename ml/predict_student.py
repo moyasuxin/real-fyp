@@ -147,7 +147,10 @@ load_dotenv()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-MODEL_PATH = "ml/model.joblib"
+
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, "model.joblib")
 
 # Initialize Supabase client
 supabase: Client = create_client(SUPABASE_URL, SERVICE_ROLE_KEY)
@@ -276,8 +279,9 @@ def build_features(student_id: int, df_courses: pd.DataFrame, df_comments: pd.Da
     # Default features
     features = {
         "total_units": 0,
-        "avg_grade_point": 0,
+        "avg_grade_point": 0.0,
         "num_courses": 0,
+        "comments_count": 0,
         "comments_total_len": 0,
         # Domain-specific features
         "programming_gpa": 0,
@@ -344,14 +348,16 @@ def build_features(student_id: int, df_courses: pd.DataFrame, df_comments: pd.Da
     
     # Process comments (engagement indicator)
     if not df_comments.empty and "content" in df_comments.columns:
+        features["comments_count"] = len(df_comments)
         features["comments_total_len"] = df_comments["content"].str.len().sum()
     
     # Create DataFrame with features (maintain compatibility with basic model)
-    # For backward compatibility, use the original 4 features
+    # For backward compatibility, use the original 5 features
     X = pd.DataFrame({
         "total_units": [features["total_units"]],
         "avg_grade_point": [features["avg_grade_point"]],
         "num_courses": [features["num_courses"]],
+        "comments_count": [features["comments_count"]],
         "comments_total_len": [features["comments_total_len"]]
     })
     

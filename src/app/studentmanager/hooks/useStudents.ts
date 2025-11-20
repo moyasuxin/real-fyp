@@ -8,15 +8,15 @@ export function useStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchStudents() {
-      setLoading(true);
-      const { data, error } = await supabase.from("students").select("*");
-      if (error) console.error(error);
-      else setStudents(data as Student[]);
-      setLoading(false);
-    }
+  async function fetchStudents() {
+    setLoading(true);
+    const { data, error } = await supabase.from("students").select("*");
+    if (error) console.error(error);
+    else setStudents(data as Student[]);
+    setLoading(false);
+  }
 
+  useEffect(() => {
     fetchStudents();
   }, []);
 
@@ -30,5 +30,5 @@ export function useStudents() {
     if (!error) setStudents(students.filter((s) => s.id !== id));
   }
 
-  return { students, loading, addStudent, deleteStudent };
+  return { students, loading, addStudent, deleteStudent, refetchStudents: fetchStudents };
 }

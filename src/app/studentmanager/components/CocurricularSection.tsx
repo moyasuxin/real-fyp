@@ -15,6 +15,7 @@ export default function CocurricularSection({ studentId }: Props) {
   const [mlStage, setMlStage] = useState("Initializing...");
   const [analyzing, setAnalyzing] = useState(false);
   const [newActivity, setNewActivity] = useState({
+    event_name: "",
     organization_name: "",
     organization_type: "Computing Club",
     position: "",
@@ -25,6 +26,7 @@ export default function CocurricularSection({ studentId }: Props) {
 
   const handleAddActivity = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newActivity.event_name) return alert("Enter event name!");
     if (!newActivity.organization_name)
       return alert("Enter organization name!");
     if (!newActivity.responsibilities)
@@ -86,6 +88,7 @@ export default function CocurricularSection({ studentId }: Props) {
       // Step 2: Add activity with AI scores
       await addActivity({
         student_id: studentId,
+        event_name: newActivity.event_name,
         organization_name: newActivity.organization_name,
         organization_type: newActivity.organization_type || null,
         position: newActivity.position || null,
@@ -121,6 +124,7 @@ export default function CocurricularSection({ studentId }: Props) {
       setAnalyzing(false);
       setMlLoading(false);
       setNewActivity({
+        event_name: "",
         organization_name: "",
         organization_type: "Computing Club",
         position: "",
@@ -175,7 +179,7 @@ export default function CocurricularSection({ studentId }: Props) {
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <strong className="text-lg">{a.organization_name}</strong>
+                    <strong className="text-lg">{a.event_name}</strong>
                     {a.organization_type && (
                       <span className="text-xs bg-blue-600 px-2 py-0.5 rounded">
                         {a.organization_type}
@@ -183,9 +187,8 @@ export default function CocurricularSection({ studentId }: Props) {
                     )}
                   </div>
                   <div className="text-sm text-gray-300">
-                    <span className="font-semibold">
-                      {a.position || "Member"}
-                    </span>
+                    <span className="font-semibold">{a.organization_name}</span>
+                    {a.position && <span> • {a.position}</span>}
                     {a.activity_period && <span> • {a.activity_period}</span>}
                   </div>
                   {a.responsibilities && (
@@ -241,6 +244,23 @@ export default function CocurricularSection({ studentId }: Props) {
         <div className="text-sm text-gray-400 mb-2">
           ℹ️ AI will analyze your activity and automatically score its impact,
           leadership, and relevance
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-300 mb-1">
+            Event Name *
+          </label>
+          <input
+            className="w-full bg-gray-700 p-2 rounded-md"
+            placeholder="e.g. Hackathon 2023, Leadership Workshop, Charity Run"
+            value={newActivity.event_name}
+            onChange={(e) =>
+              setNewActivity({
+                ...newActivity,
+                event_name: e.target.value,
+              })
+            }
+          />
         </div>
 
         <div>

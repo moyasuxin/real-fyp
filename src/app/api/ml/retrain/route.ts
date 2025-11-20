@@ -100,13 +100,17 @@ export async function POST(req: Request) {
         ? `"${pythonPath}"`
         : "python";
 
+      console.log(`Running ML prediction: ${pythonCommand} "${pythonScript}" ${studentId}`);
+
       const { stdout, stderr } = await execAsync(
         `${pythonCommand} "${pythonScript}" ${studentId}`,
         {
           cwd: projectRoot,
-          timeout: 30000, // 30 second timeout
+          timeout: 60000, // 60 second timeout
         }
       );
+
+      console.log("ML stdout:", stdout);
 
       if (stderr && !stderr.includes("Warning")) {
         console.error("Python stderr:", stderr);

@@ -10,7 +10,7 @@ import StudentCreate from "./components/StudentCreate"; // ⭐ NEW
 import { Student } from "./types/student";
 
 export default function StudentManagerPage() {
-  const { students, loading, deleteStudent } = useStudents();
+  const { students, loading, deleteStudent, refetchStudents } = useStudents();
 
   const [activeTab, setActiveTab] = useState<"chart" | "manage">("manage");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -26,7 +26,12 @@ export default function StudentManagerPage() {
         {activeTab === "manage" && (
           <>
             {createMode && (
-              <StudentCreate onClose={() => setCreateMode(false)} />
+              <StudentCreate
+                onClose={() => {
+                  setCreateMode(false);
+                  refetchStudents();
+                }}
+              />
             )}
 
             {!createMode && selectedStudent && (
