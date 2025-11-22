@@ -36,6 +36,11 @@ const LecturerComments: React.FC<LecturerCommentsProps> = ({
     try {
       await submitComment(newComment, currentUserId, currentUserName);
       setNewComment("");
+
+      // Refresh the page to update AI summary and chart after analysis
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // Wait 2 seconds to show analysis result first
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : "Failed to submit comment";

@@ -13,6 +13,7 @@ export default function ClientLayout({
 }) {
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   // 🧠 Track Supabase session
   useEffect(() => {
@@ -22,16 +23,18 @@ export default function ClientLayout({
         // Fetch user role from admin_users table
         supabase
           .from("admin_users")
-          .select("role")
+          .select("role, username")
           .eq("id", data.session.user.id)
           .single()
           .then(({ data: userData }) => {
             if (userData) {
               setUserRole(userData.role);
+              setUsername(userData.username);
             }
           });
       } else {
         setUserRole(null);
+        setUsername(null);
       }
     });
     const { data: listener } = supabase.auth.onAuthStateChange(
@@ -40,16 +43,18 @@ export default function ClientLayout({
         if (session?.user) {
           supabase
             .from("admin_users")
-            .select("role")
+            .select("role, username")
             .eq("id", session.user.id)
             .single()
             .then(({ data: userData }) => {
               if (userData) {
                 setUserRole(userData.role);
+                setUsername(userData.username);
               }
             });
         } else {
           setUserRole(null);
+          setUsername(null);
         }
       }
     );
@@ -60,6 +65,7 @@ export default function ClientLayout({
     await supabase.auth.signOut();
     setSession(null);
     setUserRole(null);
+    setUsername(null);
   };
 
   return (
@@ -69,6 +75,7 @@ export default function ClientLayout({
         session={session}
         onLogout={handleLogout}
         userRole={userRole}
+        username={username}
       />
 
       {/* ✅ Pass session down via React context or props */}

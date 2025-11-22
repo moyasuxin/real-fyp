@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/services/supabaseClient";
 
 const CreateAccountPage = () => {
   const router = useRouter();
@@ -22,27 +21,22 @@ const CreateAccountPage = () => {
     setSuccess("");
 
     try {
-      // 1. Create auth user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+      // Call server-side API to create account (bypasses RLS)
+      const response = await fetch("/api/create-admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
-      if (authError) throw authError;
+      const data = await response.json();
 
-      if (!authData.user) {
-        throw new Error("Failed to create user");
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create account");
       }
 
-      // 2. Create admin_users record
-      const { error: dbError } = await supabase.from("admin_users").insert({
-        id: authData.user.id,
-        email: formData.email,
-        username: formData.username,
-        role: formData.role,
-      });
-
-      if (dbError) throw dbError;
+      console.log("✅ Account created successfully:", data);
 
       setSuccess(
         `✅ ${
@@ -64,11 +58,16 @@ const CreateAccountPage = () => {
       }, 2000);
     } catch (err: unknown) {
       console.error("Account creation error:", err);
+
+      let errorMessage = "Failed to create account. Please try again.";
+
       if (err instanceof Error) {
-        setError(`❌ Failed to create account: ${err.message}`);
-      } else {
-        setError("❌ Failed to create account. Please try again.");
+        errorMessage = err.message;
+      } else if (err && typeof err === "object" && "message" in err) {
+        errorMessage = String(err.message);
       }
+
+      setError(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
     }

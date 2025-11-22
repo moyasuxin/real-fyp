@@ -9,6 +9,7 @@ interface HeaderProps {
   onLogout: () => void;
   onNavigate?: (view: string) => void;
   userRole?: string | null;
+  username?: string | null;
 }
 
 const DashboardHeader: React.FC<HeaderProps> = ({
@@ -16,6 +17,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({
   onLogout,
   onNavigate,
   userRole = null,
+  username = null,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -87,7 +89,9 @@ const DashboardHeader: React.FC<HeaderProps> = ({
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black font-bold rounded-md hover:bg-yellow-500 transition-colors"
               >
-                Admin
+                {userRole === "admin"
+                  ? `Hi Admin ${username || ""}`
+                  : `Hi, ${username || "User"}`}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-5 w-5 transition-transform ${

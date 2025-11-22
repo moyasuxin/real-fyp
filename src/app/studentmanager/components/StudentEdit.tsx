@@ -18,8 +18,86 @@ export default function StudentEdit({ student, onClose }: Props) {
     portfolio_url: student?.portfolio_url || "",
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState(student?.image_url || "");
 
   if (!student) return null;
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${student.id}-${Date.now()}.${fileExt}`;
+      const filePath = `student-images/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("student-images")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("student-images").getPublicUrl(filePath);
+
+      // Update student record with new image URL
+      const { error: updateError } = await supabase
+        .from("students")
+        .update({ image_url: publicUrl })
+        .eq("id", student.id);
+
+      if (updateError) throw updateError;
+
+      setImageUrl(publicUrl);
+      alert("Profile picture updated successfully!");
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+      alert("Failed to upload profile picture. Please try again.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!confirm("Are you sure you want to remove the profile picture?"))
+      return;
+
+    try {
+      const { error } = await supabase
+        .from("students")
+        .update({ image_url: null })
+        .eq("id", student.id);
+
+      if (error) throw error;
+
+      setImageUrl("");
+      alert("Profile picture removed successfully!");
+    } catch (error) {
+      console.error("Failed to remove image:", error);
+      alert("Failed to remove profile picture.");
+    }
+  };
 
   const saveProfileUrls = async () => {
     setSaving(true);
@@ -59,6 +137,74 @@ export default function StudentEdit({ student, onClose }: Props) {
           <strong>CGPA:</strong>{" "}
           {student.cgpa ? parseFloat(student.cgpa.toString()).toFixed(2) : "-"}
         </p>
+      </div>
+
+      {/* Profile Picture Section */}
+      <div className="bg-zinc-900 p-4 rounded-lg space-y-3">
+        <h3 className="text-lg font-semibold">Profile Picture</h3>
+
+        <div className="flex items-center gap-4">
+          {/* Image Preview */}
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-700 flex items-center justify-center">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={student.name || "Student"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-12 w-12 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            )}
+          </div>
+
+          {/* Upload/Remove Buttons */}
+          <div className="flex-1 space-y-2">
+            <label
+              htmlFor="image-upload"
+              className={`inline-block px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer ${
+                uploadingImage
+                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {uploadingImage ? "Uploading..." : "📤 Upload New Picture"}
+            </label>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploadingImage}
+              className="hidden"
+            />
+
+            {imageUrl && (
+              <button
+                onClick={handleRemoveImage}
+                className="ml-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition"
+              >
+                🗑️ Remove Picture
+              </button>
+            )}
+
+            <p className="text-xs text-gray-400">
+              Recommended: Square image, max 5MB (JPG, PNG, GIF)
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Profile URLs Section */}
