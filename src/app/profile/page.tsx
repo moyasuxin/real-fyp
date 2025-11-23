@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/services/supabaseClient";
+import { User } from "@supabase/supabase-js";
 
 const ProfilePage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string>("");
 
   const [formData, setFormData] = useState({
@@ -60,6 +61,10 @@ const ProfilePage = () => {
         throw new Error("Username cannot be empty");
       }
 
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const { error } = await supabase
         .from("admin_users")
         .update({ username: formData.username })
@@ -73,8 +78,10 @@ const ProfilePage = () => {
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-    } catch (err: any) {
-      setError(`❌ ${err.message || "Failed to update username"}`);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update username";
+      setError(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -115,8 +122,10 @@ const ProfilePage = () => {
         newPassword: "",
         confirmPassword: "",
       }));
-    } catch (err: any) {
-      setError(`❌ ${err.message || "Failed to update password"}`);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update password";
+      setError(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
     }
