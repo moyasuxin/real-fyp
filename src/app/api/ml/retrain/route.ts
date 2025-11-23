@@ -9,6 +9,10 @@ import path from "path";
 
 const execAsync = promisify(exec);
 
+// Environment variable to toggle between local Python and Railway API
+const USE_LOCAL_ML = process.env.USE_LOCAL_ML === "true";
+const ML_API_URL = process.env.ML_API_URL || "http://localhost:8000";
+
 // Define proper type for course data
 interface Course {
   id: number;
@@ -86,43 +90,75 @@ export async function POST(req: Request) {
     // 2️⃣ Compute GPA
     const gpaResult = computeGPA(courses);
 
-    // 3️⃣ Run Python ML prediction script
-    const projectRoot = process.cwd();
-    const pythonScript = path.join(projectRoot, "ml", "predict_student.py");
-    const pythonPath = path.join(projectRoot, "ml", ".venv", "Scripts", "python.exe");
-
+    // 3️⃣ Run ML prediction (local Python OR remote API)
     let mlScores = null;
     let mlError = null;
 
     try {
-      // Check if virtual environment exists, otherwise use system python
-      const pythonCommand = existsSync(pythonPath)
-        ? `"${pythonPath}"`
-        : "python";
+      if (USE_LOCAL_ML) {
+        // LOCAL MODE: Run Python script directly (for development/testing)
+        console.log("🔧 Using LOCAL Python ML");
+        
+        const projectRoot = process.cwd();
+        const pythonScript = path.join(projectRoot, "ml", "predict_student.py");
+        const pythonPath = path.join(projectRoot, "ml", ".venv", "Scripts", "python.exe");
 
-      console.log(`Running ML prediction: ${pythonCommand} "${pythonScript}" ${studentId}`);
+        // Check if virtual environment exists, otherwise use system python
+        const pythonCommand = existsSync(pythonPath)
+          ? `"${pythonPath}"`
+          : "python";
 
-      const { stdout, stderr } = await execAsync(
-        `${pythonCommand} "${pythonScript}" ${studentId}`,
-        {
-          cwd: projectRoot,
-          timeout: 60000, // 60 second timeout
+        console.log(`Running ML prediction: ${pythonCommand} "${pythonScript}" ${studentId}`);
+
+        const { stdout, stderr } = await execAsync(
+          `${pythonCommand} "${pythonScript}" ${studentId}`,
+          {
+            cwd: projectRoot,
+            timeout: 60000, // 60 second timeout
+          }
+        );
+
+        console.log("ML stdout:", stdout);
+
+        if (stderr && !stderr.includes("Warning")) {
+          console.error("Python stderr:", stderr);
         }
-      );
 
-      console.log("ML stdout:", stdout);
+        const result = JSON.parse(stdout);
 
-      if (stderr && !stderr.includes("Warning")) {
-        console.error("Python stderr:", stderr);
-      }
-
-      const result = JSON.parse(stdout);
-
-      if (result.success) {
-        mlScores = result.scores;
+        if (result.success) {
+          mlScores = result.scores;
+        } else {
+          mlError = result.error;
+          console.error("ML prediction failed:", result.error);
+        }
       } else {
-        mlError = result.error;
-        console.error("ML prediction failed:", result.error);
+        // REMOTE MODE: Call Railway/external ML API (for production)
+        console.log("☁️ Using REMOTE ML API:", ML_API_URL);
+        
+        const response = await fetch(`${ML_API_URL}/predict`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            student_id: parseInt(studentId),
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || `ML API error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          mlScores = result.scores;
+        } else {
+          mlError = result.error;
+          console.error("ML prediction failed:", result.error);
+        }
       }
     } catch (err) {
       mlError = err instanceof Error ? err.message : "Unknown error";
