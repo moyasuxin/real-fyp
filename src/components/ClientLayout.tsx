@@ -15,6 +15,22 @@ export default function ClientLayout({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
 
+  // Handle chunk loading errors with auto-reload
+  useEffect(() => {
+    const handleChunkError = (event: ErrorEvent) => {
+      if (
+        event.message.includes("Loading chunk") ||
+        event.message.includes("ChunkLoadError")
+      ) {
+        console.warn("Chunk loading error detected, reloading page...");
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener("error", handleChunkError);
+    return () => window.removeEventListener("error", handleChunkError);
+  }, []);
+
   // 🧠 Track Supabase session
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
