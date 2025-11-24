@@ -224,6 +224,8 @@ async function analyzePortfolio(url: string) {
       "aws", "azure", "docker", "kubernetes", "git", "api", "rest",
       "graphql", "machine learning", "ai", "deep learning", "web development",
       "mobile development", "game development", "ui/ux", "frontend", "backend",
+      "next.js", "nextjs", "tailwind", "vercel", "express", "flask", "django",
+      "spring", "laravel", "redux", "jquery", "bootstrap", "sass", "webpack"
     ];
 
     const foundSkills = techKeywords.filter(keyword =>
@@ -236,9 +238,25 @@ async function analyzePortfolio(url: string) {
       ? projectMatches.map(m => m.trim()).slice(0, 5)
       : [];
 
+    // Check if portfolio requires JavaScript (SPA detection)
+    const requiresJS = html.includes("__NEXT_DATA__") || 
+                      html.includes("root") && html.length < 5000 ||
+                      html.includes("noscript") ||
+                      textContent.length < 200;
+
+    // If content is too minimal, indicate it's an interactive portfolio
+    if (requiresJS || (foundSkills.length === 0 && projects.length === 0)) {
+      return {
+        projects: ["Interactive portfolio website (content requires JavaScript)"],
+        skills: foundSkills.length > 0 ? foundSkills.slice(0, 15) : ["web development", "interactive design"],
+        requiresManualReview: true,
+      };
+    }
+
     return {
       projects,
       skills: foundSkills.slice(0, 15),
+      requiresManualReview: false,
     };
   } catch (error) {
     console.error("Portfolio analysis error:", error);

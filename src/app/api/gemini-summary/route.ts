@@ -111,7 +111,11 @@ export async function POST(req: Request) {
           
           if (analysis.portfolio) {
             const skills = analysis.portfolio.skills.slice(0, 10).join(", ");
-            profileParts.push(`Portfolio: Demonstrates skills in ${skills}`);
+            if (analysis.portfolio.requiresManualReview) {
+              profileParts.push(`Portfolio: Has an interactive portfolio website showcasing web development and design skills`);
+            } else if (skills) {
+              profileParts.push(`Portfolio: Demonstrates skills in ${skills}`);
+            }
           }
           
           if (analysis.linkedin) {
@@ -167,9 +171,12 @@ Focus on:
 - The student's strongest and weakest skill areas (using descriptive terms only, never numbers).
 - Academic performance (CGPA can be mentioned).
 - **If "Online Presence Analysis" section is provided: Integrate specific project names, programming languages, and skills into the narrative naturally.**
+- **If GitHub data shows projects: Mention specific repository names and languages used.**
+- **IMPORTANT about Portfolio analysis: If portfolio data shows "interactive portfolio website" or limited information, this means the portfolio requires user interaction (clicking, navigation) to view content. DO NOT make negative statements like "doesn't show projects" or "doesn't highlight skills". Instead, acknowledge they maintain an online portfolio to showcase their work. Only mention lack of portfolio if NO portfolio URL is provided at all.**
 - **If "Co-curricular Activities" section is provided: Highlight their leadership roles, impact, and involvement. Mention specific organizations and achievements naturally in the narrative.**
 - DO NOT mention URLs or say things like "explore their GitHub" or "visit their profile".
-- Use the actual scraped data to describe their work (e.g., "has developed 5 projects including react-dashboard and mobile-game using JavaScript and Python").
+- If portfolio content couldn't be fully analyzed (e.g., requires JavaScript/interaction), acknowledge the portfolio exists professionally without negative implications.
+- Use the actual scraped data to describe their work when available (e.g., "has developed 5 projects including react-dashboard and mobile-game using JavaScript and Python").
 - Use friendly and natural language.
 - Avoid phrases like "demonstrated" or "evidenced".
 - When discussing co-curricular activities, integrate them into the story (e.g., "served as president of the Computing Club where they led workshops for 100+ students").
