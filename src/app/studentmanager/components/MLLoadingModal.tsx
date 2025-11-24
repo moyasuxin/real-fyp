@@ -43,18 +43,26 @@ export default function MLLoadingModal({ show, stage }: MLLoadingModalProps) {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div className="bg-zinc-900 text-white p-8 rounded-2xl shadow-2xl w-[340px] text-center space-y-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+      <div className="glass border-white/30 text-white p-8 rounded-2xl shadow-2xl w-[380px] text-center space-y-4 animate-scale-in">
         <div className="w-24 h-24 mx-auto">
           {animationData ? (
             <Lottie animationData={animationData} loop autoplay />
           ) : (
-            <div className="animate-pulse text-gray-400">Loading ML...</div>
+            <div className="w-16 h-16 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           )}
         </div>
 
-        <h2 className="text-xl font-semibold">Machine Learning Process</h2>
-        <p className="text-gray-300">{stage}</p>
+        <h2 className="text-xl font-semibold text-white">
+          Machine Learning Process
+        </h2>
+        <p className="text-white/80">{stage}</p>
+        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+          <div
+            className="bg-primary h-full rounded-full animate-pulse"
+            style={{ width: stage.includes("✅") ? "100%" : "60%" }}
+          ></div>
+        </div>
       </div>
     </div>
   );

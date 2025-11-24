@@ -18,11 +18,10 @@ const ArrowButton = ({
 }) => (
   <button
     onClick={onClick}
-    className="bg-zinc-800/70 hover:bg-zinc-700/80 p-2 rounded-full backdrop-blur-sm shadow-md"
+    className="glass hover:bg-white/20 p-3 rounded-full shadow-lg transition-all interactive border border-white/30"
   >
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6 text-zinc-400 group-hover:text-white"
+      className="h-5 w-5 text-white"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"

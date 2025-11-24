@@ -51,10 +51,13 @@ const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ student }) => {
       {
         label: "Student Performance",
         data: chartValues,
-        backgroundColor: "rgba(34,197,94,0.2)",
-        borderColor: "rgba(34,197,94,1)",
+        backgroundColor: "rgba(14, 165, 233, 0.2)",
+        borderColor: "rgba(14, 165, 233, 1)",
         borderWidth: 2,
-        pointBackgroundColor: "rgba(34,197,94,1)",
+        pointBackgroundColor: "rgba(14, 165, 233, 1)",
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "rgba(14, 165, 233, 1)",
       },
     ],
   };
@@ -65,16 +68,31 @@ const StudentRadarChart: React.FC<StudentRadarChartProps> = ({ student }) => {
     scales: {
       r: {
         angleLines: { color: "rgba(255,255,255,0.2)" },
-        grid: { color: "rgba(255,255,255,0.1)" },
+        grid: { color: "rgba(255,255,255,0.15)" },
         suggestedMin: 0,
         suggestedMax: 100,
-        ticks: { stepSize: 20, color: "#9ca3af", backdropColor: "transparent" },
-        pointLabels: { color: "#f3f4f6", font: { size: 14, weight: "bold" } },
+        ticks: {
+          stepSize: 20,
+          color: "rgba(255,255,255,0.7)",
+          backdropColor: "transparent",
+          font: { size: 11 },
+        },
+        pointLabels: {
+          color: "rgba(255,255,255,0.9)",
+          font: { size: 12, weight: "bold" },
+        },
       },
     },
     plugins: {
       legend: { display: false },
-      tooltip: { enabled: true },
+      tooltip: {
+        enabled: true,
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+        borderColor: "rgba(14, 165, 233, 0.5)",
+        borderWidth: 1,
+      },
     },
   };
 

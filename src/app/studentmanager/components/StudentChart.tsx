@@ -3,6 +3,8 @@
 import React, { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
 import { Student } from "../types/student";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -109,30 +111,75 @@ export default function StudentChart({ students }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "bottom" as const },
-      title: {
-        display: true,
-        text: `Performance Overview — Avg CGPA (Overall: ${overallCgpa.toFixed(
-          2
-        )})`,
+      legend: {
+        position: "bottom" as const,
+        labels: {
+          color: "rgba(255, 255, 255, 0.9)",
+          padding: 15,
+          font: { size: 12 },
+        },
       },
-      subtitle: {
-        display: true,
-        text: cgpaSummary,
+      title: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        titleColor: "#fff",
+        bodyColor: "#fff",
+        borderColor: "rgba(14, 165, 233, 0.5)",
+        borderWidth: 1,
       },
     },
     scales: {
-      x: { ticks: { color: "#ffffff" } },
-      y: { ticks: { color: "#ffffff" }, beginAtZero: true },
+      x: {
+        ticks: { color: "rgba(255, 255, 255, 0.7)" },
+        grid: { color: "rgba(255, 255, 255, 0.1)" },
+      },
+      y: {
+        ticks: { color: "rgba(255, 255, 255, 0.7)" },
+        grid: { color: "rgba(255, 255, 255, 0.1)" },
+        beginAtZero: true,
+      },
     },
   };
 
   return (
-    <div className="bg-zinc-800 p-6 rounded-2xl shadow-md space-y-4">
-      <h2 className="text-xl font-semibold">Student Performance by Program</h2>
-      <div className="h-[350px]">
-        <Bar data={chartData} options={options} />
-      </div>
-    </div>
+    <Card className="glass border-white/20 w-full">
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <CardTitle className="text-white flex items-center gap-2">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            Student Performance by Program
+          </CardTitle>
+          <Badge variant="primary" size="md">
+            Overall CGPA: {overallCgpa.toFixed(2)}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {programAverages.map((p) => (
+            <Badge key={p.program} variant="gray" size="sm">
+              {p.program}: {p.cgpa.toFixed(2)}
+            </Badge>
+          ))}
+        </div>
+        <div className="h-[400px]">
+          <Bar data={chartData} options={options} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

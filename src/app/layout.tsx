@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-gray-900 font-sans antialiased transition-all duration-300">
+      <body className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white font-sans antialiased transition-all duration-300">
         {/* ✅ Client logic (session + conditional header) goes here */}
         <ClientLayout>{children}</ClientLayout>
       </body>

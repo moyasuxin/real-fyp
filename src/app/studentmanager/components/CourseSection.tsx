@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { useCourses } from "../hooks/useCourses";
 import MLLoadingModal from "./MLLoadingModal";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Loader } from "@/components/ui/Loader";
 
 interface Props {
   studentId: number;
@@ -70,70 +74,85 @@ export default function CourseSection({ studentId }: Props) {
   };
 
   return (
-    <div className="bg-zinc-800 p-4 rounded-lg space-y-3">
-      <h3 className="text-lg font-semibold">Course History</h3>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : courses.length === 0 ? (
-        <p className="text-gray-400 italic">No courses yet</p>
-      ) : (
-        <ul className="space-y-2">
-          {courses.map((c) => (
-            <li
-              key={c.id}
-              className="flex justify-between items-center border border-gray-700 p-3 rounded-md"
-            >
-              <span>
-                <strong>{c.course_name}</strong>{" "}
-                {c.course_code ? `(${c.course_code}) ` : ""}— {c.credit_hour}{" "}
-                credit hours — Grade: {c.grade || "-"}
-              </span>
-              <button
-                onClick={() => deleteCourse(c.id)}
-                className="text-red-400 hover:text-red-600"
+    <Card className="glass border-white/20">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            />
+          </svg>
+          Course History
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader variant="spinner" size="md" className="text-white" />
+          </div>
+        ) : courses.length === 0 ? (
+          <p className="text-white/60 italic text-center py-6">
+            No courses yet. Add your first course below.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {courses.map((c) => (
+              <li
+                key={c.id}
+                className="flex justify-between items-center glass border border-white/20 p-3 rounded-lg hover:border-white/30 transition-colors"
               >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <span className="text-white">
+                  <strong>{c.course_name}</strong>{" "}
+                  {c.course_code ? `(${c.course_code}) ` : ""}— {c.credit_hour}{" "}
+                  credit hours — Grade:{" "}
+                  <span className="text-primary">{c.grade || "-"}</span>
+                </span>
+                <button
+                  onClick={() => deleteCourse(c.id)}
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {/* Add New Course */}
-      <form onSubmit={handleAddCourse} className="space-y-2 pt-2">
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">
-            Course Name
-          </label>
-          <input
-            className="w-full bg-gray-700 p-2 rounded-md"
+        {/* Add New Course */}
+        <form
+          onSubmit={handleAddCourse}
+          className="space-y-3 pt-4 border-t border-white/20"
+        >
+          <Input
+            label="Course Name"
             placeholder="e.g. Software Quality Assurance"
             value={newCourse.course_name}
             onChange={(e) =>
               setNewCourse({ ...newCourse, course_name: e.target.value })
             }
+            className="glass text-white border-white/30"
           />
-        </div>
 
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">
-            Course Code
-          </label>
-          <input
-            className="w-full bg-gray-700 p-2 rounded-md"
+          <Input
+            label="Course Code"
             placeholder="e.g. CSC3014"
             value={newCourse.course_code}
             onChange={(e) =>
               setNewCourse({ ...newCourse, course_code: e.target.value })
             }
+            className="glass text-white border-white/30"
           />
-        </div>
 
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">Grade</label>
-          <input
-            className="w-full bg-gray-700 p-2 rounded-md"
+          <Input
+            label="Grade"
             placeholder="e.g. A, B+, CR"
             value={newCourse.grade}
             onChange={(e) =>
@@ -142,17 +161,13 @@ export default function CourseSection({ studentId }: Props) {
                 grade: e.target.value.toUpperCase(),
               })
             }
+            className="glass text-white border-white/30"
           />
-        </div>
 
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">
-            Unit (Credit Hour)
-          </label>
-          <input
+          <Input
+            label="Unit (Credit Hour)"
             type="number"
             step="0.1"
-            className="w-full bg-gray-700 p-2 rounded-md"
             placeholder="e.g. 3"
             value={newCourse.credit_hour}
             onChange={(e) =>
@@ -161,31 +176,28 @@ export default function CourseSection({ studentId }: Props) {
                 credit_hour: e.target.value ? parseFloat(e.target.value) : 0,
               })
             }
+            className="glass text-white border-white/30"
           />
-        </div>
 
-        <div>
-          <label className="block text-sm text-gray-300 mb-1">
-            Description (Optional)
-          </label>
-          <input
-            className="w-full bg-gray-700 p-2 rounded-md"
+          <Input
+            label="Description (Optional)"
             placeholder="e.g. Software project-related subject"
             value={newCourse.course_description}
             onChange={(e) =>
               setNewCourse({ ...newCourse, course_description: e.target.value })
             }
+            className="glass text-white border-white/30"
           />
-        </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-md w-full"
-        >
-          Add Course
-        </button>
-      </form>
-      <MLLoadingModal show={mlLoading} stage={mlStage} />
-    </div>
+          <Button
+            type="submit"
+            className="w-full bg-primary hover:bg-primary/90 text-white"
+          >
+            + Add Course & Retrain ML
+          </Button>
+        </form>
+        <MLLoadingModal show={mlLoading} stage={mlStage} />
+      </CardContent>
+    </Card>
   );
 }
