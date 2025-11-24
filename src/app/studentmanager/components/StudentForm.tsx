@@ -68,7 +68,19 @@ export default function StudentForm({ onSubmit, loading }: Props) {
   });
 
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<{
+    computingRelevance?: number;
+    summary?: string;
+    github?: {
+      projects: { name: string; description: string }[];
+      languages?: string[];
+    };
+    linkedin?: { experience: unknown[]; education: unknown[] };
+    portfolio?: {
+      skills: string[];
+      projects: { length: number } | number;
+    };
+  } | null>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
 
   const handleChange = <K extends keyof FormState>(
@@ -171,7 +183,7 @@ export default function StudentForm({ onSubmit, loading }: Props) {
                   <div>
                     <span className="text-gray-400">Languages: </span>
                     <span className="text-white">
-                      {analysisResult.github.languages.join(", ")}
+                      {analysisResult.github.languages?.join(", ") || "N/A"}
                     </span>
                   </div>
                   <div>
@@ -183,11 +195,16 @@ export default function StudentForm({ onSubmit, loading }: Props) {
                   </div>
                   {analysisResult.github.projects
                     .slice(0, 3)
-                    .map((proj: any, i: number) => (
-                      <div key={i} className="ml-4 text-gray-300">
-                        • {proj.name}: {proj.description}
-                      </div>
-                    ))}
+                    .map(
+                      (
+                        proj: { name: string; description: string },
+                        i: number
+                      ) => (
+                        <div key={i} className="ml-4 text-gray-300">
+                          • {proj.name}: {proj.description}
+                        </div>
+                      )
+                    )}
                 </div>
               </div>
             )}
@@ -208,7 +225,10 @@ export default function StudentForm({ onSubmit, loading }: Props) {
                   <div>
                     <span className="text-gray-400">Projects: </span>
                     <span className="text-white">
-                      {analysisResult.portfolio.projects.length} projects
+                      {typeof analysisResult.portfolio.projects === "number"
+                        ? analysisResult.portfolio.projects
+                        : analysisResult.portfolio.projects?.length || 0}{" "}
+                      projects
                     </span>
                   </div>
                 </div>

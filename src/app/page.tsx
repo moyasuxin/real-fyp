@@ -10,7 +10,7 @@ export default function HomePage() {
   useEffect(() => {
     const redirectToDashboard = async () => {
       // Check session
-      const { data } = await supabase.auth.getSession();
+      await supabase.auth.getSession();
 
       // ✅ Whether logged in or not, just go to dashboard
       router.replace("/dashboard");

@@ -50,8 +50,8 @@ export default function StudentChart({ students }: Props) {
         design: avg("design_score"),
         infra: avg("it_infrastructure_score"),
         cocu: avg("co_curricular_points"),
-        feedback: avg("feedback_score"),
-        engagement: avg("engagement_score"),
+        feedback: avg("feedback_sentiment_score"),
+        engagement: avg("professional_engagement_score"),
         cgpa: avg("cgpa"),
       };
     });

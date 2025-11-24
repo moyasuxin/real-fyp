@@ -1,7 +1,6 @@
 // src/app/api/comments/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/services/supabaseClient";
-import { createClient } from "@supabase/supabase-js";
 
 // Helper function to retry API calls
 async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3) {
