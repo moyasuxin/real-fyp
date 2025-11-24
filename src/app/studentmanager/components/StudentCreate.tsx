@@ -5,7 +5,7 @@ import { supabase } from "@/services/supabaseClient";
 import MLLoadingModal from "./MLLoadingModal";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input, TextArea } from "@/components/ui/Input";
+import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 
 interface Program {
@@ -583,18 +583,28 @@ export default function StudentCreate({ onClose }: Props) {
                   <label className="block text-sm text-gray-300 mb-1">
                     Grade
                   </label>
-                  <input
+                  <select
                     className="w-full bg-zinc-700 p-2 rounded-md mb-2"
                     value={c.grade}
-                    onChange={
-                      (e) =>
-                        updateCourseField(
-                          index,
-                          "grade",
-                          e.target.value.toUpperCase()
-                        ) // ⭐ NEW
+                    onChange={(e) =>
+                      updateCourseField(index, "grade", e.target.value)
                     }
-                  />
+                  >
+                    <option value="">-- Select Grade --</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="B-">B-</option>
+                    <option value="C+">C+</option>
+                    <option value="C">C</option>
+                    <option value="C-">C-</option>
+                    <option value="D+">D+</option>
+                    <option value="D">D</option>
+                    <option value="F">F</option>
+                    <option value="CR">CR (Credit)</option>
+                  </select>
 
                   <label className="block text-sm text-gray-300 mb-1">
                     Credit Hour

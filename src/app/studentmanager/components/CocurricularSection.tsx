@@ -5,9 +5,6 @@ import { useCocurricular } from "../hooks/useCocurricular";
 import MLLoadingModal from "./MLLoadingModal";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input, TextArea } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
-import { Loader } from "@/components/ui/Loader";
 
 interface Props {
   studentId: number;
@@ -357,7 +354,9 @@ export default function CocurricularSection({ studentId }: Props) {
                 }
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-sm text-gray-300 mb-1">
                 End Date (optional)

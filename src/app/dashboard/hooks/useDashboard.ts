@@ -30,6 +30,7 @@ export function useDashboard({
 
   const prevProgram = useRef<string>("");
   const prevHash = useRef<string>("");
+  const prevStudentId = useRef<number | null>(null);
 
   // ✅ Fetch and auto-analyze when program changes
   useEffect(() => {
@@ -57,6 +58,7 @@ export function useDashboard({
         setStudents(parsedData);
         const firstStudent = parsedData[0];
         setSelectedStudent(firstStudent);
+        prevStudentId.current = firstStudent.id;
 
         if (!firstStudent) return;
 
@@ -108,6 +110,62 @@ export function useDashboard({
 
     fetchAndAnalyze();
   }, [activeProgram]);
+
+  // ✅ NEW: Load AI summary when selected student changes
+  useEffect(() => {
+    if (!selectedStudent || prevStudentId.current === selectedStudent.id) return;
+    
+    const loadStudentSummary = async () => {
+      try {
+        setLoading(true);
+        prevStudentId.current = selectedStudent.id;
+
+        // ✅ Core data for hash check
+        const coreDataHash = JSON.stringify({
+          cgpa: selectedStudent.cgpa ?? "0",
+          programming_score: selectedStudent.programming_score ?? "0",
+          design_score: selectedStudent.design_score ?? "0",
+          it_infrastructure_score: selectedStudent.it_infrastructure_score ?? "0",
+          co_curricular_points: selectedStudent.co_curricular_points ?? "0",
+          feedback_sentiment_score: selectedStudent.feedback_sentiment_score ?? 0,
+          professional_engagement_score:
+            selectedStudent.professional_engagement_score ?? 0,
+        });
+
+        const now = new Date();
+        const lastUpdated = selectedStudent.last_summary_updated
+          ? new Date(selectedStudent.last_summary_updated)
+          : null;
+        const hoursSinceLast = lastUpdated
+          ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
+          : Infinity;
+
+        const hasChanged = coreDataHash !== selectedStudent.last_hash;
+        const needsRefresh = hasChanged || hoursSinceLast >= 6;
+
+        if (!needsRefresh && selectedStudent.description) {
+          setAiSummary(selectedStudent.description || "No summary available.");
+          setRecommendedCareer(
+            selectedStudent.recommended_career || "Not available."
+          );
+          prevHash.current = coreDataHash;
+          return;
+        }
+
+        // ✅ Auto regenerate if needed or missing
+        await performSummaryRegeneration(selectedStudent, coreDataHash);
+        prevHash.current = coreDataHash;
+      } catch (error) {
+        console.error("Student summary load error:", error);
+        setAiSummary("❌ Failed to load AI summary.");
+        setRecommendedCareer("❌ Failed to load career prediction.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStudentSummary();
+  }, [selectedStudent]);
 
   // ✅ Reusable function to refresh AI summary
   const performSummaryRegeneration = async (

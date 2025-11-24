@@ -6,7 +6,6 @@ import MLLoadingModal from "./MLLoadingModal";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Loader } from "@/components/ui/Loader";
 
 interface Props {
   studentId: number;
@@ -96,7 +95,7 @@ export default function CourseSection({ studentId }: Props) {
       <CardContent className="space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader variant="spinner" size="md" className="text-white" />
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : courses.length === 0 ? (
           <p className="text-white/60 italic text-center py-6">
@@ -140,7 +139,6 @@ export default function CourseSection({ studentId }: Props) {
             }
             className="glass text-white border-white/30"
           />
-
           <Input
             label="Course Code"
             placeholder="e.g. CSC3014"
@@ -150,20 +148,62 @@ export default function CourseSection({ studentId }: Props) {
             }
             className="glass text-white border-white/30"
           />
-
-          <Input
-            label="Grade"
-            placeholder="e.g. A, B+, CR"
-            value={newCourse.grade}
-            onChange={(e) =>
-              setNewCourse({
-                ...newCourse,
-                grade: e.target.value.toUpperCase(),
-              })
-            }
-            className="glass text-white border-white/30"
-          />
-
+          <div>
+            <label className="block text-sm text-white/90 mb-2">Grade</label>
+            <select
+              className="w-full glass text-white border-white/30 bg-transparent p-2.5 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+              value={newCourse.grade}
+              onChange={(e) =>
+                setNewCourse({
+                  ...newCourse,
+                  grade: e.target.value,
+                })
+              }
+            >
+              <option value="" className="bg-gray-800">
+                -- Select Grade --
+              </option>
+              <option value="A+" className="bg-gray-800">
+                A+
+              </option>
+              <option value="A" className="bg-gray-800">
+                A
+              </option>
+              <option value="A-" className="bg-gray-800">
+                A-
+              </option>
+              <option value="B+" className="bg-gray-800">
+                B+
+              </option>
+              <option value="B" className="bg-gray-800">
+                B
+              </option>
+              <option value="B-" className="bg-gray-800">
+                B-
+              </option>
+              <option value="C+" className="bg-gray-800">
+                C+
+              </option>
+              <option value="C" className="bg-gray-800">
+                C
+              </option>
+              <option value="C-" className="bg-gray-800">
+                C-
+              </option>
+              <option value="D+" className="bg-gray-800">
+                D+
+              </option>
+              <option value="D" className="bg-gray-800">
+                D
+              </option>
+              <option value="F" className="bg-gray-800">
+                F
+              </option>
+              <option value="CR" className="bg-gray-800">
+                CR (Credit)
+              </option>
+            </select>
+          </div>{" "}
           <Input
             label="Unit (Credit Hour)"
             type="number"
@@ -178,7 +218,6 @@ export default function CourseSection({ studentId }: Props) {
             }
             className="glass text-white border-white/30"
           />
-
           <Input
             label="Description (Optional)"
             placeholder="e.g. Software project-related subject"
@@ -188,7 +227,6 @@ export default function CourseSection({ studentId }: Props) {
             }
             className="glass text-white border-white/30"
           />
-
           <Button
             type="submit"
             className="w-full bg-primary hover:bg-primary/90 text-white"
