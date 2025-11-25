@@ -238,16 +238,6 @@ const CreateAccountPage = () => {
           >
             {loading ? "Creating Account..." : "Create Account"}
           </Button>
-
-          <div className="text-center text-white/80 text-sm">
-            Already have an account?{" "}
-            <a
-              href="/login"
-              className="text-white font-semibold hover:underline"
-            >
-              Sign in
-            </a>
-          </div>
         </form>
       </Card>
     </div>

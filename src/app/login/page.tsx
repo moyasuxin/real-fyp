@@ -130,12 +130,6 @@ export default function LoginPage() {
               />
               Remember me
             </label>
-            <a
-              href="#"
-              className="text-white/80 hover:text-white transition-colors"
-            >
-              Forgot password?
-            </a>
           </div>
 
           <Button
@@ -146,16 +140,6 @@ export default function LoginPage() {
           >
             {loading ? "Signing in..." : "Sign In"}
           </Button>
-
-          <div className="text-center text-white/80 text-sm">
-            Don&apos;t have an account?{" "}
-            <a
-              href="/create-account"
-              className="text-white font-semibold hover:underline"
-            >
-              Sign up
-            </a>
-          </div>
         </form>
       </Card>
     </div>
