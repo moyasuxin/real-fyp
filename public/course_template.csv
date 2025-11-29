@@ -1,0 +1,11 @@
+course_name,grade,course_code,credit_hour,course_description
+Software Quality Assurance,A,CSC3014,3,Software project-related subject
+Web Development,B+,CSC2008,3,Frontend and backend web technologies
+Database Systems,A-,CSC2014,4,Relational database design and SQL
+Mobile App Development,B,CSC3016,3,Android and iOS development
+Data Structures,A,CSC2015,4,Fundamental data structures and algorithms
+Computer Networks,B+,CSC2010,3,Network protocols and architecture
+Operating Systems,A,CSC2012,4,OS concepts and implementation
+Software Engineering,A-,CSC3020,3,Software development lifecycle
+Artificial Intelligence,B+,CSC4016,3,AI fundamentals and applications
+Machine Learning,A,CSC4018,3,ML algorithms and techniques
