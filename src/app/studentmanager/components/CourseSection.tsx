@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useCourses } from "../hooks/useCourses";
 import MLLoadingModal from "./MLLoadingModal";
+import CourseCSVUpload from "./CourseCSVUpload";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -72,6 +73,48 @@ export default function CourseSection({ studentId }: Props) {
     }
   };
 
+  const handleCSVImport = async (
+    importedCourses: Array<{
+      course_name: string;
+      course_code: string;
+      grade: string;
+      credit_hour: number;
+      course_description: string;
+    }>
+  ) => {
+    setMlLoading(true);
+    setMlStage("Importing courses from CSV...");
+
+    try {
+      for (const course of importedCourses) {
+        await addCourse({
+          student_id: studentId,
+          course_name: course.course_name,
+          course_code: course.course_code || null,
+          grade: course.grade,
+          credit_hour: course.credit_hour,
+          course_description: course.course_description || null,
+        });
+      }
+
+      setMlStage("Running ML prediction...");
+      const res = await fetch(`/api/ml/retrain?studentId=${studentId}`, {
+        method: "POST",
+      });
+
+      if (!res.ok) throw new Error("ML failed");
+
+      setMlStage("✅ Done!");
+      await new Promise((r) => setTimeout(r, 800));
+      alert(`Successfully imported ${importedCourses.length} courses!`);
+    } catch (err) {
+      alert("Error during CSV import.");
+      console.error(err);
+    } finally {
+      setMlLoading(false);
+    }
+  };
+
   return (
     <Card className="glass border-white/20">
       <CardHeader>
@@ -93,6 +136,11 @@ export default function CourseSection({ studentId }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* CSV Upload Section */}
+        <div className="mb-4">
+          <CourseCSVUpload onCoursesImported={handleCSVImport} />
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>

@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/services/supabaseClient";
 import MLLoadingModal from "./MLLoadingModal";
+import CourseCSVUpload from "./CourseCSVUpload";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
 
 interface Program {
   id: number;
@@ -147,6 +147,11 @@ export default function StudentCreate({ onClose }: Props) {
     const temp = [...courses];
     temp.splice(index, 1);
     setCourses(temp);
+  };
+
+  const handleCSVImport = (importedCourses: CourseInput[]) => {
+    setCourses([...courses, ...importedCourses]);
+    alert(`Successfully imported ${importedCourses.length} courses!`);
   };
 
   const addCocurricularRow = () => {
@@ -552,6 +557,11 @@ export default function StudentCreate({ onClose }: Props) {
             {/* Courses */}
             <div className="bg-zinc-900 p-4 rounded-md">
               <h3 className="text-lg font-semibold mb-3">Courses</h3>
+
+              {/* CSV Upload Section */}
+              <div className="mb-4">
+                <CourseCSVUpload onCoursesImported={handleCSVImport} />
+              </div>
 
               {courses.map((c, index) => (
                 <div
