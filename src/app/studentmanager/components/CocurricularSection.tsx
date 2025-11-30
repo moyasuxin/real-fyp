@@ -187,7 +187,7 @@ export default function CocurricularSection({ studentId }: Props) {
         {loading ? (
           <p>Loading...</p>
         ) : activities.length === 0 ? (
-          <p className="text-gray-400 italic">No activities yet</p>
+          <p className="text-white italic">No activities yet</p>
         ) : (
           <ul className="space-y-3">
             {activities.map((a) => (
@@ -205,7 +205,7 @@ export default function CocurricularSection({ studentId }: Props) {
                         </span>
                       )}
                     </div>
-                    <div className="text-sm text-gray-300">
+                    <div className="text-sm text-white">
                       <span className="font-semibold">
                         {a.organization_name}
                       </span>
@@ -213,7 +213,7 @@ export default function CocurricularSection({ studentId }: Props) {
                       {a.activity_period && <span> • {a.activity_period}</span>}
                     </div>
                     {a.responsibilities && (
-                      <p className="text-sm text-gray-400 mt-2">
+                      <p className="text-sm text-white mt-2">
                         {a.responsibilities}
                       </p>
                     )}
@@ -272,7 +272,7 @@ export default function CocurricularSection({ studentId }: Props) {
               Event Name *
             </label>
             <input
-              className="w-full bg-gray-700 p-2 rounded-md"
+              className="w-full bg-gray-700 p-2 rounded-md text-white"
               placeholder="e.g. Hackathon 2023, Leadership Workshop, Charity Run"
               value={newActivity.event_name}
               onChange={(e) =>
@@ -289,7 +289,7 @@ export default function CocurricularSection({ studentId }: Props) {
               Organization/Club Name *
             </label>
             <input
-              className="w-full bg-gray-700 p-2 rounded-md"
+              className="w-full bg-gray-700 p-2 rounded-md text-white"
               placeholder="e.g. Computing Club, School Basketball Team, Red Cross"
               value={newActivity.organization_name}
               onChange={(e) =>
@@ -306,7 +306,7 @@ export default function CocurricularSection({ studentId }: Props) {
               Organization Type
             </label>
             <select
-              className="w-full bg-gray-700 p-2 rounded-md"
+              className="w-full bg-gray-700 p-2 rounded-md text-white"
               value={newActivity.organization_type}
               onChange={(e) =>
                 setNewActivity({
@@ -332,7 +332,7 @@ export default function CocurricularSection({ studentId }: Props) {
                 Your Position
               </label>
               <input
-                className="w-full bg-gray-700 p-2 rounded-md"
+                className="w-full bg-gray-700 p-2 rounded-md text-white"
                 placeholder="e.g. President, Member, Volunteer"
                 value={newActivity.position}
                 onChange={(e) =>
@@ -342,12 +342,12 @@ export default function CocurricularSection({ studentId }: Props) {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-300 mb-1">
+              <label className="block text-sm text-gray-300 mb-1 ">
                 Start Date *
               </label>
               <input
                 type="date"
-                className="w-full bg-gray-700 p-2 rounded-md"
+                className="w-full bg-gray-700 p-2 rounded-md text-white"
                 value={newActivity.start_date}
                 onChange={(e) =>
                   setNewActivity({ ...newActivity, start_date: e.target.value })
@@ -363,7 +363,7 @@ export default function CocurricularSection({ studentId }: Props) {
               </label>
               <input
                 type="date"
-                className="w-full bg-gray-700 p-2 rounded-md"
+                className="w-full bg-gray-700 p-2 rounded-md text-white"
                 value={newActivity.end_date}
                 min={newActivity.start_date}
                 onChange={(e) =>
@@ -381,7 +381,7 @@ export default function CocurricularSection({ studentId }: Props) {
               Responsibilities & Achievements *
             </label>
             <textarea
-              className="w-full bg-gray-700 p-2 rounded-md"
+              className="w-full bg-gray-700 p-2 rounded-md text-white"
               rows={4}
               placeholder="Describe what you did, your contributions, and any achievements. Be specific!&#10;&#10;Example: Led a team of 10 members to organize 3 coding workshops with 100+ participants. Developed the club website using React and managed social media presence. Won 1st place in inter-university hackathon."
               value={newActivity.responsibilities}

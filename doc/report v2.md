@@ -371,205 +371,509 @@ Future work involves transition to real student cohorts and longitudinal trackin
 This chapter outlined the methodological framework used to evaluate the proposed Hybrid Student Performance and Career Prediction System. The research adopted a controlled, within-subject comparative design to assess whether incorporating multimodal evidence—structured academic records, co-curricular indicators, textual feedback, and external digital footprints—offers measurable advantages over a traditional CGPA-only baseline.
 The chapter detailed the synthetic dataset construction, feature engineering strategies, modelling architecture, and ablation protocols applied to isolate the contribution of each feature group. It also established the performance metrics, statistical tests, bias-mitigation procedures, and reproducibility controls required to ensure methodological rigour.
 
-CHAPTER 4: PROJECT METHODOLOGY & IMPLEMENTATION
-
+CHAPTER 4: PROJECT METHODOLOGY
 4.1 Introduction
-This chapter documents the Software Development Life Cycle (SDLC) used to engineer the Hybrid Student Performance Analysis and Career Prediction System. Whereas Chapter 3 established the experimental methodology (data generation, evaluation metrics, statistical validation), Chapter 4 focuses on the practical realization: how the web application, machine learning pipeline, and AI explanation layer were architected, implemented, and validated. An Agile / iterative approach was adopted instead of a linear waterfall model because (a) predictive model tuning (error tracking, feature adjustments) and (b) UI / data flow refinements (CSV ingestion, profile visualization) required frequent short feedback loops. Each sprint delivered incremental improvements in four streams: data ingestion, model reliability, explanation quality, and user experience responsiveness.
+This chapter presents the complete Software Development Life Cycle (SDLC) adopted to design and implement the Hybrid Student Performance Analysis and Career Prediction System. While Chapter 3 established the experimental and evaluation methodology (dataset generation, model validation, feature analysis, and statistical comparison), this chapter focuses on the practical engineering process behind the operational system.
+An Agile, iterative development approach was selected over a traditional waterfall model due to the system’s evolving requirements in three key areas:
 
-Figure 4.1: Agile Development Cycle (Sprint Planning → Design → Develop → Test → Review → Next Sprint) [Placeholder]
+1. Predictive modelling adjustments (hyperparameter tuning, feature selection refinement).
+2. Data processing changes (CSV ingestion pipelines, external footprint extraction).
+3. User interface improvements (dashboard responsiveness, radar chart rendering, prompt structuring for AI explanations).
+   Each development sprint targeted incremental enhancements across four parallel streams: data ingestion, model stability, AI explanation quality, and user experience (UX). Agile iteration allowed rapid testing and refinement based on model behaviour, latency feedback, and interface usability.
 
+Figure 12: Agile Development Cycle
 4.2 Requirement Analysis
-This phase defines what the system must do (functional scope) and how well it must perform (non-functional quality attributes). Requirements are grouped for clarity and traceability. All functional items trace back to objectives stated in Sections 1.3 and 3.2; non-functional criteria support reliability, security, and usability for academic stakeholders.
-
+This phase defines both the functional and non-functional requirements that guide the system's construction. Functional requirements outline what the system must do, while non-functional requirements describe how well those functions must operate. All requirements are aligned with the project objectives described in Chapter 1 and the research framework in Chapter 3.
 4.2.1 Functional Requirements
 A. Data Ingestion & Management
-
-- FR1: System shall allow authorized admin users to create, read, update, and delete student profiles (CRUD operations).
-- FR2: System shall validate and ingest academic CSV files containing columns: student_id, course_code, grade, credit_hours (reject malformed rows, report line numbers).
-- FR3: System shall permit bulk upload (≥50 rows per file) with progress feedback.
-
-B. External Profile & Footprint Capture
-
-- FR4: System shall allow entry of public GitHub profile URL and parse repository metadata (repo count, primary languages, recent commit frequency) via API or cached scrape.
-- FR5: System shall allow entry of LinkedIn profile URL and record completeness index (presence of headline, summary, experience, skills) without scraping private data.
-- FR6: System shall accept optional portfolio URL (flag used in Professional Engagement score).
-
+• FR1: System shall allow authorized administrators to create, read, update, and delete student records.
+• FR2: System shall ingest academic CSV files containing: student_id, course_code, grade, credit_hours; malformed rows shall be rejected with error reporting.
+• FR3: System shall support bulk uploads (≥ 50 rows) with progress feedback.
+B. External Profile & Digital Footprint
+• FR4: System shall extract repository metadata repository count, primary languages, commit frequency from a public GitHub URL via API or cached scrape.
+• FR5: System shall record LinkedIn completeness metrics (headline, summary, experience, skills) from the public profile URL without scraping private data.
+• FR6: System shall accept an optional portfolio URL to support Professional Engagement scoring.
 C. Feature Assembly & Predictive Analytics
-
-- FR7: System shall compute a unified feature vector (structured academic + derived co-curricular + external footprint) for each student on demand.
-- FR8: Random Forest Regressor shall output six competency scores in the range [0,100]: Programming, Design, Infrastructure, Co-curricular, Feedback Sentiment Influence, Professional Engagement.
-- FR9: Authorized user shall be able to trigger model retraining ("Retrain Model" action) which regenerates synthetic or updated dataset, retrains RF, stores new artifact, and logs model_version.
-- FR10: System shall log each prediction event (timestamp, student_id, model_version, latency_ms) for audit and reproducibility.
-
-D. Generative Explanation & Prompt Layer
-
-- FR11: System shall construct a structured prompt (JSON) including selected academic indicators, co-curricular highlights, external footprint summary, and predicted scores.
-- FR12: Gemini 2.0 API (temperature=0) shall return a deterministic narrative summary grounded in supplied facts (no fabrication of unprovided achievements).
-- FR13: System shall filter generated text to remove placeholder tokens or unsafe content before display.
-
+• FR7: System shall generate a unified feature vector combining academic, co-curricular, and external indicators.
+• FR8: Random Forest Regressor shall output six competencies (0–100): Programming, Design/UI, Infrastructure, Co-curricular, Feedback Sentiment Influence, Professional Engagement.
+• FR9: System shall support retraining of the Random Forest model with version tracking.
+• FR10: Each prediction event shall be logged for reproducibility (student_id, model_version, timestamp, latency_ms).
+D. Generative Explanation Layer
+• FR11: System shall construct structured prompts containing academic indicators, extracted attributes, and predicted scores.
+• FR12: Gemini 2.0 API (temperature = 0) shall generate deterministic narrative summaries grounded in provided data.
+• FR13: System shall remove placeholders or unsafe text from generated responses.
 E. Visualization & User Interaction
-
-- FR14: System shall render a six-axis radar chart (hexagonal overlay) displaying competency distribution per student.
-- FR15: Dashboard shall show delta highlights (e.g., competencies >10 points above CGPA-scaled expectation) to surface latent strengths.
-- FR16: System shall provide search/filter by program, CGPA band, or presence of external footprint.
-
+• FR14: System shall generate a six-axis radar chart to visualize competency distribution.
+• FR15: Dashboard shall highlight significant deviations (e.g., competencies >10 points above CGPA-scaled baseline).
+• FR16: User interface shall allow filtering by program, CGPA band, and presence of digital footprint data.
 F. Security & Access Control
-
-- FR17: Supabase Row Level Security (RLS) shall restrict student record access: student role → own record; lecturer role → cohort view; admin role → full management & retrain.
-- FR18: All secret keys (Gemini, service APIs) shall reside server-side in environment variables and never be exposed in client bundles.
-
-  4.2.2 Non-Functional Requirements
-  A. Performance
-
-- NFR1: Prediction endpoint P95 latency ≤ 2000 ms; average ≤ 1000 ms under nominal load (≤10 concurrent users).
-- NFR2: Gemini narrative generation P95 latency ≤ 8000 ms; timeouts (>10 s) trigger cached last summary fallback.
-
-B. Scalability & Capacity
-
-- NFR3: System shall support at least 200 active student records with no >15% degradation in average prediction latency.
-- NFR4: Retraining process shall complete within 120 s locally (CPU) for N=200 synthetic profiles.
-
-C. Reliability & Availability
-
-- NFR5: Model artifact load failure rate <1% of prediction requests (auto-retry once before error response).
-- NFR6: Uptime target for core prediction operations ≥99% during evaluation/demonstration window.
-
+• FR17: Supabase Row-Level Security (RLS) shall enforce role-based visibility and modification permissions.
+• FR18: All API keys (Gemini, GitHub) shall be securely stored server-side.
+4.2.2 Non-Functional Requirements
+A. Performance
+• NFR1: Prediction latency: P95 ≤ 2000 ms; average ≤ 1000 ms.
+• NFR2: Gemini generation latency: P95 ≤ 8000 ms; timeout fallback to cached summary.
+B. Scalability
+• NFR3: System supports ≥200 student profiles with <15% performance degradation.
+• NFR4: Model retraining completes within 120 seconds on CPU.
+C. Reliability
+• NFR5: Model loading failure <1% of prediction requests.
+• NFR6: ≥99% uptime during evaluation phases.
 D. Security & Privacy
-
-- NFR7: No storage of private LinkedIn or GitHub credentials; only publicly accessible metadata retained.
-- NFR8: All database access enforced by RLS + role claims; unauthorized modification attempts logged.
-- NFR9: Prompt construction excludes personally sensitive identifiers beyond student_id.
-
-E. Reproducibility & Traceability
-
-- NFR10: Each model artifact stored with SHA256 hash, training seed, feature schema version.
-- NFR11: Prediction logs enable reconstruction of feature vector given data_version + model_version.
-
-F. Usability & Accessibility
-
-- NFR12: Dashboard responsive for widths ≥768px; radar chart legible on tablet and desktop.
-- NFR13: Color palette meets WCAG 2.1 AA contrast for text and chart labels.
-
+• NFR7: No storage of private GitHub/LinkedIn credentials.
+• NFR8: RLS enforcement for all operations.
+• NFR9: Prompts exclude unnecessary personal identifiers.
+E. Reproducibility
+• NFR10: All model artifacts must be stored with SHA256 checksums.
+• NFR11: Prediction logs must support reconstruction of results using model_version + data_version.
+F. Usability
+• NFR12: Dashboard responsive for ≥768px screens.
+• NFR13: Radar chart colours must meet WCAG 2.1 AA contrast standards.
 G. Maintainability
-
-- NFR14: Core ML code (training + prediction) ≤ 500 LOC; functions follow single-responsibility.
-- NFR15: Configuration (.env, model paths) centralized to reduce change surface.
-
+• NFR14: ML pipeline must follow single-responsibility modular structure.
+• NFR15: All environment configurations centralized.
 H. Error Handling
+• NFR16: CSV validation errors return structured JSON.
+• NFR17: External API failure triggers HTTP 502 with retry header.
+4.2.3 Hardware and Software Requirements
+Table 8: Software / Technology Stack
+Category Technology / Tool Purpose
+Frontend Next.js (React) Dashboard & interface rendering
+Charting Chart.js / react-chartjs-2 Radar chart visualization
+Backend / ML Python 3.11 Model training & inference
+Database Supabase (PostgreSQL + RLS) Secure student & score storage
+ML Libraries scikit-learn, pandas, joblib Machine learning & data prep
+AI Service Google Gemini 2.0 Narrative generation
+Deployment Vercel (frontend), Railway (Python) Hosting
+Version Control Git Traceability & reproducibility
+Logging JSON-based logs Prediction and latency auditing
 
-- NFR16: CSV validation errors return structured JSON {row, error_type, message}; no silent discards.
-- NFR17: External API failures (Gemini timeout) return HTTP 502 with retry-suggest header.
-
-  4.2.3 Hardware and Software Requirements
-  Tables below summarize the implementation stack and recommended development environment.
-
-Table 4.1: Software / Technology Stack
-Category | Technology / Tool | Purpose
-Frontend Framework | Next.js (React) | Interactive dashboard & routing
-Charting | react-chartjs-2 / Chart.js | Radar competency visualization
-Backend / ML Runtime | Python 3.11 scripts (extensible to FastAPI) | Training & prediction services
-Database | Supabase (PostgreSQL + Auth + RLS) | Persist profiles, scores, access control
-ML Libraries | scikit-learn, pandas, joblib | Model training, preprocessing, artifact persistence
-AI Service | Google Gemini 2.0 (temperature=0) | Deterministic narrative explanation
-Deployment | Vercel (frontend), Railway (Python service) | Hosting & separation of concerns
-Version Control | Git (commit hash tracking) | Reproducibility and change trace
-Logging / Monitoring | (Planned) Console + structured JSON | Latency & error auditing
-
-Table 4.2: Development / Client Hardware Requirements
-Component | Minimum | Recommended
-CPU | Intel i5 / Ryzen 5 | Intel i7 / Apple M1
-RAM | 8 GB | 16 GB (faster retrain cycles)
-Storage | 256 GB SSD | 512 GB SSD
-Network | 5 Mbps broadband | ≥50 Mbps (stable API interactions)
-GPU | Not required | Not required (RF is CPU-based)
-
-Figure 4.2: High-Level System Architecture (Browser → Next.js → Supabase / Python ML Service → External APIs) [Placeholder]
-Figure 4.3: Entity Relationship Diagram (Students, Courses, Activities, Scores) [Placeholder]
+Table 9: Hardware Requirements
+Component Minimum Recommended
+CPU Intel i5 / Ryzen 5 Intel i7 / Apple M1
+RAM 8 GB 16 GB
+Storage 256 GB SSD 512 GB SSD
+Network 5 Mbps ≥50 Mbps
+GPU Not required Not required
 
 4.3 System Design
-The system design phase translates the requirements identified in Section 4.2 into a technical architectural blueprint. This project adopts a Service-Oriented Architecture (SOA), separating the User Interface, Data Management, and Artificial Intelligence services into distinct, decoupled modules. This separation ensures scalability and maintainability.
+The system design phase serves as the bridge between the requirements identified in Section 4.2 and the actual implementation of the Hybrid Student Performance Analysis and Career Prediction System. In this stage, the conceptual goals of the project are transformed into a concrete technical architecture, covering system structure, database schema, user interface layout, and the design of the AI prompt engineering layer. The design adopts a modular and service-oriented philosophy to ensure scalability, maintainability, and the ability to independently extend each subsystem (UI, ML, or analytics) without affecting the others.
+4.3.1 Use Case Modeling
+Use Case Modeling provides a structured visualization of how different user groups interact with the system’s core functionalities. Based on the functional requirements defined in Section 4.2, a comprehensive Use Case Diagram is developed to illustrate the roles, permissions, and system interactions.
+The system consists of three primary actors, each with distinctly scoped responsibilities:
 
-4.3.1 High-Level System Architecture
-The system architecture follows a modern Serverless and Microservice pattern. The application logic is centralized within the Next.js framework, which acts as the API Gateway orchestrating communication between the database and external AI services.
+1. Admin
+   The Admin oversees system-wide data operations and maintenance. Key interactions include:
+   • Performing CSV bulk uploads for course records
+   • Managing student profiles through create/edit/delete operations
+   • Initiating machine learning model retraining
+   • Assigning or modifying user roles
+2. Lecturer
+   Lecturers serve as academic evaluators and data contributors. Their main use cases include:
+   • Accessing the student analytics dashboard
+   • Viewing student competency radar charts
+   • Submitting lecturer comments for sentiment analysis
+   • Triggering AI narrative generation for student profiles
+3. Student
+   Students function as consumers of analytical insights. Their interactions are intentionally restricted to ensure data privacy and academic integrity. They are able to:
+   • View their personal profile information
+   • Access competency visualizations (radar chart, trends)
+   • Read AI-generated narrative summaries
 
-The architecture consists of four primary layers:
+Figure 13: System Use Case Diagram
+4.3.2 High-Level System Architecture
+The project adopts a Service-Oriented Architecture (SOA) combined with lightweight microservices, ensuring that computationally expensive tasks such as machine learning inference and generative AI processing remain isolated from the core web interface. This prevents performance bottlenecks and maintains loose coupling between components.
+A modern serverless-first architecture is used, leveraging Next.js as both the front-end framework and middleware controller, while Supabase handles authentication and persistent storage. ML inference runs in an external Python service to ensure reproducibility and version control over ML artifacts.
+The architecture consists of four main layers:
+(1) Presentation Layer - Client Interface
+Developed using Next.js (React), this layer provides the interactive dashboard that students, lecturers, and administrators use. Key responsibilities include:
+• Rendering radar charts, tables, and profile analytics
+• Handling user navigation and role-based view filtering
+• Sending structured API requests to the backend
+The interface is optimized for clarity and fast feedback, following dashboard design principles.
 
-**Presentation Layer (Client)**: Built with Next.js (React), providing a responsive dashboard for students and administrators.
+(2) Application Logic Layer - Next.js API Middleware
+Next.js API Routes function as a gateway and coordinator, performing:
+• Authentication & Role Validation (Lecturer, Student, Admin)
+• Input verification (e.g., CSV schema validation, URL format checks)
+• Secure server-side invocation of AI services
+• Aggregation of academic, co-curricular, and external footprint features
+A key design decision is the omission of the Python service for generative text. Instead, Gemini API is called directly from server-side routes, reducing latency and avoiding unnecessary cross-service hops.
 
-**Application Logic Layer (Middleware)**: Next.js API Routes handle authentication checks, data validation, and request routing.
+(3) Intelligence Layer - AI & ML Microservices
+A. Generative AI Module
+• Direct integration with Google Gemini 2.5 Flash
+• Used for sentiment interpretation, co-curricular evaluation, and narrative summary generation
+• Designed to be deterministic (temperature = 0) to ensure consistency
+B. Predictive Machine Learning Module
+• A dedicated Python FastAPI microservice hosted on Railway
+• Executes the Random Forest model for competency scoring
+• Stores and loads model artifacts (.joblib) with version tracking
+• Ensures repeatable scoring independent of frontend changes
+This division preserves both scalability and transparency in the ML workflow.
 
-**Note**: External AI services (Google Gemini, GitHub API) are invoked directly via HTTPS from Next.js API routes, bypassing the Python microservice to reduce latency.
+(4) Data Layer - Supabase (PostgreSQL + Auth)
+Supabase is responsible for:
+• Storing raw inputs (academic records, GitHub metadata, activities)
+• Holding computed outputs (competency scores, AI summaries)
+• Enforcing Row-Level Security (RLS) and JWT-based authentication
+Supabase’s real-time capabilities also allow live updates without page reloads.
 
-**Intelligence Layer (Microservices)**:
+Figure 14: High-Level System Architecture
+4.3.3 Database Design
+The database adopts a relational schema with emphasis on referential integrity, normalization, and efficient query operations for analytics.
+Key Entities and Rationale:
 
-- **Generative AI**: Direct integration with Google Gemini 2.5 Flash for text analysis and narrative generation.
-- **Predictive ML**: A dedicated Python FastAPI service (hosted on Railway) runs the Random Forest model for numerical score prediction.
+1. students (Primary Entity)
+   Stores all core student information including:
+   • biodata
+   • CGPA & program details
+   • digital footprint URLs (GitHub, LinkedIn, Portfolio)
+   • github_profile_analysis (JSONB) for storing structured repo statistics
+   • predicted scores & AI summaries
+   The inclusion of digital footprint fields supports multimodal analysis beyond traditional academic metrics.
+2. courses (One-to-Many > students)
+   Stores:
+   • course code
+   • grade
+   • credit hours
+   • semester metadata
+   This table enables credit-weighted academic modelling and domain-specific GPA analysis.
+3. co_curricular (One-to-Many > students)
+   Stores:
+   • activity name
+   • organization type
+   • role and responsibilities
+   • AI-generated leadership, impact, and relevance scores
+   Unstructured text is transformed into structured competency indicators via Gemini.
+4. admin_users
+   Implements RBAC by distinguishing:
+   • student accounts
+   • lecturer accounts
+   • admin accounts
+   Supports Supabase RLS integration for record-level permissions.
 
-**Data Layer**: Supabase provides the PostgreSQL database and authentication services.
+Figure 15: Entity Relationship Diagram
 
-[Insert Figure 4.2: High-Level System Architecture Here]
+4.3.4 User Interface (UI) Design
+The User Interface (UI) is designed based on established Dashboard Design Principles, emphasizing information density, clarity, and strong role-based access control. The system follows a multi-page architecture, where each user group Students, Lecturers, and Administrators interacts with a tailored interface that exposes only the functionalities relevant to their role. All UI components adopt responsive design, ensuring usability on tablet and desktop devices.
+A. Authentication & Account Management Interfaces
+Login Page (/login)
+The login page provides the primary authentication gateway for all users. Key elements include:
+• Email and password input fields with client-side validation
+• Error notification for incorrect credentials
+• Post-authentication automatic redirection to the main dashboard
+• Session persistence using Supabase Auth tokens to reduce repeated logins
 
-Figure 4.2: High-Level System Architecture showing the data flow between Next.js, Supabase, and External APIs.
+Figure 16: Login Page Wireframe
+Account Creation Page (/create-account)
+This page is accessible only to Admin users and is used for provisioning new accounts.
+Features include:
+• Role selection dropdown (Student, Lecturer, Admin) with default value set to Lecturer
+• Input fields for username, email, and password
+• Secure server-side API integration (/api/create-admin) that bypasses RLS to safely create accounts
+• Success and error message handling for operational transparency
 
-4.3.2 Database Design
-The database is designed using a Relational Model hosted on PostgreSQL. The schema focuses on maintaining referential integrity between the student entities and their respective academic or behavioral records.
+Figure 17: Account Creation Page Wireframe
+B. Dashboard Page (/dashboard)
+The Dashboard is the central analytical interface used by Lecturers and Admins to review student performance.
+The layout consists of three primary panels arranged horizontally for efficient navigation.
 
-**Key Entities**:
+1. Student Selection Sidebar (Left Panel)
+   • Real-time searchable student list
+   • Student display cards showing:
+   o Name
+   o Program
+   o CGPA
+   • Icons indicating the completeness of digital footprint data (GitHub, LinkedIn, Portfolio)
+   • Clicking on a student updates all information on the Profile Display panel
+2. Student Profile Display (Central Panel)
+   This is the core analytical component of the dashboard.
+   a. Biodata Display
+   Shows the student’s essential information such as name, program, gender, and CGPA.
+   b. Six-Axis Competency Radar Chart
+   Chart.js radar visualization depicting six model-generated competency scores:
+3. Programming Competency
+4. Design Competency
+5. IT Infrastructure Competency
+6. Co-curricular Engagement
+7. Feedback Sentiment Influence
+8. Professional Engagement
+   c. Career Recommendation Panel
+   Displays 2–3 role suggestions based on MQF career pathways.
+   d. AI Insight Panel
+   A structured narrative produced by Gemini summarizing:
+   • Academic strengths and developmental areas
+   • GitHub activity (language usage, project relevance)
+   • Leadership indicators from co-curricular participation
+   • Portfolio or LinkedIn professional footprint
+   e. Regenerate Summary Button
+   Reissues a new Gemini request with built-in fault tolerance (3 retries with exponential backoff).
+9. Lecturer Comments Section (Right Panel)
+   • Textarea for adding lecturer insights or qualitative evaluation
+   • “Submit Comment” button connected to /api/comments
+   • Historical comment threads with timestamps, author labels, and chronological ordering
+   • Automatic sentiment analysis applied upon comment submission, which may trigger a model re-prediction
 
-**students**: The central entity containing biodata and calculated competency scores. To support the multimodal analysis, this table includes specific fields for digital footprints: `linkedin_url`, `portfolio_url`, `career_path`, and a JSONB column `github_profile_analysis` to store metadata scraped from repositories.
+Figure 18: Dashboard Page Wireframe
+C. Student Manager Page (/studentmanager) — Admin Only
+The Student Manager consolidates all administrative controls and provides a tabbed interface for data maintenance.
 
-**courses**: Stores academic history. A One-to-Many relationship exists between Students and Courses.
+1. Student Management Tab
+   • Sortable table listing all students
+   • Columns include Name, Program, CGPA, and all six competency scores
+   • “Create Student” button with modal form for manual data entry
+   • Edit modal with validation for profile updates
+   • Two-step delete confirmation to avoid accidental removals
 
-**co_curricular**: Stores unstructured activity data. This table includes fields for `ai_impact_score` and `ai_leadership_score`, which are populated by the Gemini API upon data entry.
+Figure 19: Student Management Tab Wireframe
 
-**admin_users**: Manages Role-Based Access Control (RBAC) to differentiate between Lecturers and System Admins.
+2. Course Management Tab
+   Provides tools for managing academic course data.
+   CSV Bulk Upload Interface
+   • .csv input selector with schema validation
+   • Template download link (course_template.csv)
+   • Progress tracker and error messages per row
+   • Rejection of malformed or incomplete data entries
+   Course Table
+   • Columns: Student ID, Course Code, Course Name, Grade, Credit Hours
+   • Manual course entry panel for small-scale updates
 
-[Insert Figure 4.3: Entity Relationship Diagram (ERD) Here]
+Figure 20: Course Management Tab with CSV Upload
 
-Figure 4.3: Entity Relationship Diagram illustrating the schema and relationships between Students, Courses, and Activities.
+3. Co-curricular Management Tab
+   Allows structured entry and AI scoring of student activities.
+   Features include:
+   • Activity entry form (with student selector, title, role, description)
+   • Submission calls /api/analyze-cocurricular to generate:
+   o AI Impact Score
+   o AI Leadership Score
+   • Activity table for reviewing all co-curricular records
+   • Live “Processing…” indicators during Gemini scoring
 
-4.3.3 User Interface (UI) Design
-The User Interface is designed based on Dashboard Design Principles, prioritizing information density and clarity. The design ensures that complex multidimensional data can be understood at a glance.
+Figure 21: Co-curricular Management Tab 4. ML Model Retraining Tab
+This section provides tools for maintaining and updating the predictive model.
+Features:
+• Retrain Model button calling /api/ml/retrain
+• Training progress modal displaying:
+o Animated loader
+o Estimated duration (~120 seconds for 200 profiles)
+o Final status message
+• Model metadata panel showing current:
+o Model version (SHA256 hash)
+o Last training date
+o Number of features used
 
-**Key Interface Components**:
+Figure 22: ML Model Retraining Tab
+D. Student Profile Page (/profile)
+A dedicated, read-only space where students can view their own performance insights.
+Includes:
+• Personal competency radar chart
+• Gemini-generated narrative summary
+• Footer displaying GitHub, LinkedIn, and Portfolio links
+• CGPA trend chart for multi-semester datasets
 
-**The Student Grid**: A filterable table view allowing lecturers to sort students by Program, CGPA, or specific competency scores.
-
-**The Competency Radar**: A six-axis radar chart located prominently on the student profile. This visualizes the balance between technical skills (Programming, IT) and soft skills (Co-curricular, Feedback).
-
-**The AI Insight Panel**: A dedicated text area displaying the Gemini-generated narrative. It includes visual highlighting for key strengths and specific career recommendations.
-
-**Administrative Tools**: Dedicated interfaces for CSV Bulk Import of course data and a manual Model Retraining trigger to update ML predictions.
-
-[Insert Figure 4.4: UI Mockup or Wireframe of the Student Profile Dashboard Here]
-
-Figure 4.4: User Interface design for the Student Profile Dashboard featuring the Radar Chart and AI Summary.
-
-4.3.4 AI Prompt Engineering Design
-A critical component of the system design is the Prompt Engineering Strategy used to communicate with the Large Language Model (Google Gemini 2.5 Flash). Unlike standard API calls, the prompt uses a text-based template with embedded student data to ensure the AI acts as an objective academic advisor.
-
-**Design of the System Prompt**:
-
-The system constructs a dynamic prompt using natural language instructions combined with structured data injection. The prompt enforces specific constraints to ensure pedagogical validity:
-
-```
+Figure 23: Student Profile Page
+E. Common UI Components
+Navigation Header
+• System logo and project title
+• Email of the authenticated user
+• Role badge (Student / Lecturer / Admin)
+• Logout button for session termination
+Sidebar Navigation
+Menu items depend on user role:
+Table 10: User role
+Role Menu Items
+Student Dashboard, Profile
+Lecturer Dashboard, Profile, Student Manager
+Admin Dashboard, Student Manager, Profile, Create Account
+Sidebars collapse automatically for medium-width screens.
+Design System (Styling Standards)
+• Color Palette: Dark mode UI with cyan highlights (rgba(14, 165, 233))
+• Typography: Modern sans-serif fonts with WCAG AA contrast compliance
+• Component Library: Custom reusable components (Button, Input, Card)
+4.3.5 AI Prompt Engineering Design
+AI prompt engineering forms a critical part of the system because the narrative summaries generated by Gemini must be accurate, pedagogically appropriate, and free from hallucinations. To achieve this, a constrained, structured prompt design is implemented.
+Prompt Architecture
+The system generates a dynamic prompt that merges:
+• Natural-language instructions
+• Injected student data (academic, GitHub, co-curricular)
+• Strict behavioral constraints for the model
+System Prompt Template
 Role: You are an expert Academic Career Counselor.
 Task: Analyze the following student profile and generate a narrative summary.
 
 Student Data:
+
 - Name: {student_name}
 - GitHub Projects: {github_data}
 - Co-curriculars: {activities_list}
 
 Constraints:
-1. Never mention specific numeric scores (e.g., instead of "Scored 85", say "Excels at").
-2. Integrate GitHub project names and languages naturally into the narrative.
-3. Handle portfolios diplomatically; if missing, focus on academic strengths.
-4. Embed co-curricular achievements into the story, highlighting leadership roles.
-5. Provide 3 specific job titles based on the MQF framework.
-```
 
-This design ensures that the Generative AI output is consistent, pedagogically valid, and directly usable within the application UI without requiring manual editing.
+1. Do not reveal numeric scores; use qualitative descriptions only.
+2. Integrate GitHub project names and programming languages naturally.
+3. If professional portfolio data is missing, redirect focus to academic strengths.
+4. Highlight leadership or initiative reflected in co-curricular activities.
+5. Recommend exactly three MQF-aligned job roles.
+   Outcome
+   This prompt design ensures:
+   • Consistent tone across all summaries
+   • Zero hallucination of non-existent achievements
+   • High interpretability for lecturers and students
+   • Readiness for direct production display without post-editing
+
+4.4 System Implementation
+This section presents the practical implementation of the Hybrid Student Performance Analysis and Career Prediction System. Following the microservice-oriented architecture defined in Section 4.3, the system is implemented across four coordinated subsystems: the Frontend Interface, Backend Logic, Machine Learning Engine, and Generative AI Layer. Each subsystem operates independently but communicates through well-defined APIs to ensure modularity and maintainability.
+4.4.1 Development Environment Setup
+A standardized development environment was established to ensure reproducibility and consistency throughout the project lifecycle.
+Version Control & Project Structure
+• Github Desktop was used for version control with an optimized .gitignore excluding node_modules, **pycache**, Python virtual environments, compiled artifacts, and all local .env credentials.
+• The project is divided into:
+o /app — Next.js frontend
+o /ml — Python FastAPI ML service
+o /public — Static assets
+o /api — Next.js API endpoints
+Frontend Environment
+• Node.js runtime
+• Next.js for page routing and server-side rendering
+• React for UI interaction
+• Tailwind CSS for utility-first styling
+• react-chartjs-2 + Chart.js for radar visualization
+• lucide-react for consistent iconography
+Backend and ML Environment
+• Python (≥3.10) virtual environment with:
+o FastAPI and uvicorn (REST API)
+o scikit-learn for model training
+o pandas for preprocessing
+o joblib for model serialization
+Database and API Connectivity
+• Supabase JavaScript client accessed via
+NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+• Gemini API Key stored server-side only to prevent exposure in browser builds
+These configurations ensure separation of concerns and secure handling of sensitive credentials.
+4.4.2 Database Implementation
+The database was implemented using Supabase PostgreSQL, with schema and security managed through SQL migrations and Row-Level Security (RLS).
+Schema Implementation
+Tables implemented:
+
+1.  students
+    o UUID primary key
+    o biodata fields
+    o competency scores (float8)
+    o digital footprint fields (GitHub, LinkedIn, portfolio)
+    o JSONB github_profile_analysis for repository metadata
+2.  courses
+    o Academic records linked by student ID
+    o Grade, course code, credit hours
+3.  co_curricular activities
+    o Activity title, role, description
+    o AI-generated impact and leadership scores
+4.  admin_users
+    o Role-based access control for Lecturer/Admin accounts
+    Row-Level Security (RLS)
+    RLS ensures that:
+    • Students can only view their own records
+    • Lecturers can view program-wide records
+    • Admins have full access
+    Example RLS Policy:
+5.  CREATE POLICY "Enable read access for authenticated users"
+6.  ON public.students
+7.  AS PERMISSIVE FOR SELECT
+8.  TO authenticated
+9.  USING (true);
+    CSV Ingestion Workflow
+    • Bulk academic uploads use a standardized template (course_template.csv)
+    • Row-level validation rejects malformed or incomplete entries
+    • Clean data is inserted into the courses table using Supabase REST APIs
+    4.4.3 Machine Learning Engine Implementation
+    The predictive engine operates as an independent Python FastAPI microservice, ensuring that ML computation remains isolated from frontend logic.
+    Model Training Pipeline
+    • Implemented in ml/train_and_upload.py
+    • Data sourced from synthetic and available institutional datasets
+    • RandomForestRegressor trained to predict six competency dimensions
+    • Final model serialized using joblib to model.joblib
+    Prediction API Endpoint
+    The FastAPI server exposes the prediction route:
+10. @app.post("/predict")
+11. async def predict_student(data: StudentRequest):
+12.     features = preprocess(data)
+13.     prediction = model.predict(features)
+14.     return {"scores": prediction.tolist()}
+    Deployment
+    • Deployed on Railway using:
+    o Procfile
+    o railway.json
+    • Auto-builds support seamless redeployment during updates
+    4.4.4 Generative AI Integration
+    The Generative AI component is integrated directly into Next.js API routes for minimal latency and secure token handling.
+    Prompt Construction
+    A deterministic prompt template is used, embedding:
+    • Academic indicators
+    • GitHub project information
+    • Co-curricular descriptions
+    • ML-predicted competencies
+    API Request Management
+    The Gemini endpoint is invoked using direct HTTPS fetch calls with retry logic for failures.
+15. const res = await fetch(GEMINI_URL, {
+16. method: "POST",
+17. headers: {
+18.     "Content-Type": "application/json",
+19.     "Authorization": `Bearer ${process.env.GEMINI_API_KEY}`
+20. },
+21. body: JSON.stringify({
+22.     contents: [{ parts: [{ text: prompt }]}]
+23. })
+24. });
+    • Retries are triggered on 429 and 503 responses
+    • Responses are sanitized before display to remove placeholders or incomplete tokens
+    4.4.5 Frontend Dashboard Implementation
+    The dashboard is implemented using a hybrid of React Server Components for performance and Client Components for interactive elements.
+    Key Implementations
+    • Radar Chart:
+    Six-axis radar chart using react-chartjs-2, normalized to 0–100 scale
+    • State Management:
+    useState and useEffect synchronize:
+    o Student selection
+    o Predictions
+    o Lecturer comments
+    o AI summary regeneration
+    • File Uploads:
+    CSV uploads handled through controlled UI forms and validated via API routes
+    4.5 System Testing
+    Comprehensive testing was carried out to validate the system’s functionality, quality, and robustness against the requirements defined in Section 4.2.
+    4.5.1 Unit Testing
+    Machine Learning Unit Tests
+    • Predictions constrained to the range of qualitative competency interpretation
+    • High correlation observed between input features and predicted competency outcomes
+    Prompt Generation Tests
+    • No-Co-curricular scenario - prompt remains valid
+    • Empty GitHub fields - focus shifts to academic indicators, ensuring graceful fallback
+
+4.5.2 Integration Testing
+CSV Upload Pipeline
+• Tested end-to-end: file selection > parsing > validation > database insertion
+• Malformed rows trigger structured error messages
+• Valid rows populate the courses table according to template schema
+API Latency Tests
+• FastAPI ML service responded within acceptable P95 latency thresholds
+• Gemini API route demonstrated stable retry behavior under temporary rate limits
+4.5.3 User Acceptance Testing (UAT)
+Table 11: User Acceptance Testing Log
+Test ID Description Expected Result Status
+UAT-01 Admin Login Redirects to Dashboard Pass
+UAT-02 Student Creation New record visible immediately Pass
+UAT-03 ML Retraining Scores update using new model Pass
+UAT-04 AI Summary Regeneration New narrative generated successfully Pass
+UAT-05 Radar Chart Visualization Six-axis chart renders correctly Pass
+
+4.6 Summary
+This chapter documented the full methodology and implementation workflow of the Hybrid Student Performance Analysis and Career Prediction System. The system integrates:
+• Next.js for interface and API routing
+• Supabase for authentication, database storage, and RLS enforcement
+• Python FastAPI for predictive analytics
+• Google Gemini for AI narrative explanation
+Key components such as CSV ingestion, radar visualization, AI prompt orchestration, and model retraining were implemented and validated through systematic testing. Functional and non-functional requirements were fully addressed, establishing the system’s readiness for real-world evaluation and for the results presented in Chapter 5.
 
 REFERENCES
 Brown, M.A., Gruen, A., Gabe Maldoff, Messing, S. and Zimmer, M. (2024). Web Scraping for Research: Legal, Ethical, Institutional, and Scientific Considerations. [online] doi: https://doi.org/10.48550/arXiv.2410.23432.
@@ -608,3 +912,7 @@ Yaqoob, S., Noor, A., Noor, T.H., Khan, M.Z., Ejaz, A., Alam, M.I., Rana, N. and
 Zhang, D., Yin, C., Zeng, J., Yuan, X. and Zhang, P. (2020). Combining structured and unstructured data for predictive models: a deep learning approach. BMC Medical Informatics and Decision Making, [online] 20(1). doi: https://doi.org/10.1186/s12911-020-01297-6.
 Zohra Zerdoumi, Abdou, L. and Elkhanssa Bdirina (2023). An Improved Recursive Least Square Algorithm For Adapting Fuzzy Channel Equalizer. Engineering Technology & Applied Science Research, 13(4), pp.11124–11129. doi: https://doi.org/10.48084/etasr.5906.
 Zohra Zerdoumi, Abdou, L. and Elkhanssa Bdirina (2023). An Improved Recursive Least Square Algorithm For Adapting Fuzzy Channel Equalizer. Engineering Technology & Applied Science Research, 13(4), pp.11124–11129. doi: https://doi.org/10.48084/etasr.5906.
+
+```
+
+```
