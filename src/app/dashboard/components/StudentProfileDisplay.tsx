@@ -220,6 +220,12 @@ const StudentProfileDisplay: React.FC<StudentProfileDisplayProps> = ({
               />
             </svg>
             Performance Analysis
+            {loading && (
+              <div className="flex items-center gap-2 ml-auto">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm text-white/60">Refreshing...</span>
+              </div>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>

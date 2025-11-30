@@ -14,6 +14,7 @@ interface UseDashboardReturn {
   recommendedCareer: string;
   loading: boolean;
   pageLoading: boolean;
+  showUpdateToast: boolean;
   setSelectedStudent: (student: Student | null) => void;
   regenerateSummary: () => Promise<void>;
 }
@@ -27,6 +28,7 @@ export function useDashboard({
   const [recommendedCareer, setRecommendedCareer] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
+  const [showUpdateToast, setShowUpdateToast] = useState(false);
 
   const prevProgram = useRef<string>("");
   const prevHash = useRef<string>("");
@@ -187,6 +189,10 @@ export function useDashboard({
           const newStudent = payload.new as Student;
           // Replace selected student with the updated values
           setSelectedStudent(newStudent);
+          
+          // Show toast notification
+          setShowUpdateToast(true);
+          setTimeout(() => setShowUpdateToast(false), 3000);
         }
       )
       .subscribe();
@@ -279,6 +285,7 @@ export function useDashboard({
     recommendedCareer,
     loading,
     pageLoading,
+    showUpdateToast,
     setSelectedStudent,
     regenerateSummary,
   };
