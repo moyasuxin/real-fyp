@@ -111,13 +111,14 @@ export function useDashboard({
     fetchAndAnalyze();
   }, [activeProgram]);
 
-  // ✅ NEW: Load AI summary when selected student changes
+  // ✅ Load/refresh AI summary when the selected student's data changes
   useEffect(() => {
-    if (!selectedStudent || prevStudentId.current === selectedStudent.id) return;
-    
+    if (!selectedStudent) return;
+
     const loadStudentSummary = async () => {
       try {
         setLoading(true);
+        // Track current student id
         prevStudentId.current = selectedStudent.id;
 
         // ✅ Core data for hash check
@@ -166,6 +167,34 @@ export function useDashboard({
 
     loadStudentSummary();
   }, [selectedStudent]);
+
+  // ✅ Realtime: Update the selected student when their row changes in Supabase
+  useEffect(() => {
+    const id = selectedStudent?.id;
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`students-updates-${id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'students',
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          const newStudent = payload.new as Student;
+          // Replace selected student with the updated values
+          setSelectedStudent(newStudent);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedStudent?.id]);
 
   // ✅ Reusable function to refresh AI summary
   const performSummaryRegeneration = async (
