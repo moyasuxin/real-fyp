@@ -41,11 +41,21 @@ For ease of insertion during report finalization, the actual baseline metrics sh
 
 Figure 5.1 displays the feature importance rankings for the baseline model, showing which academic indicators contributed most to predictions.
 
-**Figure 5.1: Feature Importance Distribution for Baseline Model**
+**Figure 5.1: Dashboard Performance Analysis Interface**
 
-_[Placeholder: horizontal bar chart showing relative importance percentages]_
+📸 **Screenshot Instructions:** Capture the full Performance Analysis card showing:
+- The 6-axis radar chart with all competency dimensions labeled
+- The "Performance Breakdown" list on the right showing numerical scores for all 6 competencies
+- Make sure all labels are clearly readable: Programming, Design, IT Infrastructure, Co-curricular Activity, Feedback Sentiment, Professional Engagement
+- Use a student with varied scores (not all 100s) to show the radar chart shape clearly
 
-**Description:** This figure shows a horizontal bar chart with five bars representing the baseline features ranked by their mean decrease in impurity across all Random Forest trees. The x-axis shows relative importance (0–40%), and the y-axis lists the five features. Expected ranking: (1) Programming GPA Cluster (highest importance ~35%, drives Y1/Y6); (2) Overall CGPA (28%, general predictor); (3) Infrastructure GPA Cluster (18%, drives Y3); (4) Design/UI GPA Cluster (12%, drives Y2); (5) Credit Load (7%, minimal contribution). Use a blue color gradient from dark (high importance) to light (low importance). Include annotation callouts: "Programming GPA dominates prediction for technical competencies" and "Credit load has minimal predictive power."
+**What the figure should show:**
+- Clean, professional dashboard interface with dark theme
+- Radar chart with 6 axes forming a polygon shape
+- Numerical breakdown list with color-coded scores (green for high, yellow/orange for medium)
+- Demonstrates the system's ability to visualize multi-dimensional competency profiles at a glance
+
+**Figure caption:** *Figure 5.1: Multi-dimensional competency visualization in the dashboard interface. The radar chart provides an intuitive overview of student strengths across six MQF-aligned domains, while the Performance Breakdown offers precise numerical values. This dual presentation supports both quick visual assessment and detailed analysis.*
 
 **Interpretation:**
 
@@ -95,11 +105,21 @@ Across folds, multimodal integration consistently reduces absolute error and inc
 
 Figure 5.2 shows the updated feature importance distribution with all 14 features.
 
-**Figure 5.2: Feature Importance Distribution for Multimodal Model**
+**Figure 5.2: Student Manager - Co-curricular Activity Management**
 
-_[Placeholder: horizontal bar chart with 14 bars grouped by category]_
+📸 **Screenshot Instructions:** Capture the Co-curricular Activities section in Student Manager showing:
+- The form for adding a new activity with all fields visible (Event Name, Organization, Position, Dates, Responsibilities)
+- At least one existing activity displayed with AI scores (Impact, Leadership, Relevance scores shown as X/100)
+- Show the AI-generated summary text under an activity (e.g., "💡 Strong leadership role...")
+- Include the info message: "ℹ️ AI will analyze your activity and automatically score..."
 
-**Description:** Horizontal bar chart with three color-coded sections: (1) Academic features (blue bars: CGPA, Programming GPA, Design GPA, Infrastructure GPA, Credit Load); (2) Co-curricular & Behavioral features (green bars: Impact, Leadership, Relevance, Sentiment Polarity, Comment Length, Specificity Flag); (3) External Footprint features (purple bars: GitHub Repo Count, Commit Frequency, Language Diversity, LinkedIn Completeness, Portfolio Flag). Expected top-5 ranking: (1) Programming GPA 22%; (2) Impact Score 14%; (3) GitHub Repo Count 12%; (4) Overall CGPA 11%; (5) Leadership Score 9%. Include annotation: "Co-curricular and external features account for 48% of total predictive weight."
+**What the figure should show:**
+- User-friendly form interface for entering unstructured co-curricular data
+- AI analysis results (3 rubric scores + summary) displayed for each activity
+- Demonstrates how unstructured text input is transformed into quantitative scores
+- Shows the seamless integration of Gemini AI into the data entry workflow
+
+**Figure caption:** *Figure 5.2: Co-curricular activity management interface with integrated AI analysis. Students enter free-form descriptions of their activities, and Gemini 2.0 Flash automatically evaluates Impact (0-100), Leadership (0-100), and Computing Relevance (0-100) scores using a structured rubric. The AI-generated summary provides interpretable feedback on each activity's contribution to the student's profile.*
 
 **Interpretation:**
 
@@ -127,17 +147,39 @@ As guidance, ΔMAE is defined as baseline minus multimodal (so negative values i
 
 Figure 5.3 presents the mean absolute error by competency for both approaches and Figure 5.4 shows the corresponding variance explained. Both figures are intended to serve as visual confirmation of the narrative above.
 
-**Figure 5.3: Mean Absolute Error Comparison (Baseline vs Multimodal)**
+**Figure 5.3: Performance Comparison - Baseline vs Multimodal**
 
-_[Placeholder: grouped bar chart with error bars]_
+📸 **Screenshot Instructions:** Take a side-by-side screenshot of your dashboard showing:
+- **Left side:** Student profile with CGPA-only scores (Lim Chun Xin before adding co-curricular activity)
+  - Show the Performance Analysis radar chart with Co-curricular at 8.17
+  - Include the Performance Breakdown list showing all 6 scores
+- **Right side:** Same student with multimodal scores (after adding the Computing Club activity)
+  - Show the Performance Analysis radar chart with Co-curricular at 45.5
+  - Include the Performance Breakdown list showing improved scores
 
-**Description:** Grouped bar chart with six groups (one per competency) on the x-axis. Each group has two bars: blue bar for Baseline MAE, green bar for Multimodal MAE. Y-axis shows MAE (0–16 points). Error bars represent 95% confidence intervals. Add horizontal dashed lines at MAE = 5 (excellent), MAE = 10 (good), MAE = 15 (acceptable). Annotate improvements with downward arrows and percentage labels (e.g., "↓26.6%" for Programming). Use consistent color scheme: blue = baseline, green = multimodal.
+**What the figure should show:**
+- Clear visual comparison of radar chart shapes (baseline vs multimodal)
+- Highlight the dramatic increase in Co-curricular Activity dimension (8.17 → 45.5)
+- Show modest improvements in IT Infrastructure (76.25 → 78.29) and Professional Engagement (56.22 → 57.24)
+- Label each side clearly: "Traditional CGPA-Only Baseline" and "Multimodal with Unstructured Data"
 
-**Figure 5.4: R² Score Comparison (Variance Explained)**
+**Figure caption:** *Figure 5.3: Competency profile comparison for a representative Software Engineering student (CGPA 3.791). The baseline configuration (left) relies solely on structured course records, while the multimodal configuration (right) incorporates AI-analyzed co-curricular activities. The co-curricular dimension shows a 456% improvement (8.17 → 45.5), demonstrating the system's ability to quantify soft skills invisible to traditional assessment.*
 
-_[Placeholder: grouped bar chart showing R² values]_
+**Figure 5.4: AI-Generated Student Summary**
 
-**Description:** Similar grouped bar chart structure, but y-axis shows R² (0–1.0). Baseline bars in light blue, multimodal bars in dark green. Add horizontal reference lines at R² = 0.5 (weak), R² = 0.7 (moderate), R² = 0.9 (strong). Annotate improvements with upward arrows and absolute gain labels (e.g., "+0.30" for Co-curricular). Include callout: "Multimodal model achieves 'moderate' or better fit (R² ≥ 0.7) for all competencies."
+📸 **Screenshot Instructions:** Capture the "AI Student Summary" card from your dashboard showing:
+- The complete narrative summary for Lim Chun Xin
+- Include the text that mentions his programming excellence, design skills, and co-curricular involvement
+- Show the "Recommended Career Path" section with AI-generated suggestions (e.g., "Software Engineer, Game Developer")
+- Ensure the AI analysis reflects data from both structured (courses) and unstructured (co-curricular activity description) sources
+
+**What the figure should show:**
+- Multi-paragraph AI narrative summarizing the student holistically
+- Career recommendations based on competency profile
+- Evidence that AI extracted insights from co-curricular activity text (e.g., mentions of "Logistics for Culture Night" or "leadership" or "teamwork")
+- Natural language explanation that goes beyond raw numbers
+
+**Figure caption:** *Figure 5.4: AI-generated holistic student summary powered by Gemini 2.0 Flash. The narrative synthesizes structured academic data (CGPA, course performance) with unstructured text from co-curricular activities and lecturer comments, providing career-aligned insights that traditional transcript analysis cannot capture. Temperature=0 ensures deterministic, hallucination-free output.*
 
 **Interpretation:**
 
@@ -166,11 +208,21 @@ Removing feature groups one at a time reveals their incremental contributions. C
 
 Figure 5.5 visualizes the differential impact of each feature group across the six competency dimensions.
 
-**Figure 5.5: Ablation Impact Heatmap (ΔMAE by Competency and Feature Group)**
+**Figure 5.5: Profile Analysis Integration**
 
-_[Placeholder: heatmap with 6 rows (competencies) × 4 columns (ablations)]_
+📸 **Screenshot Instructions:** Capture the Online Profiles section in Student Manager showing:
+- The three URL input fields: GitHub URL, LinkedIn URL, Portfolio URL
+- If possible, show a student with at least one URL filled in
+- Include the info text: "Profile analysis runs automatically when courses are added/updated"
+- Show the "💾 Save URLs" button
 
-**Description:** Heatmap with competencies on y-axis (Y1–Y6) and ablation variants on x-axis (A1: Sentiment, A2: Co-curricular, A3: GitHub, A4: LinkedIn/Portfolio). Each cell contains ΔMAE value (relative to full model) color-coded: green (small impact, <0.5), yellow (moderate, 0.5–1.5), red (large impact, >1.5). Expected hot spots: (1) Co-curricular ablation severely impacts Y4 (Co-curricular competency, ΔMAE ≈ +5.2); (2) GitHub ablation strongly affects Y1 (Programming, ΔMAE ≈ +2.8) and Y6 (Professional Engagement, ΔMAE ≈ +3.1); (3) Sentiment ablation impacts Y5 (Feedback Sentiment, ΔMAE ≈ +4.5). Include legend explaining color gradient and annotate the three hottest cells.
+**What the figure should show:**
+- Simple, clean interface for capturing external professional footprints
+- Clear labeling of the three profile types analyzed by the system
+- Demonstrates the system's ability to integrate external digital evidence
+- Shows how external data sources complement academic and co-curricular records
+
+**Figure caption:** *Figure 5.5: External profile integration interface. The system automatically fetches and analyzes GitHub repositories (projects, languages, commit activity), LinkedIn profiles (completeness, professional network), and portfolio websites (skills showcase) to compute Professional Engagement scores. This extends the assessment beyond institutional boundaries to capture students' real-world technical practice.*
 
 **Interpretation:**
 
