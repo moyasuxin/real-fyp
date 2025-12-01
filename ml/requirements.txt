@@ -7,6 +7,4 @@ joblib==1.4.2
 pandas==2.2.3
 python-dotenv==1.0.0
 psycopg2-binary==2.9.10
-supabase==2.4.0
-httpx==0.25.2
-httpcore==1.0.2
+supabase==2.7.4
