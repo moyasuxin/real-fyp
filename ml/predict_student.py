@@ -632,8 +632,17 @@ if __name__ == "__main__":
     
     try:
         student_id = int(sys.argv[1])
+        print(f"\n=== STARTING PREDICTION FOR STUDENT {student_id} ===", file=sys.stderr)
         result = predict_scores(student_id)
+        print(f"\n=== PREDICTION COMPLETE ===", file=sys.stderr)
         print(json.dumps(result))
-    except ValueError:
-        print(json.dumps({"success": False, "error": "Invalid student_id (must be an integer)"}))
+    except ValueError as e:
+        print(json.dumps({"success": False, "error": f"Invalid student_id (must be an integer): {str(e)}"}), file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"\n=== PREDICTION ERROR ===", file=sys.stderr)
+        print(error_trace, file=sys.stderr)
+        print(json.dumps({"success": False, "error": f"Prediction failed: {str(e)}"}), file=sys.stderr)
         sys.exit(1)

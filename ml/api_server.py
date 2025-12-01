@@ -72,6 +72,10 @@ async def predict(request: PredictRequest):
         
         if result.returncode != 0:
             error_msg = result.stderr or result.stdout
+            print(f"❌ PREDICTION FAILED:", file=sys.stderr)
+            print(f"Return code: {result.returncode}", file=sys.stderr)
+            print(f"STDOUT: {result.stdout}", file=sys.stderr)
+            print(f"STDERR: {result.stderr}", file=sys.stderr)
             raise HTTPException(
                 status_code=500,
                 detail=f"Prediction failed: {error_msg}"

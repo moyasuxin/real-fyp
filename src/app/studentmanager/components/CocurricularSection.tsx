@@ -106,14 +106,21 @@ export default function CocurricularSection({ studentId }: Props) {
       await new Promise((r) => setTimeout(r, 1000));
 
       // Step 3: Retrain ML
+      console.log(`🔄 Starting ML retrain for student ${studentId}...`);
       const res = await fetch(`/api/ml/retrain?studentId=${studentId}`, {
         method: "POST",
       });
 
       if (!res.ok) {
         const mlError = await res.text();
-        console.error("ML retrain failed:", mlError);
+        console.error("❌ ML retrain failed:", mlError);
         throw new Error(`ML retrain failed: ${mlError}`);
+      }
+
+      const retrainResult = await res.json();
+      console.log("✅ ML retrain completed:", retrainResult);
+      if (retrainResult.ml_error) {
+        console.warn("⚠️ ML retrain warning:", retrainResult.ml_error);
       }
 
       setMlStage("✅ Done!");
