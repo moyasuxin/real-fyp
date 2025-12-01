@@ -508,12 +508,24 @@ def predict_scores(student_id: int):
         ai_total_relevance = 0
         activity_count = 0
         
+        # Debug logging
+        print(f"\n=== CO-CURRICULAR ACTIVITIES DEBUG ===", file=sys.stderr)
+        print(f"Student ID: {student_id}", file=sys.stderr)
+        print(f"Activities found: {len(cocurricular_res.data) if cocurricular_res.data else 0}", file=sys.stderr)
+        
         if cocurricular_res.data:
             activity_count = len(cocurricular_res.data)
             for activity in cocurricular_res.data:
-                ai_total_impact += activity.get("ai_impact_score", 0)
-                ai_total_leadership += activity.get("ai_leadership_score", 0)
-                ai_total_relevance += activity.get("ai_relevance_score", 0)
+                impact = activity.get("ai_impact_score", 0)
+                leadership = activity.get("ai_leadership_score", 0)
+                relevance = activity.get("ai_relevance_score", 0)
+                print(f"Activity: Impact={impact}, Leadership={leadership}, Relevance={relevance}", file=sys.stderr)
+                ai_total_impact += impact
+                ai_total_leadership += leadership
+                ai_total_relevance += relevance
+        
+        print(f"Totals: Impact={ai_total_impact}, Leadership={ai_total_leadership}, Relevance={ai_total_relevance}", file=sys.stderr)
+        print(f"====================================\n", file=sys.stderr)
         
         # Average AI scores across all activities (if any)
         avg_impact = ai_total_impact / activity_count if activity_count > 0 else 0
@@ -537,6 +549,15 @@ def predict_scores(student_id: int):
             (min(activity_count * 10, 100) * 0.10) +
             ((soft_skills_count * 8) + (soft_skills_gpa * 15)) * 0.15
         )
+        
+        print(f"\n=== CO-CURRICULAR CALCULATION ===", file=sys.stderr)
+        print(f"Avg Impact: {avg_impact:.2f} * 0.30 = {avg_impact * 0.30:.2f}", file=sys.stderr)
+        print(f"Avg Leadership: {avg_leadership:.2f} * 0.25 = {avg_leadership * 0.25:.2f}", file=sys.stderr)
+        print(f"Avg Relevance: {avg_relevance:.2f} * 0.20 = {avg_relevance * 0.20:.2f}", file=sys.stderr)
+        print(f"Activity Count: {activity_count} * 10 * 0.10 = {min(activity_count * 10, 100) * 0.10:.2f}", file=sys.stderr)
+        print(f"Soft Skills: {soft_skills_count} * 8 + {soft_skills_gpa:.2f} * 15 = {((soft_skills_count * 8) + (soft_skills_gpa * 15)) * 0.15:.2f}", file=sys.stderr)
+        print(f"FINAL CO-CURRICULAR SCORE: {co_curricular_points:.2f}", file=sys.stderr)
+        print(f"=================================\n", file=sys.stderr)
         
         # === 5. FEEDBACK SENTIMENT SCORE ===
         # Formula: MIN(100, 50 + (Comments_Length × 0.05) + (Faculty_Interactions × 10))

@@ -279,16 +279,29 @@ export function useDashboard({
         throw new Error("ML retrain failed");
       }
       
-      // Fetch the updated student data with new ML scores
-      const { data: updatedStudent } = await supabase
+      // Wait a moment for database to update
+      await new Promise(r => setTimeout(r, 500));
+      
+      // Fetch the updated student data with new ML scores (force fresh query)
+      const { data: updatedStudent, error: fetchError } = await supabase
         .from("students")
         .select("*")
         .eq("id", selectedStudent.id)
         .single();
       
-      if (!updatedStudent) {
+      if (fetchError || !updatedStudent) {
+        console.error("Failed to fetch updated student:", fetchError);
         throw new Error("Failed to fetch updated student data");
       }
+      
+      console.log("Updated student scores:", {
+        programming: updatedStudent.programming_score,
+        design: updatedStudent.design_score,
+        infrastructure: updatedStudent.it_infrastructure_score,
+        cocurricular: updatedStudent.co_curricular_points,
+        feedback: updatedStudent.feedback_sentiment_score,
+        professional: updatedStudent.professional_engagement_score,
+      });
       
       // Update local state with fresh data
       setSelectedStudent(updatedStudent);
