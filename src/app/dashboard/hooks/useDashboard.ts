@@ -262,20 +262,56 @@ export function useDashboard({
     }
   };
 
-  // ✅ Manual refresh handler
+  // ✅ Manual refresh handler (now also triggers ML retrain)
   const regenerateSummary = async () => {
     if (!selectedStudent) return;
-    const coreDataHash = JSON.stringify({
-      cgpa: selectedStudent.cgpa ?? "0",
-      programming_score: selectedStudent.programming_score ?? "0",
-      design_score: selectedStudent.design_score ?? "0",
-      it_infrastructure_score: selectedStudent.it_infrastructure_score ?? "0",
-      co_curricular_points: selectedStudent.co_curricular_points ?? "0",
-      feedback_sentiment_score: selectedStudent.feedback_sentiment_score ?? 0,
-      professional_engagement_score:
-        selectedStudent.professional_engagement_score ?? 0,
-    });
-    await performSummaryRegeneration(selectedStudent, coreDataHash);
+    
+    try {
+      setLoading(true);
+      setAiSummary("Retraining ML model and regenerating summary...");
+      
+      // First, retrain the ML model to update all scores
+      const mlRes = await fetch(`/api/ml/retrain?studentId=${selectedStudent.id}`, {
+        method: "POST",
+      });
+      
+      if (!mlRes.ok) {
+        throw new Error("ML retrain failed");
+      }
+      
+      // Fetch the updated student data with new ML scores
+      const { data: updatedStudent } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", selectedStudent.id)
+        .single();
+      
+      if (!updatedStudent) {
+        throw new Error("Failed to fetch updated student data");
+      }
+      
+      // Update local state with fresh data
+      setSelectedStudent(updatedStudent);
+      
+      // Now regenerate AI summary with updated scores
+      const coreDataHash = JSON.stringify({
+        cgpa: updatedStudent.cgpa ?? "0",
+        programming_score: updatedStudent.programming_score ?? "0",
+        design_score: updatedStudent.design_score ?? "0",
+        it_infrastructure_score: updatedStudent.it_infrastructure_score ?? "0",
+        co_curricular_points: updatedStudent.co_curricular_points ?? "0",
+        feedback_sentiment_score: updatedStudent.feedback_sentiment_score ?? 0,
+        professional_engagement_score:
+          updatedStudent.professional_engagement_score ?? 0,
+      });
+      
+      await performSummaryRegeneration(updatedStudent, coreDataHash);
+    } catch (error) {
+      console.error("Refresh error:", error);
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setAiSummary(`❌ Failed to refresh: ${errorMsg}`);
+      setLoading(false);
+    }
   };
 
   return {
