@@ -268,7 +268,18 @@ export function useDashboard({
     
     try {
       setLoading(true);
-      setAiSummary("Retraining ML model and regenerating summary...");
+      setAiSummary("Waking up ML service and retraining model...");
+      
+      // Wake up Render service if it's asleep (can take 30-50 seconds on free tier)
+      try {
+        await fetch(process.env.NEXT_PUBLIC_ML_API_URL || "https://real-fyp.onrender.com/health", {
+          method: "GET",
+        });
+      } catch {
+        // Ignore wake-up errors, main request will handle it
+      }
+      
+      setAiSummary("Retraining ML model with latest data...");
       
       // First, retrain the ML model to update all scores
       const mlRes = await fetch(`/api/ml/retrain?studentId=${selectedStudent.id}`, {
@@ -276,7 +287,17 @@ export function useDashboard({
       });
       
       if (!mlRes.ok) {
-        throw new Error("ML retrain failed");
+        const errorText = await mlRes.text();
+        console.error("ML retrain failed:", errorText);
+        throw new Error("ML retrain failed - check console for details");
+      }
+      
+      const mlResult = await mlRes.json();
+      console.log("ML retrain result:", mlResult);
+      
+      if (mlResult.ml_error) {
+        console.warn("ML prediction had errors:", mlResult.ml_error);
+        // Continue anyway - we might still have updated GPA
       }
       
       // Wait a moment for database to update

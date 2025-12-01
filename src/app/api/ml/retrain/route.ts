@@ -135,6 +135,7 @@ export async function POST(req: Request) {
       } else {
         // REMOTE MODE: Call Railway/external ML API (for production)
         console.log("☁️ Using REMOTE ML API:", ML_API_URL);
+        console.log("📤 Sending prediction request for student:", studentId);
         
         const response = await fetch(`${ML_API_URL}/predict`, {
           method: "POST",
@@ -146,15 +147,25 @@ export async function POST(req: Request) {
           }),
         });
 
+        console.log("📥 ML API response status:", response.status);
+
         if (!response.ok) {
-          const errorData = await response.json();
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch {
+            errorData = { detail: await response.text() };
+          }
+          console.error("❌ ML API error response:", errorData);
           throw new Error(errorData.detail || `ML API error: ${response.status}`);
         }
 
         const result = await response.json();
+        console.log("✅ ML API result:", result);
 
         if (result.success) {
           mlScores = result.scores;
+          console.log("✅ ML scores received:", mlScores);
         } else {
           mlError = result.error;
           console.error("ML prediction failed:", result.error);
